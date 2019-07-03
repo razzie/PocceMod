@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace PocceMod
 {
-    public sealed class PocceMod : PocceModBase
+    public sealed class PocceMod : BaseScript
     {
         private Menu skinMenu;
 
@@ -20,7 +20,7 @@ namespace PocceMod
 
         public static async Task SpawnTrashPed()
         {
-            var ped = await SpawnPed(TrashPedList);
+            var ped = await Manager.SpawnPed(Manager.TrashPedList);
             API.StartEntityFire(ped);
             API.SetEntityAsNoLongerNeeded(ref ped);
         }
@@ -28,8 +28,8 @@ namespace PocceMod
         public static async Task PedRiot(bool useWeapons)
         {
             int i = 0;
-            var peds = GetPeds();
-            var weapons = useWeapons ? WeaponList : null;
+            var peds = Manager.GetPeds();
+            var weapons = useWeapons ? Manager.WeaponList : null;
 
             if (peds.Count < 2)
                 return;
@@ -45,7 +45,7 @@ namespace PocceMod
 
                 API.ClearPedTasks(ped);
 
-                await ArmPed(ped, weapons);
+                await Manager.ArmPed(ped, weapons);
 
                 int enemyPed;
                 if (i % 2 == 0)
@@ -65,18 +65,18 @@ namespace PocceMod
         public static async Task PocceRiot(bool useWeapons)
         {
             var peds = new List<int>();
-            var weapons = useWeapons ? WeaponList : null;
+            var weapons = useWeapons ? Manager.WeaponList : null;
 
             for (int i = 0; i < 4; ++i)
             {
-                int ped1 = await SpawnPed(PocceList);
-                int ped2 = await SpawnPed(PocceList);
+                int ped1 = await Manager.SpawnPed(Manager.PocceList);
+                int ped2 = await Manager.SpawnPed(Manager.PocceList);
 
                 peds.Add(ped1);
                 peds.Add(ped2);
 
-                await ArmPed(ped1, weapons);
-                await ArmPed(ped2, weapons);
+                await Manager.ArmPed(ped1, weapons);
+                await Manager.ArmPed(ped2, weapons);
 
                 API.TaskCombatPed(ped1, ped2, 0, 16);
                 API.TaskCombatPed(ped2, ped1, 0, 16);
@@ -84,9 +84,9 @@ namespace PocceMod
 
             for (int i = 0; i < 4; ++i)
             {
-                int ped = await SpawnPed(PocceList);
+                int ped = await Manager.SpawnPed(Manager.PocceList);
                 peds.Add(ped);
-                await ArmPed(ped, weapons);
+                await Manager.ArmPed(ped, weapons);
                 API.TaskCombatPed(ped, Game.Player.Character.Handle, 0, 16);
             }
 
@@ -103,7 +103,7 @@ namespace PocceMod
 
             if (!API.IsPedInAnyVehicle(player, true))
             {
-                Notification("Player is not in a vehicle");
+                Manager.Notification("Player is not in a vehicle");
                 return;
             }
 
@@ -115,8 +115,8 @@ namespace PocceMod
             {
                 if (API.IsVehicleSeatFree(vehicle, seat))
                 {
-                    var pocce = PocceList[API.GetRandomIntInRange(0, PocceList.Length)];
-                    await RequestModel(pocce);
+                    var pocce = Manager.PocceList[API.GetRandomIntInRange(0, Manager.PocceList.Length)];
+                    await Manager.RequestModel(pocce);
                     var ped = API.CreatePedInsideVehicle(vehicle, 26, pocce, seat, true, false);
                     API.SetEntityAsNoLongerNeeded(ref ped);
                 }
@@ -125,24 +125,24 @@ namespace PocceMod
 
         public static async Task PocceCompanion()
         {
-            var ped = await SpawnPed(PocceList);
-            await MakeCompanion(ped);
-            await ArmPed(ped, WeaponList);
+            var ped = await Manager.SpawnPed(Manager.PocceList);
+            await Manager.MakeCompanion(ped);
+            await Manager.ArmPed(ped, Manager.WeaponList);
             API.SetEntityAsNoLongerNeeded(ref ped);
         }
 
         public static async Task PetCompanion()
         {
-            var ped = await SpawnPed(PetList, 28);
-            await MakeCompanion(ped);
-            await ArmPed(ped, null);
+            var ped = await Manager.SpawnPed(Manager.PetList, 28);
+            await Manager.MakeCompanion(ped);
+            await Manager.ArmPed(ped, null);
             API.SetEntityAsNoLongerNeeded(ref ped);
         }
 
         public static List<string> IdentifyPedModels()
         {
             var coords = Game.Player.Character.Position;
-            var peds = GetPeds(true, true);
+            var peds = Manager.GetPeds(true, true);
             var models = new List<string>();
 
             foreach (var ped in peds)
@@ -152,7 +152,7 @@ namespace PocceMod
                 {
                     var model = string.Format("0x{0:X8}", API.GetEntityModel(ped));
                     models.Add(model);
-                    Notification("ped:" + model);
+                    Manager.Notification("ped:" + model);
                 }
             }
 
@@ -269,7 +269,7 @@ namespace PocceMod
 
             vehicleMenu.OnItemSelect += async (_menu, _item, _index) =>
             {
-                var vehicle = await SpawnVehicle(_item.Text);
+                var vehicle = await Manager.SpawnVehicle(_item.Text);
                 API.SetEntityAsNoLongerNeeded(ref vehicle);
                 vehicleMenu.CloseMenu();
             };
@@ -314,14 +314,14 @@ namespace PocceMod
 
             propMenu.OnItemSelect += async (_menu, _item, _index) =>
             {
-                var prop = await SpawnProp(_item.Text);
+                var prop = await Manager.SpawnProp(_item.Text);
                 API.SetEntityAsNoLongerNeeded(ref prop);
                 propMenu.CloseMenu();
             };
 
             propMenu.OnListItemSelect += async (_menu, _listItem, _listIndex, _itemIndex) =>
             {
-                var prop = await SpawnProp(_listItem.ListItems[_listIndex]);
+                var prop = await Manager.SpawnProp(_listItem.ListItems[_listIndex]);
                 API.SetEntityAsNoLongerNeeded(ref prop);
                 propMenu.CloseMenu();
             };
@@ -342,7 +342,7 @@ namespace PocceMod
         private async Task OnTick()
         {
             await Delay(2000);
-            await UpdateCompanions();
+            await Manager.UpdateCompanions();
         }
     }
 }

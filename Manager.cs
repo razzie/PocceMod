@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PocceMod
 {
-    public abstract class PocceModBase : BaseScript
+    public static class Manager
     {
         public static uint[] WeaponList { get; } = { 0x1B06D571, 0xBFEFFF6D, 0x1D073A89, 0x958A4A8F, 0x3656C8C1 };
         public static uint[] TrashPedList { get; } = { 0xE16D8F01, 0x6BD9B68C, 0xB097523B, 0x0E32D8D0, 0xE0E69974 };
@@ -61,7 +61,7 @@ namespace PocceMod
             return peds;
         }
 
-        protected static List<int> GetCompanions(IEnumerable<int> peds)
+        public static List<int> GetCompanions(IEnumerable<int> peds)
         {
             var companions = new List<int>();
 
@@ -81,7 +81,7 @@ namespace PocceMod
             while (!API.HasModelLoaded(model))
             {
                 API.RequestModel(model);
-                await Delay(10);
+                await BaseScript.Delay(10);
             }
         }
 
@@ -90,7 +90,7 @@ namespace PocceMod
             while (!API.NetworkHasControlOfEntity(entity))
             {
                 API.NetworkRequestControlOfEntity(entity);
-                await Delay(10);
+                await BaseScript.Delay(10);
             }
         }
 
@@ -170,7 +170,7 @@ namespace PocceMod
         {
             API.TaskSetBlockingOfNonTemporaryEvents(ped, true);
             API.SetPedKeepTask(ped, true);
-            await Delay(10);
+            await BaseScript.Delay(10);
 
             API.SetPedCombatAbility(ped, 100);
             API.SetPedCombatMovement(ped, 2);
@@ -205,7 +205,7 @@ namespace PocceMod
             API.ClearPedTasksImmediately(ped);
             API.TaskSetBlockingOfNonTemporaryEvents(ped, true);
             API.SetPedKeepTask(ped, true);
-            await Delay(10);
+            await BaseScript.Delay(10);
 
             API.TaskGoToEntity(ped, player, -1, 5.0f, 2.0f, 0, 0);
         }
@@ -264,7 +264,7 @@ namespace PocceMod
                         if (otherVehicle != vehicle)
                         {
                             API.TaskLeaveVehicle(companion, otherVehicle, 0);
-                            await Delay(10);
+                            await BaseScript.Delay(10);
                         }
                         else
                         {
