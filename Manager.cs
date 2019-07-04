@@ -8,12 +8,7 @@ namespace PocceMod
 {
     public static class Manager
     {
-        public static uint[] WeaponList { get; } = { 0x1B06D571, 0xBFEFFF6D, 0x1D073A89, 0x958A4A8F, 0x3656C8C1 };
-        public static uint[] TrashPedList { get; } = { 0xE16D8F01, 0x6BD9B68C, 0xB097523B, 0x0E32D8D0, 0xE0E69974 };
-        public static uint[] PocceList { get; } = { 0x780C01BD, 0x303638A7, 0xC79F6928, 0x445AC854, 0x028ABF95, 0x9FC7F637, 0x9CF26183, 0xBE086EFD, 0xDB134533, 0x5AA42C21, 0xC7496729, 0x5C2CF7F8, 0x20C8012F };
-        public static uint[] PetList { get; } = { 0x573201B8, 0x14EC17EA, 0x4E8F95A2, 0x6D362854, 0x9563221D, 0x431FC24C, 0xA8683715 };
-        public static string[] ScenarioList { get; } = { "WORLD_HUMAN_AA_COFFEE", "WORLD_HUMAN_AA_SMOKE", "WORLD_HUMAN_DRINKING", "WORLD_HUMAN_PARTYING", "WORLD_HUMAN_PUSH_UPS", "WORLD_HUMAN_SUPERHERO" };
-        public static string PocceCompanionDecor = "POCCE_COMPANION";
+        private static readonly string PocceCompanionDecor = "POCCE_COMPANION";
 
         public static void Notification(string message, bool blink = false, bool saveToBrief = false)
         {
@@ -307,7 +302,7 @@ namespace PocceMod
                         if (!API.IsPedActiveInScenario(companion))
                         {
                             var heading = API.GetEntityHeading(companion);
-                            var scenario = ScenarioList[API.GetRandomIntInRange(0, ScenarioList.Length)];
+                            var scenario = Config.ScenarioList[API.GetRandomIntInRange(0, Config.ScenarioList.Length)];
                             API.TaskLookAtEntity(companion, player, -1, 2048, 3);
                             API.TaskStandGuard(companion, pos.X, pos.Y, pos.Z, heading, scenario);
                         }

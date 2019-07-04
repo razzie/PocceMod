@@ -20,7 +20,7 @@ namespace PocceMod
 
         public static async Task SpawnTrashPed()
         {
-            var ped = await Manager.SpawnPed(Manager.TrashPedList);
+            var ped = await Manager.SpawnPed(Config.TrashPedList);
             API.StartEntityFire(ped);
             API.SetEntityAsNoLongerNeeded(ref ped);
         }
@@ -29,7 +29,7 @@ namespace PocceMod
         {
             int i = 0;
             var peds = Manager.GetPeds();
-            var weapons = useWeapons ? Manager.WeaponList : null;
+            var weapons = useWeapons ? Config.WeaponList : null;
 
             if (peds.Count < 2)
                 return;
@@ -65,12 +65,12 @@ namespace PocceMod
         public static async Task PocceRiot(bool useWeapons)
         {
             var peds = new List<int>();
-            var weapons = useWeapons ? Manager.WeaponList : null;
+            var weapons = useWeapons ? Config.WeaponList : null;
 
             for (int i = 0; i < 4; ++i)
             {
-                int ped1 = await Manager.SpawnPed(Manager.PocceList);
-                int ped2 = await Manager.SpawnPed(Manager.PocceList);
+                int ped1 = await Manager.SpawnPed(Config.PocceList);
+                int ped2 = await Manager.SpawnPed(Config.PocceList);
 
                 peds.Add(ped1);
                 peds.Add(ped2);
@@ -84,7 +84,7 @@ namespace PocceMod
 
             for (int i = 0; i < 4; ++i)
             {
-                int ped = await Manager.SpawnPed(Manager.PocceList);
+                int ped = await Manager.SpawnPed(Config.PocceList);
                 peds.Add(ped);
                 await Manager.ArmPed(ped, weapons);
                 API.TaskCombatPed(ped, Game.Player.Character.Handle, 0, 16);
@@ -115,7 +115,7 @@ namespace PocceMod
             {
                 if (API.IsVehicleSeatFree(vehicle, seat))
                 {
-                    var pocce = Manager.PocceList[API.GetRandomIntInRange(0, Manager.PocceList.Length)];
+                    var pocce = Config.PocceList[API.GetRandomIntInRange(0, Config.PocceList.Length)];
                     await Manager.RequestModel(pocce);
                     var ped = API.CreatePedInsideVehicle(vehicle, 26, pocce, seat, true, false);
                     API.SetEntityAsNoLongerNeeded(ref ped);
@@ -125,15 +125,15 @@ namespace PocceMod
 
         public static async Task PocceCompanion()
         {
-            var ped = await Manager.SpawnPed(Manager.PocceList);
+            var ped = await Manager.SpawnPed(Config.PocceList);
             await Manager.MakeCompanion(ped);
-            await Manager.ArmPed(ped, Manager.WeaponList);
+            await Manager.ArmPed(ped, Config.WeaponList);
             API.SetEntityAsNoLongerNeeded(ref ped);
         }
 
         public static async Task PetCompanion()
         {
-            var ped = await Manager.SpawnPed(Manager.PetList, 28);
+            var ped = await Manager.SpawnPed(Config.PetList, 28);
             await Manager.MakeCompanion(ped);
             await Manager.ArmPed(ped, null);
             API.SetEntityAsNoLongerNeeded(ref ped);
@@ -261,8 +261,7 @@ namespace PocceMod
             MenuController.AddSubmenu(menu, vehicleMenu);
             MenuController.BindMenuItem(menu, vehicleMenu, spawnVehicleButton);
 
-            string vehicles = API.LoadResourceFile(API.GetCurrentResourceName(), "vehicles.ini");
-            foreach (var vehicle in vehicles.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries))
+            foreach (var vehicle in Config.VehicleList)
             {
                 vehicleMenu.AddMenuItem(new MenuItem(vehicle));
             }
@@ -281,8 +280,7 @@ namespace PocceMod
 
             var propList = new List<string>();
             string lastPropPrefix = string.Empty;
-            string props = API.LoadResourceFile(API.GetCurrentResourceName(), "props.ini");
-            foreach (var prop in props.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries))
+            foreach (var prop in Config.PropList)
             {
                 var propPrefix = prop.Substring(0, 10);
                 if (propPrefix != lastPropPrefix)
