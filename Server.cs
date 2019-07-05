@@ -7,12 +7,17 @@ namespace PocceMod.Server
     {
         public Server()
         {
+            EventHandlers["PocceMod:Burn"] += new Action<int>(entity =>
+            {
+                TriggerClientEvent("PocceMod:Burn", entity);
+            });
+
             EventHandlers["PocceMod:AddRope"] += new Action<int, int, int>((player, entity1, entity2) =>
             {
                 TriggerClientEvent("PocceMod:AddRope", player, entity1, entity2);
             });
 
-            EventHandlers["PocceMod:ClearRopes"] += new Action<int>((player) =>
+            EventHandlers["PocceMod:ClearRopes"] += new Action<int>(player =>
             {
                 TriggerClientEvent("PocceMod:ClearRopes", player);
             });

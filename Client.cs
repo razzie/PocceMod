@@ -91,7 +91,7 @@ namespace PocceMod
         public static async Task SpawnTrashPed()
         {
             var ped = await Peds.Spawn(Config.TrashPedList);
-            API.StartEntityFire(ped);
+            Common.Burn(ped);
             API.SetEntityAsNoLongerNeeded(ref ped);
         }
 

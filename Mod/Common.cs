@@ -1,18 +1,24 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace PocceMod.Mod
 {
-    public static class Common
+    public class Common : BaseScript
     {
+        public Common()
+        {
+            EventHandlers["PocceMod:Burn"] += new Action<int>(entity => API.StartEntityFire(API.NetToEnt(entity)));
+        }
+
         public static async Task RequestModel(uint model)
         {
             while (!API.HasModelLoaded(model))
             {
                 API.RequestModel(model);
-                await BaseScript.Delay(10);
+                await Delay(10);
             }
         }
 
@@ -37,6 +43,11 @@ namespace PocceMod.Mod
             }
 
             return found;
+        }
+
+        public static void Burn(int entity)
+        {
+            TriggerServerEvent("PocceMod:Burn", API.ObjToNet(entity));
         }
     }
 }
