@@ -1,7 +1,5 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
-using MenuAPI;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -9,7 +7,7 @@ namespace PocceMod
 {
     public sealed class PocceMod : BaseScript
     {
-        private Menu skinMenu;
+        private DataSource<string> _skins = new DataSource<string>();
 
         public PocceMod()
         {
@@ -159,182 +157,57 @@ namespace PocceMod
             return models;
         }
 
-        private void AddSkins(List<string> models)
+        public static async Task ChangeSkin(string hexModel)
         {
-            foreach (var model in models)
-            {
-                bool newSkin = true;
-                var skins = skinMenu.GetMenuItems();
-                foreach (var skin in skins)
-                {
-                    if (skin.Text == model)
-                    {
-                        newSkin = false;
-                        break;
-                    }
-                }
-                if (newSkin)
-                {
-                    skinMenu.AddMenuItem(new MenuItem(model));
-                }
-            }
+            var model = uint.Parse(hexModel.Substring(2), System.Globalization.NumberStyles.HexNumber);
+            await Game.Player.ChangeModel(new Model((PedHash)model));
         }
 
         private void SetupMenu()
         {
-            MenuController.MenuToggleKey = Control.SelectCharacterMichael;
-            MenuController.EnableMenuToggleKeyOnController = false;
-            MenuController.MenuAlignment = MenuController.MenuAlignmentOption.Right;
+            Manager.AddSubmenu("Spawn vehicle", async (vehicle) => await Manager.SpawnVehicle(vehicle), Config.VehicleList);
+            Manager.AddSubmenu("Spawn prop", async (prop) => await Manager.SpawnProp(prop), Config.PropList, 10);
 
-            Menu menu = new Menu("PocceMod", "menu");
-            MenuController.AddMenu(menu);
-
-            var spawnVehicleButton = new MenuItem("Spawn vehicle");
-            menu.AddMenuItem(spawnVehicleButton);
-            var spawnPropButton = new MenuItem("Spawn prop");
-            menu.AddMenuItem(spawnPropButton);
-            menu.AddMenuItem(new MenuItem("Spawn trash ped"));
-            menu.AddMenuItem(new MenuItem("Ped riot"));
-            menu.AddMenuItem(new MenuItem("Ped riot with weapons"));
-            menu.AddMenuItem(new MenuItem("Pocce riot"));
-            menu.AddMenuItem(new MenuItem("Pocce riot with weapons"));
-            menu.AddMenuItem(new MenuItem("Pocce passengers"));
-            menu.AddMenuItem(new MenuItem("Pocce companion"));
-            menu.AddMenuItem(new MenuItem("Pet companion"));
-            menu.AddMenuItem(new MenuItem("Identify skins"));
-            var skinMenuButton = new MenuItem("Change skin");
-            menu.AddMenuItem(skinMenuButton);
-
-            menu.OnItemSelect += async (_menu, _item, _index) =>
+            Manager.AddMenuListItem("Spawn", async (spawn) =>
             {
-                switch (_index)
+                switch (spawn)
                 {
-                    // submenus
                     case 0:
-                    case 1:
-                    case 11:
-                        return;
-
-                    case 2:
-                        await SpawnTrashPed();
-                        break;
-
-                    case 3:
-                        await PedRiot(false);
-                        break;
-
-                    case 4:
-                        await PedRiot(true);
-                        break;
-
-                    case 5:
-                        await PocceRiot(false);
-                        break;
-
-                    case 6:
-                        await PocceRiot(true);
-                        break;
-
-                    case 7:
-                        await PoccePassengers();
-                        break;
-
-                    case 8:
                         await PocceCompanion();
                         break;
-
-                    case 9:
+                    case 1:
                         await PetCompanion();
                         break;
-
-                    case 10:
-                        var models = IdentifyPedModels();
-                        AddSkins(models);
+                    case 2:
+                        await PoccePassengers();
+                        break;
+                    case 3:
+                        await SpawnTrashPed();
                         break;
                 }
+            }, "Pocce companion", "Pet companion", "Pocce passengers", "Trash ped");
 
-                menu.CloseMenu();
-            };
-
-
-            Menu vehicleMenu = new Menu("PocceMod", "select vehicle");
-            MenuController.AddSubmenu(menu, vehicleMenu);
-            MenuController.BindMenuItem(menu, vehicleMenu, spawnVehicleButton);
-
-            foreach (var vehicle in Config.VehicleList)
+            Manager.AddMenuListItem("Riot", async (riot) =>
             {
-                vehicleMenu.AddMenuItem(new MenuItem(vehicle));
-            }
-
-            vehicleMenu.OnItemSelect += async (_menu, _item, _index) =>
-            {
-                var vehicle = await Manager.SpawnVehicle(_item.Text);
-                API.SetEntityAsNoLongerNeeded(ref vehicle);
-                vehicleMenu.CloseMenu();
-            };
-
-
-            Menu propMenu = new Menu("PocceMod", "select prop");
-            MenuController.AddSubmenu(menu, propMenu);
-            MenuController.BindMenuItem(menu, propMenu, spawnPropButton);
-
-            var propList = new List<string>();
-            string lastPropPrefix = string.Empty;
-            foreach (var prop in Config.PropList)
-            {
-                var propPrefix = prop.Substring(0, 10);
-                if (propPrefix != lastPropPrefix)
+                switch (riot)
                 {
-                    if (propList.Count > 0)
-                    {
-                        if (propList.Count == 1)
-                        {
-                            var propItem = new MenuItem(propList[0]);
-                            propMenu.AddMenuItem(propItem);
-                        }
-                        else
-                        {
-                            var propListItem = new MenuListItem(lastPropPrefix + "*", propList, 0);
-                            propMenu.AddMenuItem(propListItem);
-                        }
-                        propList = new List<string>();
-                    }
-                    lastPropPrefix = propPrefix;
+                    case 0:
+                        await PocceRiot(false);
+                        break;
+                    case 1:
+                        await PocceRiot(true);
+                        break;
+                    case 2:
+                        await PedRiot(false);
+                        break;
+                    case 3:
+                        await PedRiot(true);
+                        break;
                 }
+            }, "Pocce riot", "Armed pocce riot", "Ped riot", "Armed ped riot");
 
-                propList.Add(prop);
-            }
-            if (propList.Count > 0)
-            {
-                var propListItem = new MenuListItem(lastPropPrefix, propList, 0);
-                propMenu.AddMenuItem(propListItem);
-            }
-
-            propMenu.OnItemSelect += async (_menu, _item, _index) =>
-            {
-                var prop = await Manager.SpawnProp(_item.Text);
-                API.SetEntityAsNoLongerNeeded(ref prop);
-                propMenu.CloseMenu();
-            };
-
-            propMenu.OnListItemSelect += async (_menu, _listItem, _listIndex, _itemIndex) =>
-            {
-                var prop = await Manager.SpawnProp(_listItem.ListItems[_listIndex]);
-                API.SetEntityAsNoLongerNeeded(ref prop);
-                propMenu.CloseMenu();
-            };
-
-
-            skinMenu = new Menu("PocceMod", "identified skins");
-            MenuController.AddSubmenu(menu, skinMenu);
-            MenuController.BindMenuItem(menu, skinMenu, skinMenuButton);
-
-            skinMenu.OnItemSelect += async (_menu, _item, _index) =>
-            {
-                var model = uint.Parse(_item.Text.Substring(2), System.Globalization.NumberStyles.HexNumber);
-                await Game.Player.ChangeModel(new Model((PedHash)model));
-                skinMenu.CloseMenu();
-            };
+            Manager.AddMenuItem("Indentify skins", () => { _skins.Push(IdentifyPedModels()); return null; });
+            Manager.AddSubmenu("Change skin", async (skin) => await ChangeSkin(skin), _skins);
         }
 
         private async Task OnTick()
