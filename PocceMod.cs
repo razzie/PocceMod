@@ -7,7 +7,7 @@ namespace PocceMod
 {
     public sealed class PocceMod : BaseScript
     {
-        private DataSource<string> _skins = new DataSource<string>();
+        private static List<int> _ropes = new List<int>();
 
         public PocceMod()
         {
@@ -163,8 +163,51 @@ namespace PocceMod
             await Game.Player.ChangeModel(new Model((PedHash)model));
         }
 
+        public static void TowClosestPed()
+        {
+            var peds = Manager.GetPeds(true, true, false, 400.0f);
+
+            if (Manager.GetClosestEntity(peds, out int closest, true))
+                _ropes.Add(Manager.AttachRope(closest, true));
+            else
+                Manager.Notification("no nearby peds");
+        }
+
+        public static void TowClosestVehicle()
+        {
+            var peds = Manager.GetVehicles(true, 400.0f);
+
+            if (Manager.GetClosestEntity(peds, out int closest))
+                _ropes.Add(Manager.AttachRope(closest));
+            else
+                Manager.Notification("no nearby vehicles");
+        }
+
+        public static void TowClosestProp()
+        {
+            var peds = Manager.GetProps(400.0f);
+
+            if (Manager.GetClosestEntity(peds, out int closest))
+                _ropes.Add(Manager.AttachRope(closest));
+            else
+                Manager.Notification("no nearby props");
+        }
+
+        public static void ClearRopes()
+        {
+            foreach (var rope in _ropes)
+            {
+                var tmp_rope = rope;
+                API.DeleteRope(ref tmp_rope);
+            }
+
+            _ropes.Clear();
+        }
+
         private void SetupMenu()
         {
+            var skins = new DataSource<string>();
+
             Manager.AddSubmenu("Spawn vehicle", async (vehicle) => await Manager.SpawnVehicle(vehicle), Config.VehicleList);
             Manager.AddSubmenu("Spawn prop", async (prop) => await Manager.SpawnProp(prop), Config.PropList, 10);
 
@@ -206,8 +249,28 @@ namespace PocceMod
                 }
             }, "Pocce riot", "Armed pocce riot", "Ped riot", "Armed ped riot");
 
-            Manager.AddMenuItem("Indentify skins", () => { _skins.Push(IdentifyPedModels()); return null; });
-            Manager.AddSubmenu("Change skin", async (skin) => await ChangeSkin(skin), _skins);
+            Manager.AddMenuListItem("Tow", (tow) =>
+            {
+                switch (tow)
+                {
+                    case 0:
+                        TowClosestPed();
+                        break;
+                    case 1:
+                        TowClosestVehicle();
+                        break;
+                    case 2:
+                        TowClosestProp();
+                        break;
+                    case 3:
+                        ClearRopes();
+                        break;
+                }
+                return null;
+            }, "Closest ped", "Closest vehicle", "Closest prop", "Clear ropes");
+
+            Manager.AddMenuItem("Indentify skins", () => { skins.Push(IdentifyPedModels()); return null; });
+            Manager.AddSubmenu("Change skin", async (skin) => await ChangeSkin(skin), skins);
         }
 
         private async Task OnTick()

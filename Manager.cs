@@ -54,7 +54,7 @@ namespace PocceMod
             API.DrawNotification(blink, saveToBrief);
         }
 
-        public static List<int> GetPeds(bool includeAnimals = true, bool includePlayers = false, bool includeDead = false, float radiusSquared = 900.0f)
+        public static List<int> GetPeds(bool includeAnimals = true, bool includePlayers = false, bool includeDead = false, float rangeSquared = 900.0f)
         {
             var peds = new List<int>();
             int ped = 0;
@@ -67,7 +67,7 @@ namespace PocceMod
 
             do
             {
-                var pos = new Ped(ped).Position;
+                var pos = API.GetEntityCoords(ped, true);
 
                 if (!includeAnimals && !API.IsPedHuman(ped))
                     continue;
@@ -78,7 +78,7 @@ namespace PocceMod
                 if (!includeDead && API.IsPedDeadOrDying(ped, true))
                     continue;
 
-                if (coords.DistanceToSquared(pos) > 900.0f || ped == player)
+                if (coords.DistanceToSquared(pos) > rangeSquared || ped == player)
                     continue;
 
                 peds.Add(ped);
@@ -86,8 +86,91 @@ namespace PocceMod
             } while (API.FindNextPed(handle, ref ped));
 
             API.EndFindPed(handle);
-
             return peds;
+        }
+
+        public static List<int> GetVehicles(bool includeWithDriver = true, float rangeSquared = 900.0f)
+        {
+            var vehicles = new List<int>();
+            int vehicle = 0;
+            int handle = API.FindFirstVehicle(ref vehicle);
+            var player = Game.Player.Character.Handle;
+            var playerVehicle = API.GetVehiclePedIsIn(player, false);
+            var coords = Game.Player.Character.Position;
+
+            if (handle == -1)
+                return vehicles;
+
+            do
+            {
+                var pos = API.GetEntityCoords(vehicle, false);
+
+                if (vehicle == playerVehicle)
+                    continue;
+
+                if (!includeWithDriver && !API.IsVehicleSeatFree(vehicle, -1))
+                    continue;
+
+                if (coords.DistanceToSquared(pos) > rangeSquared)
+                    continue;
+
+                vehicles.Add(vehicle);
+
+            } while (API.FindNextVehicle(handle, ref vehicle));
+
+            API.EndFindVehicle(handle);
+            return vehicles;
+        }
+
+        public static List<int> GetProps(float rangeSquared = 100.0f)
+        {
+            var props = new List<int>();
+            int prop = 0;
+            int handle = API.FindFirstObject(ref prop);
+            var coords = Game.Player.Character.Position;
+
+            if (handle == -1)
+                return props;
+
+            do
+            {
+                var pos = API.GetEntityCoords(prop, false);
+
+                if (API.IsEntityAPed(prop) || API.IsEntityAVehicle(prop))
+                    continue;
+
+                if (coords.DistanceToSquared(pos) > rangeSquared)
+                    continue;
+
+                props.Add(prop);
+
+            } while (API.FindNextObject(handle, ref prop));
+
+            API.EndFindObject(handle);
+            return props;
+        }
+
+        public static bool GetClosestEntity(IEnumerable<int> entities, out int closest, bool alive = false)
+        {
+            closest = -1;
+            bool found = false;
+            float minDist = float.MaxValue;
+            var coords = Game.Player.Character.Position;
+
+            foreach (var entity in entities)
+            {
+                var pos = API.GetEntityCoords(entity, alive);
+                var dist = coords.DistanceToSquared(pos);
+
+                if (dist < minDist)
+                {
+                    closest = entity;
+                    minDist = dist;
+                    found = true;
+                }
+            }
+
+            return found;
         }
 
         public static List<int> GetCompanions(IEnumerable<int> peds)
@@ -110,15 +193,6 @@ namespace PocceMod
             while (!API.HasModelLoaded(model))
             {
                 API.RequestModel(model);
-                await BaseScript.Delay(10);
-            }
-        }
-
-        public static async Task RequestControl(int entity)
-        {
-            while (!API.NetworkHasControlOfEntity(entity))
-            {
-                API.NetworkRequestControlOfEntity(entity);
                 await BaseScript.Delay(10);
             }
         }
@@ -245,9 +319,6 @@ namespace PocceMod
             var peds = GetPeds();
             var companions = GetCompanions(peds);
 
-            if (companions.Count == 0)
-                return;
-
             int target = 0;
             if (API.GetEntityPlayerIsFreeAimingAt(API.GetPlayerIndex(), ref target) || API.GetPlayerTargetEntity(API.GetPlayerIndex(), ref target))
             {
@@ -347,6 +418,25 @@ namespace PocceMod
                     }
                 }
             }
+        }
+
+        public static int AttachRope(int entity, bool alive = false)
+        {
+            var player = Game.Player.Character.Handle;
+            var coords = API.GetEntityCoords(player, true);
+            var pos = API.GetEntityCoords(entity, alive);
+            var length = (float)Math.Sqrt(coords.DistanceToSquared(pos));
+
+            if (API.IsPedInAnyVehicle(player, false))
+            {
+                player = API.GetVehiclePedIsIn(player, false);
+                coords = API.GetEntityCoords(player, false);
+            }
+
+            int unkPtr = 0;
+            var rope = API.AddRope(coords.X, coords.Y, coords.Z, 0.0f, 0.0f, 0.0f, length, 1, length, 1.0f, 0.0f, false, false, false, 5.0f, true, ref unkPtr);
+            API.AttachEntitiesToRope(rope, player, entity, coords.X, coords.Y, coords.Z, pos.X, pos.Y, pos.Z, length, false, false, null, null);
+            return rope;
         }
 
         public static void AddMenuItem(string item, Func<Task> onSelect)
