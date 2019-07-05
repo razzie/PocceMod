@@ -7,6 +7,7 @@ namespace PocceMod
 {
     public sealed class PocceMod : BaseScript
     {
+        private static List<int> _props = new List<int>();
         private static List<int> _ropes = new List<int>();
 
         public PocceMod()
@@ -163,34 +164,12 @@ namespace PocceMod
             await Game.Player.ChangeModel(new Model((PedHash)model));
         }
 
-        public static void TowClosestPed()
+        public static void TowClosest(IEnumerable<int> entities)
         {
-            var peds = Manager.GetPeds(true, true, false, 400.0f);
-
-            if (Manager.GetClosestEntity(peds, out int closest, true))
-                _ropes.Add(Manager.AttachRope(closest, true));
-            else
-                Manager.Notification("no nearby peds");
-        }
-
-        public static void TowClosestVehicle()
-        {
-            var peds = Manager.GetVehicles(true, 400.0f);
-
-            if (Manager.GetClosestEntity(peds, out int closest))
+            if (Manager.GetClosestEntity(entities, out int closest))
                 _ropes.Add(Manager.AttachRope(closest));
             else
-                Manager.Notification("no nearby vehicles");
-        }
-
-        public static void TowClosestProp()
-        {
-            var peds = Manager.GetProps(400.0f);
-
-            if (Manager.GetClosestEntity(peds, out int closest))
-                _ropes.Add(Manager.AttachRope(closest));
-            else
-                Manager.Notification("no nearby props");
+                Manager.Notification("nothing in range");
         }
 
         public static void ClearRopes()
@@ -203,13 +182,24 @@ namespace PocceMod
 
             _ropes.Clear();
         }
+        
+        public static void ClearProps()
+        {
+            foreach (var prop in _props)
+            {
+                var tmp_prop = prop;
+                API.DeleteObject(ref tmp_prop);
+            }
+
+            _props.Clear();
+        }
 
         private void SetupMenu()
         {
             var skins = new DataSource<string>();
 
             Manager.AddSubmenu("Spawn vehicle", async (vehicle) => await Manager.SpawnVehicle(vehicle), Config.VehicleList);
-            Manager.AddSubmenu("Spawn prop", async (prop) => await Manager.SpawnProp(prop), Config.PropList, 10);
+            Manager.AddSubmenu("Spawn prop", async (prop) => { var entity = await Manager.SpawnProp(prop); _props.Add(entity); }, Config.PropList, 10);
 
             Manager.AddMenuListItem("Spawn", async (spawn) =>
             {
@@ -254,20 +244,31 @@ namespace PocceMod
                 switch (tow)
                 {
                     case 0:
-                        TowClosestPed();
+                        TowClosest(Manager.GetPeds(true, true, false));
                         break;
                     case 1:
-                        TowClosestVehicle();
+                        TowClosest(Manager.GetVehicles(true));
                         break;
                     case 2:
-                        TowClosestProp();
-                        break;
-                    case 3:
-                        ClearRopes();
+                        TowClosest(Manager.GetProps(900.0f));
                         break;
                 }
                 return null;
-            }, "Closest ped", "Closest vehicle", "Closest prop", "Clear ropes");
+            }, "Closest ped", "Closest vehicle", "Closest prop");
+
+            Manager.AddMenuListItem("Clear", (clear) =>
+            {
+                switch (clear)
+                {
+                    case 0:
+                        ClearRopes();
+                        break;
+                    case 1:
+                        ClearProps();
+                        break;
+                }
+                return null;
+            }, "Ropes", "Props");
 
             Manager.AddMenuItem("Indentify skins", () => { skins.Push(IdentifyPedModels()); return null; });
             Manager.AddSubmenu("Change skin", async (skin) => await ChangeSkin(skin), skins);

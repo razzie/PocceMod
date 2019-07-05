@@ -10,3 +10,4 @@ files {
     "MenuAPI.dll"
 }
 client_script 'PocceMod.net.dll'
+server_script 'PocceMod.Server.net.dll'
