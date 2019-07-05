@@ -8,15 +8,12 @@ namespace PocceMod
 {
     public sealed class Client : BaseScript
     {
-        private static List<int> _props = new List<int>();
-        private static List<int> _ropes = new List<int>();
-
         public Client()
         {
             var skins = new DataSource<string>();
 
             Hud.AddSubmenu("Spawn vehicle", async (vehicle) => await Vehicles.Spawn(vehicle), Config.VehicleList);
-            Hud.AddSubmenu("Spawn prop", async (prop) => { var entity = await Props.Spawn(prop); _props.Add(entity); }, Config.PropList, 10);
+            Hud.AddSubmenu("Spawn prop", async (prop) => await Props.Spawn(prop), Config.PropList, 10);
 
             Hud.AddMenuListItem("Spawn", async (spawn) =>
             {
@@ -78,10 +75,10 @@ namespace PocceMod
                 switch (clear)
                 {
                     case 0:
-                        ClearRopes();
+                        Ropes.Clear();
                         break;
                     case 1:
-                        ClearProps();
+                        Props.Clear();
                         break;
                 }
                 return null;
@@ -241,31 +238,9 @@ namespace PocceMod
         public static void TowClosest(IEnumerable<int> entities)
         {
             if (Common.GetClosestEntity(entities, out int closest))
-                _ropes.Add(Ropes.PlayerAttach(closest));
+                Ropes.PlayerAttach(closest);
             else
                 Hud.Notification("nothing in range");
-        }
-
-        public static void ClearRopes()
-        {
-            foreach (var rope in _ropes)
-            {
-                var tmp_rope = rope;
-                API.DeleteRope(ref tmp_rope);
-            }
-
-            _ropes.Clear();
-        }
-        
-        public static void ClearProps()
-        {
-            foreach (var prop in _props)
-            {
-                var tmp_prop = prop;
-                API.DeleteObject(ref tmp_prop);
-            }
-
-            _props.Clear();
         }
     }
 }

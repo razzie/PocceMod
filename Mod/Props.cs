@@ -8,6 +8,8 @@ namespace PocceMod.Mod
 {
     public static class Props
     {
+        private static List<int> _props = new List<int>();
+
         public static List<int> Get(float rangeSquared = 100.0f)
         {
             var props = new List<int>();
@@ -56,6 +58,7 @@ namespace PocceMod.Mod
                 var prop = API.CreateObject((int)hash, pos.X, pos.Y, pos.Z + 2.0f, true, false, true);
                 //API.AttachEntityToEntityPhysically(obj, vehicle, 0, roofBone, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1000.0f, true, false, true, true, 2);
                 API.AttachEntityToEntity(prop, vehicle, roofBone, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, false, false, false, false, 0, true);
+                _props.Add(prop);
                 return prop;
             }
             else
@@ -64,8 +67,20 @@ namespace PocceMod.Mod
                 var heading = API.GetEntityRotation(player, 0).Z;
                 var prop = API.CreateObject((int)hash, pos.X + (float)Math.Cos(heading), pos.Y + (float)Math.Sin(heading), pos.Z - 1.0f, true, false, true);
                 API.SetEntityCollision(prop, true, true);
+                _props.Add(prop);
                 return prop;
             }
+        }
+
+        public static void Clear()
+        {
+            foreach (var prop in _props)
+            {
+                var tmp_prop = prop;
+                API.DeleteObject(ref tmp_prop);
+            }
+
+            _props.Clear();
         }
     }
 }
