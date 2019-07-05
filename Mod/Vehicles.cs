@@ -1,12 +1,18 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace PocceMod.Mod
 {
-    public static class Vehicles
+    public class Vehicles : BaseScript
     {
+        public Vehicles()
+        {
+            EventHandlers["PocceMod:EMP"] += new Action<int>(entity => EMP(API.NetToVeh(entity)));
+        }
+
         public static List<int> Get(bool includeWithDriver = true, float rangeSquared = 900.0f)
         {
             var vehicles = new List<int>();
@@ -61,6 +67,36 @@ namespace PocceMod.Mod
             var vehicle = API.CreateVehicle(hash, pos.X, pos.Y, pos.Z + 1.0f, Game.Player.Character.Heading, true, false);
             Game.Player.Character.SetIntoVehicle(new Vehicle(vehicle), VehicleSeat.Driver);
             return vehicle;
+        }
+
+        public static void EMP(float rangeSquared = 900.0f)
+        {
+            var vehicles = Get(true, rangeSquared);
+            foreach (var vehicle in vehicles)
+            {
+                var model = (uint)API.GetEntityModel(vehicle);
+                var seats = API.GetVehicleModelNumberOfSeats(model);
+                for (int seat = -1; seat < seats; ++seat)
+                {
+                    var ped = API.GetPedInVehicleSeat(vehicle, seat);
+                    if (API.IsPedAPlayer(ped))
+                    {
+                        TriggerServerEvent("PocceMod:EMP", API.VehToNet(vehicle));
+                        break;
+                    }
+                }
+
+                EMP(vehicle);
+            }
+        }
+
+        private static void EMP(int vehicle)
+        {
+            var model = (uint)API.GetEntityModel(vehicle);
+            if (API.IsThisModelAHeli(model) || API.IsThisModelAPlane(model))
+                API.SetVehicleEngineHealth(vehicle, 1.0f);
+            else
+                API.SetVehicleEngineHealth(vehicle, 0.0f);
         }
     }
 }

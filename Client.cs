@@ -67,7 +67,7 @@ namespace PocceMod
                         TowClosest(Props.Get(900.0f));
                         break;
                 }
-                return null;
+                return Delay(0);
             }, "Closest ped", "Closest vehicle", "Closest prop");
 
             Hud.AddMenuListItem("Clear", (clear) =>
@@ -81,16 +81,18 @@ namespace PocceMod
                         Props.Clear();
                         break;
                 }
-                return null;
+                return Delay(0);
             }, "Ropes", "Props");
 
-            Hud.AddMenuItem("Indentify skins", () => { skins.Push(IdentifyPedModels()); return null; });
+            Hud.AddMenuItem("Indentify skins", () => { skins.Push(IdentifyPedModels()); return Delay(0); });
             Hud.AddSubmenu("Change skin", async (skin) => await ChangeSkin(skin), skins);
+            Hud.AddMenuItem("EMP", () => { Vehicles.EMP(); return Delay(0); });
         }
 
         public static async Task SpawnTrashPed()
         {
             var ped = await Peds.Spawn(Config.TrashPedList);
+            await Delay(500);
             Common.Burn(ped);
             API.SetEntityAsNoLongerNeeded(ref ped);
         }
