@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace PocceMod
+namespace PocceMod.Mod
 {
     public class DataSource<T>
     {

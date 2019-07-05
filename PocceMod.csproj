@@ -48,10 +48,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Config.cs" />
-    <Compile Include="DataSource.cs" />
-    <Compile Include="PocceMod.cs" />
-    <Compile Include="Manager.cs" />
+    <Compile Include="Mod\Common.cs" />
+    <Compile Include="Mod\Config.cs" />
+    <Compile Include="Mod\DataSource.cs" />
+    <Compile Include="Client.cs" />
+    <Compile Include="Mod\Companions.cs" />
+    <Compile Include="Mod\Hud.cs" />
+    <Compile Include="Mod\Peds.cs" />
+    <Compile Include="Mod\Props.cs" />
+    <Compile Include="Mod\Ropes.cs" />
+    <Compile Include="Mod\Vehicles.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

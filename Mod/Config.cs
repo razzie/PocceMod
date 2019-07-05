@@ -1,7 +1,7 @@
 ﻿using CitizenFX.Core.Native;
 using System;
 
-namespace PocceMod
+namespace PocceMod.Mod
 {
     public static class Config
     {

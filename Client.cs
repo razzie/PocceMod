@@ -1,25 +1,99 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using PocceMod.Mod;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace PocceMod
 {
-    public sealed class PocceMod : BaseScript
+    public sealed class Client : BaseScript
     {
         private static List<int> _props = new List<int>();
         private static List<int> _ropes = new List<int>();
 
-        public PocceMod()
+        public Client()
         {
-            SetupMenu();
+            var skins = new DataSource<string>();
 
-            Tick += OnTick;
+            Hud.AddSubmenu("Spawn vehicle", async (vehicle) => await Vehicles.Spawn(vehicle), Config.VehicleList);
+            Hud.AddSubmenu("Spawn prop", async (prop) => { var entity = await Props.Spawn(prop); _props.Add(entity); }, Config.PropList, 10);
+
+            Hud.AddMenuListItem("Spawn", async (spawn) =>
+            {
+                switch (spawn)
+                {
+                    case 0:
+                        await PocceCompanion();
+                        break;
+                    case 1:
+                        await PetCompanion();
+                        break;
+                    case 2:
+                        await PoccePassengers();
+                        break;
+                    case 3:
+                        await SpawnTrashPed();
+                        break;
+                }
+            }, "Pocce companion", "Pet companion", "Pocce passengers", "Trash ped");
+
+            Hud.AddMenuListItem("Riot", async (riot) =>
+            {
+                switch (riot)
+                {
+                    case 0:
+                        await PocceRiot(false);
+                        break;
+                    case 1:
+                        await PocceRiot(true);
+                        break;
+                    case 2:
+                        await PedRiot(false);
+                        break;
+                    case 3:
+                        await PedRiot(true);
+                        break;
+                }
+            }, "Pocce riot", "Armed pocce riot", "Ped riot", "Armed ped riot");
+
+            Hud.AddMenuListItem("Tow", (tow) =>
+            {
+                switch (tow)
+                {
+                    case 0:
+                        TowClosest(Peds.Get(true, true, false));
+                        break;
+                    case 1:
+                        TowClosest(Vehicles.Get(true));
+                        break;
+                    case 2:
+                        TowClosest(Props.Get(900.0f));
+                        break;
+                }
+                return null;
+            }, "Closest ped", "Closest vehicle", "Closest prop");
+
+            Hud.AddMenuListItem("Clear", (clear) =>
+            {
+                switch (clear)
+                {
+                    case 0:
+                        ClearRopes();
+                        break;
+                    case 1:
+                        ClearProps();
+                        break;
+                }
+                return null;
+            }, "Ropes", "Props");
+
+            Hud.AddMenuItem("Indentify skins", () => { skins.Push(IdentifyPedModels()); return null; });
+            Hud.AddSubmenu("Change skin", async (skin) => await ChangeSkin(skin), skins);
         }
 
         public static async Task SpawnTrashPed()
         {
-            var ped = await Manager.SpawnPed(Config.TrashPedList);
+            var ped = await Peds.Spawn(Config.TrashPedList);
             API.StartEntityFire(ped);
             API.SetEntityAsNoLongerNeeded(ref ped);
         }
@@ -27,7 +101,7 @@ namespace PocceMod
         public static async Task PedRiot(bool useWeapons)
         {
             int i = 0;
-            var peds = Manager.GetPeds();
+            var peds = Peds.Get();
             var weapons = useWeapons ? Config.WeaponList : null;
 
             if (peds.Count < 2)
@@ -44,7 +118,7 @@ namespace PocceMod
 
                 API.ClearPedTasks(ped);
 
-                await Manager.ArmPed(ped, weapons);
+                await Peds.Arm(ped, weapons);
 
                 int enemyPed;
                 if (i % 2 == 0)
@@ -68,14 +142,14 @@ namespace PocceMod
 
             for (int i = 0; i < 4; ++i)
             {
-                int ped1 = await Manager.SpawnPed(Config.PocceList);
-                int ped2 = await Manager.SpawnPed(Config.PocceList);
+                int ped1 = await Peds.Spawn(Config.PocceList);
+                int ped2 = await Peds.Spawn(Config.PocceList);
 
                 peds.Add(ped1);
                 peds.Add(ped2);
 
-                await Manager.ArmPed(ped1, weapons);
-                await Manager.ArmPed(ped2, weapons);
+                await Peds.Arm(ped1, weapons);
+                await Peds.Arm(ped2, weapons);
 
                 API.TaskCombatPed(ped1, ped2, 0, 16);
                 API.TaskCombatPed(ped2, ped1, 0, 16);
@@ -83,9 +157,9 @@ namespace PocceMod
 
             for (int i = 0; i < 4; ++i)
             {
-                int ped = await Manager.SpawnPed(Config.PocceList);
+                int ped = await Peds.Spawn(Config.PocceList);
                 peds.Add(ped);
-                await Manager.ArmPed(ped, weapons);
+                await Peds.Arm(ped, weapons);
                 API.TaskCombatPed(ped, Game.Player.Character.Handle, 0, 16);
             }
 
@@ -102,7 +176,7 @@ namespace PocceMod
 
             if (!API.IsPedInAnyVehicle(player, true))
             {
-                Manager.Notification("Player is not in a vehicle");
+                Hud.Notification("Player is not in a vehicle");
                 return;
             }
 
@@ -115,7 +189,7 @@ namespace PocceMod
                 if (API.IsVehicleSeatFree(vehicle, seat))
                 {
                     var pocce = Config.PocceList[API.GetRandomIntInRange(0, Config.PocceList.Length)];
-                    await Manager.RequestModel(pocce);
+                    await Common.RequestModel(pocce);
                     var ped = API.CreatePedInsideVehicle(vehicle, 26, pocce, seat, true, false);
                     API.SetEntityAsNoLongerNeeded(ref ped);
                 }
@@ -124,24 +198,24 @@ namespace PocceMod
 
         public static async Task PocceCompanion()
         {
-            var ped = await Manager.SpawnPed(Config.PocceList);
-            await Manager.MakeCompanion(ped);
-            await Manager.ArmPed(ped, Config.WeaponList);
+            var ped = await Peds.Spawn(Config.PocceList);
+            await Companions.Add(ped);
+            await Peds.Arm(ped, Config.WeaponList);
             API.SetEntityAsNoLongerNeeded(ref ped);
         }
 
         public static async Task PetCompanion()
         {
-            var ped = await Manager.SpawnPed(Config.PetList, 28);
-            await Manager.MakeCompanion(ped);
-            await Manager.ArmPed(ped, null);
+            var ped = await Peds.Spawn(Config.PetList, 28);
+            await Companions.Add(ped);
+            await Peds.Arm(ped, null);
             API.SetEntityAsNoLongerNeeded(ref ped);
         }
 
         public static List<string> IdentifyPedModels()
         {
             var coords = Game.Player.Character.Position;
-            var peds = Manager.GetPeds(true, true);
+            var peds = Peds.Get(true, true);
             var models = new List<string>();
 
             foreach (var ped in peds)
@@ -151,7 +225,7 @@ namespace PocceMod
                 {
                     var model = string.Format("0x{0:X8}", API.GetEntityModel(ped));
                     models.Add(model);
-                    Manager.Notification("ped:" + model);
+                    Hud.Notification("ped:" + model);
                 }
             }
 
@@ -166,10 +240,10 @@ namespace PocceMod
 
         public static void TowClosest(IEnumerable<int> entities)
         {
-            if (Manager.GetClosestEntity(entities, out int closest))
-                _ropes.Add(Manager.AttachRope(closest));
+            if (Common.GetClosestEntity(entities, out int closest))
+                _ropes.Add(Ropes.PlayerAttach(closest));
             else
-                Manager.Notification("nothing in range");
+                Hud.Notification("nothing in range");
         }
 
         public static void ClearRopes()
@@ -192,92 +266,6 @@ namespace PocceMod
             }
 
             _props.Clear();
-        }
-
-        private void SetupMenu()
-        {
-            var skins = new DataSource<string>();
-
-            Manager.AddSubmenu("Spawn vehicle", async (vehicle) => await Manager.SpawnVehicle(vehicle), Config.VehicleList);
-            Manager.AddSubmenu("Spawn prop", async (prop) => { var entity = await Manager.SpawnProp(prop); _props.Add(entity); }, Config.PropList, 10);
-
-            Manager.AddMenuListItem("Spawn", async (spawn) =>
-            {
-                switch (spawn)
-                {
-                    case 0:
-                        await PocceCompanion();
-                        break;
-                    case 1:
-                        await PetCompanion();
-                        break;
-                    case 2:
-                        await PoccePassengers();
-                        break;
-                    case 3:
-                        await SpawnTrashPed();
-                        break;
-                }
-            }, "Pocce companion", "Pet companion", "Pocce passengers", "Trash ped");
-
-            Manager.AddMenuListItem("Riot", async (riot) =>
-            {
-                switch (riot)
-                {
-                    case 0:
-                        await PocceRiot(false);
-                        break;
-                    case 1:
-                        await PocceRiot(true);
-                        break;
-                    case 2:
-                        await PedRiot(false);
-                        break;
-                    case 3:
-                        await PedRiot(true);
-                        break;
-                }
-            }, "Pocce riot", "Armed pocce riot", "Ped riot", "Armed ped riot");
-
-            Manager.AddMenuListItem("Tow", (tow) =>
-            {
-                switch (tow)
-                {
-                    case 0:
-                        TowClosest(Manager.GetPeds(true, true, false));
-                        break;
-                    case 1:
-                        TowClosest(Manager.GetVehicles(true));
-                        break;
-                    case 2:
-                        TowClosest(Manager.GetProps(900.0f));
-                        break;
-                }
-                return null;
-            }, "Closest ped", "Closest vehicle", "Closest prop");
-
-            Manager.AddMenuListItem("Clear", (clear) =>
-            {
-                switch (clear)
-                {
-                    case 0:
-                        ClearRopes();
-                        break;
-                    case 1:
-                        ClearProps();
-                        break;
-                }
-                return null;
-            }, "Ropes", "Props");
-
-            Manager.AddMenuItem("Indentify skins", () => { skins.Push(IdentifyPedModels()); return null; });
-            Manager.AddSubmenu("Change skin", async (skin) => await ChangeSkin(skin), skins);
-        }
-
-        private async Task OnTick()
-        {
-            await Delay(2000);
-            await Manager.UpdateCompanions();
         }
     }
 }
