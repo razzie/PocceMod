@@ -7,6 +7,8 @@ namespace PocceMod.Server
     {
         public Server()
         {
+            EventHandlers["playerDropped"] += new Action<Player, string>(PlayerDropped);
+
             EventHandlers["PocceMod:Burn"] += new Action<int>(entity =>
             {
                 TriggerClientEvent("PocceMod:Burn", entity);
@@ -26,6 +28,11 @@ namespace PocceMod.Server
             {
                 TriggerClientEvent("PocceMod:ClearRopes", player);
             });
+        }
+
+        private void PlayerDropped([FromSource] Player source, string reason)
+        {
+            TriggerClientEvent("PocceMod:ClearRopes", source.Handle);
         }
     }
 }
