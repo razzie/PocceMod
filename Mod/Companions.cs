@@ -139,6 +139,12 @@ namespace PocceMod.Mod
                     }
                     else if (pos.DistanceToSquared(Game.Player.Character.Position) > 25.0f)
                     {
+                        if (API.IsPedActiveInScenario(companion))
+                        {
+                            API.ClearPedTasks(companion);
+                            API.ClearPedTasksImmediately(companion);
+                        }
+
                         API.TaskGoToEntity(companion, player, -1, 5.0f, 2.0f, 0, 0);
                     }
                     else if (API.IsPedHuman(companion))
@@ -147,8 +153,8 @@ namespace PocceMod.Mod
                         {
                             var heading = API.GetEntityHeading(companion);
                             var scenario = Config.ScenarioList[API.GetRandomIntInRange(0, Config.ScenarioList.Length)];
-                            API.TaskLookAtEntity(companion, player, -1, 2048, 3);
-                            API.TaskStandGuard(companion, pos.X, pos.Y, pos.Z, heading, scenario);
+                            //API.TaskLookAtEntity(companion, player, -1, 2048, 3);
+                            API.TaskStartScenarioInPlace(companion, scenario, 0, true);
                         }
                     }
                     else

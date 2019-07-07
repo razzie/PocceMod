@@ -100,7 +100,7 @@ namespace PocceMod
         public static async Task PedRiot(bool useWeapons)
         {
             int i = 0;
-            var peds = Peds.Get();
+            var peds = Peds.Get(!useWeapons); // do not include animals when using weapons
             var weapons = useWeapons ? Config.WeaponList : null;
 
             if (peds.Count < 2)

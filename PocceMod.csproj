@@ -70,7 +70,7 @@
     <None Include="config\props.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="config\scenario.ini">
+    <None Include="config\scenarios.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="config\trashpeds.ini">
