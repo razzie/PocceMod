@@ -11,7 +11,7 @@ namespace PocceMod.Mod
 
         public Ropes()
         {
-            EventHandlers["PocceMod:AddRope"] += new Action<int, int, int>(AddRope);
+            EventHandlers["PocceMod:AddRope"] += new Action<int, int, int, bool>(AddRope);
             EventHandlers["PocceMod:ClearRopes"] += new Action<int>(ClearRopes);
         }
 
@@ -27,9 +27,6 @@ namespace PocceMod.Mod
                 return pos;
 
             var model = (uint)API.GetEntityModel(entity);
-            if (API.IsThisModelAHeli(model))
-                return pos;
-
             var min = Vector3.Zero;
             var max = Vector3.Zero;
             API.GetModelDimensions(model, ref min, ref max);
@@ -43,13 +40,13 @@ namespace PocceMod.Mod
             return pos;
         }
 
-        private static void AddRope(int player, int entity1, int entity2)
+        private static void AddRope(int player, int entity1, int entity2, bool tow)
         {
             entity1 = API.NetToEnt(entity1);
             entity2 = API.NetToEnt(entity2);
 
-            var pos1 = GetAdjustedPosition(entity1, -0.75f);
-            var pos2 = GetAdjustedPosition(entity2, 0.75f);
+            var pos1 = tow ? GetAdjustedPosition(entity1, -0.75f) : API.GetEntityCoords(entity1, API.IsEntityAPed(entity1));
+            var pos2 = tow ? GetAdjustedPosition(entity2, 0.75f) : API.GetEntityCoords(entity2, API.IsEntityAPed(entity2));
             var length = (float)Math.Sqrt(pos1.DistanceToSquared(pos2));
 
             int unkPtr = 0;
@@ -79,23 +76,23 @@ namespace PocceMod.Mod
             }
         }
 
-        public static void PlayerAttach(int entity)
+        public static void PlayerAttach(int entity, bool tow = false)
         {
             var player = Game.Player.Character.Handle;
             if (API.IsPedInAnyVehicle(player, false))
             {
                 var vehicle = API.GetVehiclePedIsIn(player, false);
-                Attach(vehicle, entity);
+                Attach(vehicle, entity, tow);
             }
             else
             {
-                Attach(player, entity);
+                Attach(player, entity, tow);
             }
         }
 
-        public static void Attach(int entity1, int entity2)
+        public static void Attach(int entity1, int entity2, bool tow = false)
         {
-            TriggerServerEvent("PocceMod:AddRope", Game.Player.Handle, API.ObjToNet(entity1), API.ObjToNet(entity2));
+            TriggerServerEvent("PocceMod:AddRope", Game.Player.Handle, API.ObjToNet(entity1), API.ObjToNet(entity2), tow);
         }
 
         public static void Clear()

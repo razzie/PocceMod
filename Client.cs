@@ -53,22 +53,25 @@ namespace PocceMod
                 }
             }, "Pocce riot", "Armed pocce riot", "Ped riot", "Armed ped riot");
 
-            Hud.AddMenuListItem("Tow", (tow) =>
+            Hud.AddMenuListItem("Rope", (tow) =>
             {
                 switch (tow)
                 {
                     case 0:
-                        TowClosest(Peds.Get(true, true, false));
+                        RopeClosest(Peds.Get(true, true));
                         break;
                     case 1:
-                        TowClosest(Vehicles.Get(true));
+                        RopeClosest(Vehicles.Get());
                         break;
                     case 2:
-                        TowClosest(Props.Get(900.0f));
+                        RopeClosest(Vehicles.Get(), true);
+                        break;
+                    case 3:
+                        RopeClosest(Props.Get());
                         break;
                 }
                 return Delay(0);
-            }, "Closest ped", "Closest vehicle", "Closest prop");
+            }, "Closest ped", "Closest vehicle", "Closest vehicle tow", "Closest prop");
 
             Hud.AddMenuListItem("Clear", (clear) =>
             {
@@ -237,10 +240,10 @@ namespace PocceMod
             await Game.Player.ChangeModel(new Model((PedHash)model));
         }
 
-        public static void TowClosest(IEnumerable<int> entities)
+        public static void RopeClosest(IEnumerable<int> entities, bool tow = false)
         {
             if (Common.GetClosestEntity(entities, out int closest))
-                Ropes.PlayerAttach(closest);
+                Ropes.PlayerAttach(closest, tow);
             else
                 Hud.Notification("nothing in range");
         }

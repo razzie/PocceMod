@@ -19,9 +19,9 @@ namespace PocceMod.Server
                 TriggerClientEvent("PocceMod:EMP", entity);
             });
 
-            EventHandlers["PocceMod:AddRope"] += new Action<int, int, int>((player, entity1, entity2) =>
+            EventHandlers["PocceMod:AddRope"] += new Action<int, int, int, bool>((player, entity1, entity2, tow) =>
             {
-                TriggerClientEvent("PocceMod:AddRope", player, entity1, entity2);
+                TriggerClientEvent("PocceMod:AddRope", player, entity1, entity2, tow);
             });
 
             EventHandlers["PocceMod:ClearRopes"] += new Action<int>(player =>
