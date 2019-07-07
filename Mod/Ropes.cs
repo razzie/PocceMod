@@ -92,12 +92,12 @@ namespace PocceMod.Mod
 
         public static void Attach(int entity1, int entity2, bool tow = false)
         {
-            TriggerServerEvent("PocceMod:AddRope", Game.Player.Handle, API.ObjToNet(entity1), API.ObjToNet(entity2), tow);
+            TriggerServerEvent("PocceMod:AddRope", API.ObjToNet(entity1), API.ObjToNet(entity2), tow);
         }
 
         public static void Clear()
         {
-            TriggerServerEvent("PocceMod:ClearRopes", Game.Player.Handle);
+            TriggerServerEvent("PocceMod:ClearRopes");
         }
     }
 }

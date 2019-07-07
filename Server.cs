@@ -8,29 +8,33 @@ namespace PocceMod.Server
         public Server()
         {
             EventHandlers["playerDropped"] += new Action<Player, string>(PlayerDropped);
-
-            EventHandlers["PocceMod:Burn"] += new Action<int>(entity =>
-            {
-                TriggerClientEvent("PocceMod:Burn", entity);
-            });
-
-            EventHandlers["PocceMod:EMP"] += new Action<int>(entity =>
-            {
-                TriggerClientEvent("PocceMod:EMP", entity);
-            });
-
-            EventHandlers["PocceMod:AddRope"] += new Action<int, int, int, bool>((player, entity1, entity2, tow) =>
-            {
-                TriggerClientEvent("PocceMod:AddRope", player, entity1, entity2, tow);
-            });
-
-            EventHandlers["PocceMod:ClearRopes"] += new Action<int>(player =>
-            {
-                TriggerClientEvent("PocceMod:ClearRopes", player);
-            });
+            EventHandlers["PocceMod:Burn"] += new Action<int>(Burn);
+            EventHandlers["PocceMod:EMP"] += new Action<int>(EMP);
+            EventHandlers["PocceMod:AddRope"] += new Action<Player, int, int, bool>(AddRope);
+            EventHandlers["PocceMod:ClearRopes"] += new Action<Player>(ClearRopes);
         }
 
         private void PlayerDropped([FromSource] Player source, string reason)
+        {
+            ClearRopes(source);
+        }
+
+        private void Burn(int entity)
+        {
+            TriggerClientEvent("PocceMod:Burn", entity);
+        }
+
+        private void EMP(int entity)
+        {
+            TriggerClientEvent("PocceMod:EMP", entity);
+        }
+
+        private void AddRope([FromSource] Player source, int entity1, int entity2, bool tow)
+        {
+            TriggerClientEvent("PocceMod:AddRope", source.Handle, entity1, entity2, tow);
+        }
+
+        private void ClearRopes([FromSource] Player source)
         {
             TriggerClientEvent("PocceMod:ClearRopes", source.Handle);
         }
