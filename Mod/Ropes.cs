@@ -15,13 +15,41 @@ namespace PocceMod.Mod
             EventHandlers["PocceMod:ClearRopes"] += new Action<int>(ClearRopes);
         }
 
+        private static Vector3 GetAdjustedPosition(int entity, float front)
+        {
+            var right = Vector3.Zero;
+            var forward = Vector3.Zero;
+            var up = Vector3.Zero;
+            var pos = Vector3.Zero;
+            API.GetEntityMatrix(entity, ref right, ref forward, ref up, ref pos);
+
+            if (!API.IsEntityAVehicle(entity))
+                return pos;
+
+            var model = (uint)API.GetEntityModel(entity);
+            if (API.IsThisModelAHeli(model))
+                return pos;
+
+            var min = Vector3.Zero;
+            var max = Vector3.Zero;
+            API.GetModelDimensions(model, ref min, ref max);
+
+            if (front > 0)
+                right *= (max.X * front);
+            else
+                right *= (-min.X * front);
+
+            pos += right;
+            return pos;
+        }
+
         private static void AddRope(int player, int entity1, int entity2)
         {
             entity1 = API.NetToEnt(entity1);
             entity2 = API.NetToEnt(entity2);
 
-            var pos1 = API.GetEntityCoords(entity1, API.IsEntityAPed(entity1));
-            var pos2 = API.GetEntityCoords(entity2, API.IsEntityAPed(entity2));
+            var pos1 = GetAdjustedPosition(entity1, -0.75f);
+            var pos2 = GetAdjustedPosition(entity2, 0.75f);
             var length = (float)Math.Sqrt(pos1.DistanceToSquared(pos2));
 
             int unkPtr = 0;
@@ -32,6 +60,9 @@ namespace PocceMod.Mod
                 playerRopes.Add(rope);
             else
                 _ropes.Add(player, new List<int> { rope });
+
+            if (!API.RopeAreTexturesLoaded())
+                API.RopeLoadTextures();
         }
 
         private static void ClearRopes(int player)
