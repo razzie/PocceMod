@@ -6,11 +6,17 @@ using System.Threading.Tasks;
 
 namespace PocceMod.Mod
 {
-    public static class Props
+    public class Props : BaseScript
     {
+        private static readonly string PoccePropDecor = "POCCE_PROP";
         private static List<int> _props = new List<int>();
 
-        public static List<int> Get(float rangeSquared = 100.0f)
+        public Props()
+        {
+            API.DecorRegister(PoccePropDecor, 2);
+        }
+
+        public static List<int> Get(bool playerOnly = true, float rangeSquared = 900.0f)
         {
             var props = new List<int>();
             int prop = 0;
@@ -23,6 +29,9 @@ namespace PocceMod.Mod
             do
             {
                 var pos = API.GetEntityCoords(prop, false);
+
+                if (playerOnly && !API.DecorGetBool(prop, PoccePropDecor))
+                    continue;
 
                 if (API.IsEntityAPed(prop) || API.IsEntityAVehicle(prop))
                     continue;
@@ -71,7 +80,7 @@ namespace PocceMod.Mod
             _props.Add(prop);
 
             API.SetEntityCollision(prop, true, true);
-
+            API.DecorSetBool(prop, PoccePropDecor, true);
             return prop;
         }
 
@@ -92,14 +101,15 @@ namespace PocceMod.Mod
             API.GetModelDimensions(model, ref propMin, ref propMax);
 
             await Common.RequestModel(model);
-            var prop = API.CreateObject((int)model, pos.X, pos.Y, pos.Z, true, false, true);
+            var prop = API.CreateObject((int)model, pos.X, pos.Y, pos.Z + entityMax.Z - propMin.Z, true, false, true);
             _props.Add(prop);
 
-            if (!API.DoesEntityHavePhysics(prop) || propMax.Z - propMin.Z > 2.0f) // large objects glitch too much
+            if (!API.DoesEntityHavePhysics(prop) || propMax.Z - propMin.Z > 3.0f) // large objects glitch too much
                 API.AttachEntityToEntity(prop, entity, 0, 0.0f, 0.0f, -propMin.Z, 0.0f, 0.0f, 0.0f, false, false, false, false, 0, true);
             else
-                API.AttachEntityToEntityPhysically(prop, entity, 0, 0, 0.0f, 0.0f, entityMax.Z, 0.0f, 0.0f, propMin.Z, 0.0f, 0.0f, 0.0f, 100.0f, true, false, true, false, 2);
+                API.AttachEntityToEntityPhysically(prop, entity, 0, 0, 0.0f, 0.0f, entityMax.Z, 0.0f, 0.0f, propMin.Z, 0.0f, 0.0f, 0.0f, 100.0f, true, false, true, true, 2);
 
+            API.DecorSetBool(prop, PoccePropDecor, true);
             return prop;
         }
 
