@@ -46,6 +46,20 @@ namespace PocceMod.Mod
             return vehicles;
         }
 
+        public static bool GetFreeSeat(int vehicle, out int seat)
+        {
+            var model = (uint)API.GetEntityModel(vehicle);
+            int seats = API.GetVehicleModelNumberOfSeats(model);
+
+            for (seat = -1; seat < seats; ++seat)
+            {
+                if (API.IsVehicleSeatFree(vehicle, seat))
+                    return true;
+            }
+
+            return false;
+        }
+
         public static async Task<int> Spawn(string model)
         {
             var pos = Game.Player.Character.Position;

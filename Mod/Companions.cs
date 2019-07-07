@@ -111,7 +111,7 @@ namespace PocceMod.Mod
                         if (otherVehicle != vehicle)
                         {
                             API.TaskLeaveVehicle(companion, otherVehicle, 0);
-                            await BaseScript.Delay(10);
+                            await Delay(10);
                         }
                         else
                         {
@@ -119,17 +119,10 @@ namespace PocceMod.Mod
                         }
                     }
 
-                    var model = (uint)API.GetEntityModel(vehicle);
-                    int seats = API.GetVehicleModelNumberOfSeats(model);
-
-                    for (int seat = -1; seat < seats; ++seat)
-                    {
-                        if (API.IsVehicleSeatFree(vehicle, seat))
-                        {
-                            API.TaskEnterVehicle(companion, vehicle, -1, 0, 2.0f, 1, 0);
-                            continue;
-                        }
-                    }
+                    if (Vehicles.GetFreeSeat(vehicle, out int seat))
+                        API.TaskEnterVehicle(companion, vehicle, -1, seat, 2.0f, 1, 0);
+                    else
+                        break;
                 }
             }
             else

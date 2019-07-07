@@ -183,18 +183,12 @@ namespace PocceMod
             }
 
             var vehicle = API.GetVehiclePedIsIn(player, false);
-            var vehicleModel = API.GetEntityModel(vehicle);
-            var seats = API.GetVehicleModelNumberOfSeats((uint)vehicleModel);
-
-            for (int seat = -1; seat < seats; ++seat)
+            if (Vehicles.GetFreeSeat(vehicle, out int seat))
             {
-                if (API.IsVehicleSeatFree(vehicle, seat))
-                {
-                    var pocce = Config.PocceList[API.GetRandomIntInRange(0, Config.PocceList.Length)];
-                    await Common.RequestModel(pocce);
-                    var ped = API.CreatePedInsideVehicle(vehicle, 26, pocce, seat, true, false);
-                    API.SetEntityAsNoLongerNeeded(ref ped);
-                }
+                var pocce = Config.PocceList[API.GetRandomIntInRange(0, Config.PocceList.Length)];
+                await Common.RequestModel(pocce);
+                var ped = API.CreatePedInsideVehicle(vehicle, 26, pocce, seat, true, false);
+                API.SetEntityAsNoLongerNeeded(ref ped);
             }
         }
 
