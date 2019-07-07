@@ -7,15 +7,24 @@ namespace PocceMod.Mod
 {
     public class Companions : BaseScript
     {
-        private static readonly string PocceCompanionDecor = "POCCE_COMPANION";
+        private static readonly string PocceCompanionFlagDecor = "POCCE_COMPANION_FLAG";
+        private static readonly string PocceCompanionPlayerDecor = "POCCE_COMPANION_PLAYER";
 
         public Companions()
         {
+            API.DecorRegister(PocceCompanionFlagDecor, 2);
+            API.DecorRegister(PocceCompanionPlayerDecor, 3);
+
             Tick += async () =>
             {
                 await Delay(2000);
                 await Update();
             };
+        }
+
+        private static bool IsCompanion(int ped)
+        {
+            return API.DecorGetBool(ped, PocceCompanionFlagDecor) && API.DecorGetInt(ped, PocceCompanionPlayerDecor) == API.PlayerId();
         }
 
         public static List<int> Get(IEnumerable<int> peds)
@@ -24,10 +33,8 @@ namespace PocceMod.Mod
 
             foreach (var ped in peds)
             {
-                if (API.DecorGetBool(ped, PocceCompanionDecor) && API.NetworkHasControlOfEntity(ped))
+                if (IsCompanion(ped))
                     companions.Add(ped);
-
-                //API.DoesEntityBelongToThisScript(ped, )
             }
 
             return companions;
@@ -35,14 +42,15 @@ namespace PocceMod.Mod
 
         public static async Task Add(int ped)
         {
+            var playerID = API.PlayerId();
             var player = Game.Player.Character.Handle;
             var playerGroup = API.GetPedGroupIndex(player);
 
-            if (!API.DecorIsRegisteredAsType(PocceCompanionDecor, 2))
-                API.DecorRegister(PocceCompanionDecor, 2);
-
-            API.DecorSetBool(ped, PocceCompanionDecor, true);
+            API.DecorSetBool(ped, PocceCompanionFlagDecor, true);
+            API.DecorSetInt(ped, PocceCompanionPlayerDecor, playerID);
             API.SetPedRelationshipGroupHash(ped, (uint)API.GetPedRelationshipGroupHash(player));
+            var blip = API.AddBlipForEntity(ped);
+            API.SetBlipAsFriendly(blip, true);
 
             API.ClearPedTasksImmediately(ped);
             API.TaskSetBlockingOfNonTemporaryEvents(ped, true);
@@ -59,7 +67,7 @@ namespace PocceMod.Mod
             var companions = Get(peds);
 
             int target = 0;
-            if (API.GetEntityPlayerIsFreeAimingAt(API.GetPlayerIndex(), ref target) || API.GetPlayerTargetEntity(API.GetPlayerIndex(), ref target))
+            if (API.GetEntityPlayerIsFreeAimingAt(API.PlayerId(), ref target) || API.GetPlayerTargetEntity(API.PlayerId(), ref target))
             {
                 foreach (var companion in companions)
                 {
@@ -72,7 +80,7 @@ namespace PocceMod.Mod
             {
                 if (API.IsPedInCombat(ped, player))
                 {
-                    if (API.DecorGetBool(ped, PocceCompanionDecor))
+                    if (IsCompanion(ped))
                     {
                         API.ClearPedTasks(ped);
                         continue;
