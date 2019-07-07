@@ -38,7 +38,7 @@ namespace PocceMod.Mod
             return props;
         }
 
-        public static async Task<int> Spawn(string model)
+        public static Task<int> Spawn(string model)
         {
             var player = Game.Player.Character.Handle;
             var hash = (uint)API.GetHashKey(model);
@@ -46,30 +46,61 @@ namespace PocceMod.Mod
             if (!API.IsModelValid(hash))
             {
                 Hud.Notification(string.Format("Invalid model hash: 0x{0:X8} ({1})", hash, model));
-                return -1;
+                return Task.FromResult(-1);
             }
-
-            await Common.RequestModel(hash);
+            
             if (API.IsPedInAnyVehicle(player, false))
             {
                 var vehicle = API.GetVehiclePedIsIn(player, false);
-                var roofBone = API.GetEntityBoneIndexByName(vehicle, "roof");
-                var pos = API.GetWorldPositionOfEntityBone(vehicle, roofBone);
-                var prop = API.CreateObject((int)hash, pos.X, pos.Y, pos.Z + 2.0f, true, false, true);
-                //API.AttachEntityToEntityPhysically(obj, vehicle, 0, roofBone, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1000.0f, true, false, true, true, 2);
-                API.AttachEntityToEntity(prop, vehicle, roofBone, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, false, false, false, false, 0, true);
-                _props.Add(prop);
-                return prop;
+                return SpawnOnEntity(vehicle, hash);
             }
             else
             {
-                var pos = Game.Player.Character.Position;
-                var heading = API.GetEntityRotation(player, 0).Z;
-                var prop = API.CreateObject((int)hash, pos.X + (float)Math.Cos(heading), pos.Y + (float)Math.Sin(heading), pos.Z - 1.0f, true, false, true);
-                API.SetEntityCollision(prop, true, true);
-                _props.Add(prop);
-                return prop;
+                 return SpawnInFrontOfPed(player, hash);
             }
+        }
+
+        private static async Task<int> SpawnInFrontOfPed(int ped, uint model)
+        {
+            var pedModel = (uint)API.GetEntityModel(ped);
+            var pos = API.GetEntityCoords(ped, true);
+            var heading = (Math.PI / 180) * API.GetEntityHeading(ped);
+
+            await Common.RequestModel(model);
+            var prop = API.CreateObject((int)model, pos.X - (float)Math.Sin(heading), pos.Y + (float)Math.Cos(heading), pos.Z - 1.0f, true, false, true);
+            _props.Add(prop);
+
+            API.SetEntityCollision(prop, true, true);
+
+            return prop;
+        }
+
+        private static async Task<int> SpawnOnEntity(int entity, uint model)
+        {
+            var subentity = API.GetEntityAttachedTo(entity);
+            if (subentity > 0)
+                return await SpawnOnEntity(subentity, model);
+
+            var pos = API.GetEntityCoords(entity, API.IsEntityAPed(entity));
+            var entityModel = (uint)API.GetEntityModel(entity);
+            Vector3 entityMin = Vector3.Zero;
+            Vector3 entityMax = Vector3.Zero;
+            API.GetModelDimensions(entityModel, ref entityMin, ref entityMax);
+
+            Vector3 propMin = Vector3.Zero;
+            Vector3 propMax = Vector3.Zero;
+            API.GetModelDimensions(model, ref propMin, ref propMax);
+
+            await Common.RequestModel(model);
+            var prop = API.CreateObject((int)model, pos.X, pos.Y, pos.Z, true, false, true);
+            _props.Add(prop);
+
+            if (!API.DoesEntityHavePhysics(prop) || propMax.Z - propMin.Z > 2.0f) // large objects glitch too much
+                API.AttachEntityToEntity(prop, entity, 0, 0.0f, 0.0f, -propMin.Z, 0.0f, 0.0f, 0.0f, false, false, false, false, 0, true);
+            else
+                API.AttachEntityToEntityPhysically(prop, entity, 0, 0, 0.0f, 0.0f, entityMax.Z, 0.0f, 0.0f, propMin.Z, 0.0f, 0.0f, 0.0f, 100.0f, true, false, true, false, 2);
+
+            return prop;
         }
 
         public static void Clear()
