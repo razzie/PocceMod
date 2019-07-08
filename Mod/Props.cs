@@ -115,7 +115,7 @@ namespace PocceMod.Mod
             return prop;
         }
 
-        public static void Clear()
+        public static void ClearAll()
         {
             foreach (var prop in _props)
             {
@@ -124,6 +124,16 @@ namespace PocceMod.Mod
             }
 
             _props.Clear();
+        }
+
+        public static void ClearLast()
+        {
+            if (_props.Count == 0)
+                return;
+
+            var prop = _props[_props.Count - 1];
+            API.DeleteObject(ref prop);
+            _props.RemoveAt(_props.Count - 1);
         }
     }
 }

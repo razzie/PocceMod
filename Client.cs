@@ -81,11 +81,14 @@ namespace PocceMod
                         Ropes.Clear();
                         break;
                     case 1:
-                        Props.Clear();
+                        Props.ClearLast();
+                        break;
+                    case 2:
+                        Props.ClearAll();
                         break;
                 }
                 return Delay(0);
-            }, "Ropes", "Props");
+            }, "Ropes", "Last prop", "Props");
 
             Hud.AddMenuItem("Indentify skins", () => { skins.Push(IdentifyPedModels()); return Delay(0); });
             Hud.AddSubmenu("Change skin", async (skin) => await ChangeSkin(skin), skins);
