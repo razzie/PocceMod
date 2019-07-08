@@ -73,12 +73,14 @@ namespace PocceMod.Mod
         {
             var pedModel = (uint)API.GetEntityModel(ped);
             var pos = API.GetEntityCoords(ped, true);
-            var heading = (Math.PI / 180) * API.GetEntityHeading(ped);
+            var heading = API.GetEntityHeading(ped);
+            var headingRad = (Math.PI / 180) * heading;
 
             await Common.RequestModel(model);
-            var prop = API.CreateObject((int)model, pos.X - (float)Math.Sin(heading), pos.Y + (float)Math.Cos(heading), pos.Z - 1.0f, true, false, true);
+            var prop = API.CreateObject((int)model, pos.X - (float)Math.Sin(headingRad), pos.Y + (float)Math.Cos(headingRad), pos.Z - 1.0f, true, false, true);
             _props.Add(prop);
 
+            API.SetEntityHeading(prop, -heading);
             API.SetEntityCollision(prop, true, true);
             API.DecorSetBool(prop, PoccePropDecor, true);
             return prop;

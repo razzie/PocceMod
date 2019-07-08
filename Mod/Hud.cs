@@ -97,7 +97,7 @@ namespace PocceMod.Mod
                 string lastItemPrefix = string.Empty;
                 foreach (var item in items)
                 {
-                    var itemPrefix = item.Substring(0, groupByLetters);
+                    var itemPrefix = (item.Length > groupByLetters) ? item.Substring(0, groupByLetters) : item;
                     if (itemPrefix != lastItemPrefix)
                     {
                         if (itemList.Count > 0)
