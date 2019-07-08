@@ -183,7 +183,7 @@ namespace PocceMod
             }
 
             var vehicle = API.GetVehiclePedIsIn(player, false);
-            if (Vehicles.GetFreeSeat(vehicle, out int seat))
+            while (Vehicles.GetFreeSeat(vehicle, out int seat))
             {
                 var pocce = Config.PocceList[API.GetRandomIntInRange(0, Config.PocceList.Length)];
                 await Common.RequestModel(pocce);
