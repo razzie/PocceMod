@@ -94,13 +94,15 @@ namespace PocceMod.Mod
             if (API.IsPedInAnyVehicle(player, false))
             {
                 var vehicle = API.GetVehiclePedIsIn(player, false);
+                var seats = Vehicles.GetFreeSeats(vehicle);
+
                 foreach (var companion in companions)
                 {
+                    if (seats.Count == 0)
+                        break;
+
                     if (!API.IsPedHuman(companion))
                         continue;
-
-                    if (!API.AreAnyVehicleSeatsFree(vehicle))
-                        break;
 
                     if (API.IsPedInAnyVehicle(companion, true))
                     {
@@ -111,10 +113,8 @@ namespace PocceMod.Mod
                         continue;
                     }
 
-                    if (Vehicles.GetFreeSeat(vehicle, out int seat))
-                        API.TaskEnterVehicle(companion, vehicle, -1, seat, 2.0f, 1, 0);
-                    else
-                        break;
+                    var seat = seats.Dequeue();
+                    API.TaskEnterVehicle(companion, vehicle, -1, seat, 2.0f, 1, 0);
                 }
             }
             else

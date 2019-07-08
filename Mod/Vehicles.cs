@@ -60,6 +60,21 @@ namespace PocceMod.Mod
             return false;
         }
 
+        public static Queue<int> GetFreeSeats(int vehicle)
+        {
+            var model = (uint)API.GetEntityModel(vehicle);
+            int seats = API.GetVehicleModelNumberOfSeats(model);
+            var freeSeats = new Queue<int>();
+
+            for (int seat = -1; seat < seats; ++seat)
+            {
+                if (API.IsVehicleSeatFree(vehicle, seat))
+                    freeSeats.Enqueue(seat);
+            }
+
+            return freeSeats;
+        }
+
         public static async Task<int> Spawn(string model)
         {
             var pos = Game.Player.Character.Position;
