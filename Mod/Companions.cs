@@ -18,7 +18,7 @@ namespace PocceMod.Mod
             Tick += async () =>
             {
                 await Delay(2000);
-                await Update();
+                Update();
             };
         }
 
@@ -40,7 +40,7 @@ namespace PocceMod.Mod
             return companions;
         }
 
-        public static async Task Add(int ped)
+        public static void Add(int ped)
         {
             var playerID = API.PlayerId();
             var player = Game.Player.Character.Handle;
@@ -55,12 +55,9 @@ namespace PocceMod.Mod
             API.ClearPedTasksImmediately(ped);
             API.TaskSetBlockingOfNonTemporaryEvents(ped, true);
             API.SetPedKeepTask(ped, true);
-            await Delay(10);
-
-            API.TaskGoToEntity(ped, player, -1, 5.0f, 2.0f, 0, 0);
         }
 
-        private static async Task Update()
+        private static void Update()
         {
             var player = Game.Player.Character.Handle;
             var peds = Peds.Get();
@@ -109,14 +106,9 @@ namespace PocceMod.Mod
                     {
                         var otherVehicle = API.GetVehiclePedIsUsing(companion);
                         if (otherVehicle != vehicle)
-                        {
                             API.TaskLeaveVehicle(companion, otherVehicle, 0);
-                            await Delay(10);
-                        }
-                        else
-                        {
-                            continue;
-                        }
+
+                        continue;
                     }
 
                     if (Vehicles.GetFreeSeat(vehicle, out int seat))

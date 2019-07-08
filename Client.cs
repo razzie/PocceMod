@@ -115,9 +115,9 @@ namespace PocceMod
                 {
                     var vehicle = API.GetVehiclePedIsIn(ped, false);
                     API.TaskLeaveVehicle(ped, vehicle, 1);
-                    await Delay(1000);
                 }
 
+                await Delay(1000); // let them get out of vehicles
                 API.ClearPedTasks(ped);
 
                 await Peds.Arm(ped, weapons);
@@ -195,7 +195,7 @@ namespace PocceMod
         public static async Task PocceCompanion()
         {
             var ped = await Peds.Spawn(Config.PocceList);
-            await Companions.Add(ped);
+            Companions.Add(ped);
             await Peds.Arm(ped, Config.WeaponList);
             API.SetEntityAsNoLongerNeeded(ref ped);
         }
@@ -203,7 +203,7 @@ namespace PocceMod
         public static async Task PetCompanion()
         {
             var ped = await Peds.Spawn(Config.PetList, 28);
-            await Companions.Add(ped);
+            Companions.Add(ped);
             await Peds.Arm(ped, null);
             API.SetEntityAsNoLongerNeeded(ref ped);
         }
