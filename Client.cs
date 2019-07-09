@@ -69,9 +69,18 @@ namespace PocceMod
                     case 3:
                         RopeClosest(Props.Get());
                         break;
+                    case 4:
+                        var player = Game.Player.Character.Handle;
+                        if (API.IsPedInAnyHeli(player))
+                        {
+                            var heli = API.GetVehiclePedIsIn(player, false);
+                            API.EnableCargobobHook(heli, 1);
+                            API.SetCargobobPickupMagnetActive(heli, true);
+                        }
+                        break;
                 }
                 return Delay(0);
-            }, "Closest ped", "Closest vehicle", "Closest vehicle tow", "Closest prop");
+            }, "Closest ped", "Closest vehicle", "Closest vehicle tow", "Closest prop", "Cargobob magnet");
 
             Hud.AddMenuListItem("Clear", (clear) =>
             {
