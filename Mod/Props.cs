@@ -8,12 +8,12 @@ namespace PocceMod.Mod
 {
     public class Props : BaseScript
     {
-        private static readonly string PoccePropDecor = "POCCE_PROP";
+        private static readonly string PropDecor = "POCCE_PROP";
         private static List<int> _props = new List<int>();
 
         public Props()
         {
-            API.DecorRegister(PoccePropDecor, 2);
+            API.DecorRegister(PropDecor, 2);
         }
 
         public static List<int> Get(bool playerOnly = true, float rangeSquared = 900.0f)
@@ -30,7 +30,7 @@ namespace PocceMod.Mod
             {
                 var pos = API.GetEntityCoords(prop, false);
 
-                if (playerOnly && !API.DecorGetBool(prop, PoccePropDecor))
+                if (playerOnly && !API.DecorGetBool(prop, PropDecor))
                     continue;
 
                 if (API.IsEntityAPed(prop) || API.IsEntityAVehicle(prop))
@@ -82,7 +82,7 @@ namespace PocceMod.Mod
 
             API.SetEntityHeading(prop, -heading);
             API.SetEntityCollision(prop, true, true);
-            API.DecorSetBool(prop, PoccePropDecor, true);
+            API.DecorSetBool(prop, PropDecor, true);
             return prop;
         }
 
@@ -111,7 +111,7 @@ namespace PocceMod.Mod
             else
                 API.AttachEntityToEntityPhysically(prop, entity, 0, 0, 0.0f, 0.0f, entityMax.Z, 0.0f, 0.0f, propMin.Z, 0.0f, 0.0f, 0.0f, 100.0f, true, false, true, true, 2);
 
-            API.DecorSetBool(prop, PoccePropDecor, true);
+            API.DecorSetBool(prop, PropDecor, true);
             return prop;
         }
 

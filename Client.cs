@@ -104,7 +104,7 @@ namespace PocceMod
                 switch (other)
                 {
                     case 0:
-                        await Autopilot();
+                        await Autopilot.Activate();
                         break;
                     case 1:
                         Vehicles.EMP();
@@ -304,42 +304,6 @@ namespace PocceMod
                 Ropes.PlayerAttach(closest, tow);
             else
                 Hud.Notification("Nothing in range");
-        }
-
-        public static async Task Autopilot()
-        {
-            var player = Game.Player.Character.Handle;
-            if (API.IsPedInAnyVehicle(player, false))
-            {
-                var vehicle = API.GetVehiclePedIsIn(player, false);
-
-                async Task SpawnAutopilot()
-                {
-                    var autopilot = 0xA8683715; // monkey
-                    await Common.RequestModel(autopilot);
-                    var ped = API.CreatePedInsideVehicle(vehicle, 26, autopilot, -1, true, false);
-                    API.SetEntityAsNoLongerNeeded(ref ped);
-                }
-
-                if (API.IsVehicleSeatFree(vehicle, -1))
-                {
-                    await SpawnAutopilot();
-                }
-                else if (Vehicles.GetFreeSeat(vehicle, out int seat, 1))
-                {
-                    var driver = API.GetPedInVehicleSeat(vehicle, -1);
-                    API.SetPedIntoVehicle(driver, vehicle, seat);
-                    await SpawnAutopilot();
-                }
-                else
-                {
-                    Hud.Notification("Passenger seat not available");
-                }
-            }
-            else
-            {
-                Hud.Notification("Player is not in a vehicle");
-            }
         }
     }
 }

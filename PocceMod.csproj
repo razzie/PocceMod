@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Mod\Autopilot.cs" />
     <Compile Include="Mod\Common.cs" />
     <Compile Include="Mod\Config.cs" />
     <Compile Include="Mod\DataSource.cs" />

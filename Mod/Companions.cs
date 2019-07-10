@@ -1,19 +1,18 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace PocceMod.Mod
 {
     public class Companions : BaseScript
     {
-        private static readonly string PocceCompanionFlagDecor = "POCCE_COMPANION_FLAG";
-        private static readonly string PocceCompanionPlayerDecor = "POCCE_COMPANION_PLAYER";
+        private static readonly string FlagDecor = "POCCE_COMPANION_FLAG";
+        private static readonly string PlayerDecor = "POCCE_COMPANION_PLAYER";
 
         public Companions()
         {
-            API.DecorRegister(PocceCompanionFlagDecor, 2);
-            API.DecorRegister(PocceCompanionPlayerDecor, 3);
+            API.DecorRegister(FlagDecor, 2);
+            API.DecorRegister(PlayerDecor, 3);
 
             Tick += async () =>
             {
@@ -24,7 +23,7 @@ namespace PocceMod.Mod
 
         private static bool IsCompanion(int ped)
         {
-            return API.DecorGetBool(ped, PocceCompanionFlagDecor) && API.DecorGetInt(ped, PocceCompanionPlayerDecor) == API.PlayerId();
+            return API.DecorGetBool(ped, FlagDecor) && API.DecorGetInt(ped, PlayerDecor) == API.PlayerId();
         }
 
         public static List<int> Get(IEnumerable<int> peds)
@@ -45,8 +44,8 @@ namespace PocceMod.Mod
             var playerID = API.PlayerId();
             var player = Game.Player.Character.Handle;
 
-            API.DecorSetBool(ped, PocceCompanionFlagDecor, true);
-            API.DecorSetInt(ped, PocceCompanionPlayerDecor, playerID);
+            API.DecorSetBool(ped, FlagDecor, true);
+            API.DecorSetInt(ped, PlayerDecor, playerID);
             API.SetPedRelationshipGroupHash(ped, (uint)API.GetPedRelationshipGroupHash(player));
             var blip = API.AddBlipForEntity(ped);
             API.SetBlipAsFriendly(blip, true);
