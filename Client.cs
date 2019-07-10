@@ -228,10 +228,14 @@ namespace PocceMod
                     await Common.RequestModel(pocce);
                     ped = API.CreatePedInsideVehicle(vehicle, 26, pocce, seat, true, false);
                 }
+                else if (API.GetEntitySpeed(vehicle) > 0.1f)
+                {
+                    Hud.Notification("Player is in a moving vehicle and there are no free seats");
+                    return;
+                }
                 else
                 {
-                    Hud.Notification("No free seat");
-                    return;
+                    ped = await Peds.Spawn(Config.PocceList);
                 }
             }
             else
@@ -255,7 +259,7 @@ namespace PocceMod
             else if (API.IsPedInAnyVehicle(player, false))
             {
                 var vehicle = API.GetVehiclePedIsIn(player, false);
-                if (!API.IsVehicleStopped(vehicle))
+                if (API.GetVehicleDashboardSpeed(vehicle) > 0.1f)
                 {
                     Hud.Notification("Player is in a moving vehicle");
                     return;

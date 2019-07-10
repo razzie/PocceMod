@@ -123,7 +123,7 @@ namespace PocceMod.Mod
                     if (API.IsPedInAnyVehicle(companion, true))
                     {
                         var vehicle = API.GetVehiclePedIsIn(companion, false);
-                        if (API.IsVehicleStopped(vehicle))
+                        if (API.GetEntitySpeed(vehicle) < 0.1f)
                             API.TaskLeaveVehicle(companion, vehicle, 0);
                         else
                             API.TaskLeaveVehicle(companion, vehicle, 4096);
