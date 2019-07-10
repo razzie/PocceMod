@@ -199,7 +199,6 @@ namespace PocceMod
         public static async Task PoccePassengers()
         {
             int player = Game.Player.Character.Handle;
-
             if (!API.IsPedInAnyVehicle(player, true))
             {
                 Hud.Notification("Player is not in a vehicle");
@@ -218,7 +217,28 @@ namespace PocceMod
 
         public static async Task PocceCompanion()
         {
-            var ped = await Peds.Spawn(Config.PocceList);
+            int ped;
+            int player = Game.Player.Character.Handle;
+            if (API.IsPedInAnyVehicle(player, false))
+            {
+                var vehicle = API.GetVehiclePedIsIn(player, false);
+                if (Vehicles.GetFreeSeat(vehicle, out int seat))
+                {
+                    var pocce = Config.PocceList[API.GetRandomIntInRange(0, Config.PocceList.Length)];
+                    await Common.RequestModel(pocce);
+                    ped = API.CreatePedInsideVehicle(vehicle, 26, pocce, seat, true, false);
+                }
+                else
+                {
+                    Hud.Notification("No free seat");
+                    return;
+                }
+            }
+            else
+            {
+                ped = await Peds.Spawn(Config.PocceList);
+            }
+
             Companions.Add(ped);
             await Peds.Arm(ped, Config.WeaponList);
             API.SetEntityAsNoLongerNeeded(ref ped);
@@ -226,6 +246,22 @@ namespace PocceMod
 
         public static async Task PetCompanion()
         {
+            int player = Game.Player.Character.Handle;
+            if (API.IsPedInAnyHeli(player))
+            {
+                Hud.Notification("Don't spawn that poor pet on a heli");
+                return;
+            }
+            else if (API.IsPedInAnyVehicle(player, false))
+            {
+                var vehicle = API.GetVehiclePedIsIn(player, false);
+                if (!API.IsVehicleStopped(vehicle))
+                {
+                    Hud.Notification("Player is in a moving vehicle");
+                    return;
+                }
+            }
+
             var ped = await Peds.Spawn(Config.PetList, 28);
             Companions.Add(ped);
             await Peds.Arm(ped, null);

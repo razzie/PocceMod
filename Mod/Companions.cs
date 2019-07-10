@@ -44,15 +44,12 @@ namespace PocceMod.Mod
         {
             var playerID = API.PlayerId();
             var player = Game.Player.Character.Handle;
-            var playerGroup = API.GetPedGroupIndex(player);
 
             API.DecorSetBool(ped, PocceCompanionFlagDecor, true);
             API.DecorSetInt(ped, PocceCompanionPlayerDecor, playerID);
             API.SetPedRelationshipGroupHash(ped, (uint)API.GetPedRelationshipGroupHash(player));
             var blip = API.AddBlipForEntity(ped);
             API.SetBlipAsFriendly(blip, true);
-
-            API.ClearPedTasksImmediately(ped);
             API.TaskSetBlockingOfNonTemporaryEvents(ped, true);
             API.SetPedKeepTask(ped, true);
         }
@@ -117,8 +114,9 @@ namespace PocceMod.Mod
                     API.TaskEnterVehicle(companion, vehicle, -1, seat, 2.0f, 1, 0);
                 }
             }
-            else
+            else // player is not in vehicle
             {
+                var coords = API.GetEntityCoords(player, true);
                 foreach (var companion in companions)
                 {
                     var pos = API.GetEntityCoords(companion, true);
@@ -130,7 +128,7 @@ namespace PocceMod.Mod
                         else
                             API.TaskLeaveVehicle(companion, vehicle, 4096);
                     }
-                    else if (pos.DistanceToSquared(Game.Player.Character.Position) > 25.0f)
+                    else if (pos.DistanceToSquared(coords) > 25.0f)
                     {
                         if (API.IsPedActiveInScenario(companion))
                         {
@@ -146,7 +144,6 @@ namespace PocceMod.Mod
                         {
                             var heading = API.GetEntityHeading(companion);
                             var scenario = Config.ScenarioList[API.GetRandomIntInRange(0, Config.ScenarioList.Length)];
-                            //API.TaskLookAtEntity(companion, player, -1, 2048, 3);
                             API.TaskStartScenarioInPlace(companion, scenario, 0, true);
                         }
                     }
