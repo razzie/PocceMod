@@ -46,12 +46,12 @@ namespace PocceMod.Mod
             return vehicles;
         }
 
-        public static bool GetFreeSeat(int vehicle, out int seat)
+        public static bool GetFreeSeat(int vehicle, out int seat, int minSeat = -1)
         {
             var model = (uint)API.GetEntityModel(vehicle);
             int seats = API.GetVehicleModelNumberOfSeats(model);
 
-            for (seat = -1; seat < seats; ++seat)
+            for (seat = minSeat; seat < seats; ++seat)
             {
                 if (API.IsVehicleSeatFree(vehicle, seat))
                     return true;

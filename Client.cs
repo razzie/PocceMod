@@ -99,9 +99,21 @@ namespace PocceMod
                 return Delay(0);
             }, "Ropes", "Last rope", "Props", "Last prop");
 
+            Hud.AddMenuListItem("Other", async (other) =>
+            {
+                switch (other)
+                {
+                    case 0:
+                        Vehicles.EMP();
+                        break;
+                    case 1:
+                        await Autopilot();
+                        break;
+                }
+            }, "EMP", "Autopilot");
+
             Hud.AddMenuItem("Indentify skins", () => { skins.Push(IdentifyPedModels()); return Delay(0); });
             Hud.AddSubmenu("Change skin", async (skin) => await ChangeSkin(skin), skins);
-            Hud.AddMenuItem("EMP", () => { Vehicles.EMP(); return Delay(0); });
         }
 
         public static async Task SpawnTrashPed()
@@ -251,7 +263,32 @@ namespace PocceMod
             if (Common.GetClosestEntity(entities, out int closest))
                 Ropes.PlayerAttach(closest, tow);
             else
-                Hud.Notification("nothing in range");
+                Hud.Notification("Nothing in range");
+        }
+
+        public static async Task Autopilot()
+        {
+            var player = Game.Player.Character.Handle;
+            if (API.IsPedInAnyVehicle(player, false))
+            {
+                var vehicle = API.GetVehiclePedIsIn(player, false);
+                if (Vehicles.GetFreeSeat(vehicle, out int seat, 1))
+                {
+                    API.SetPedIntoVehicle(player, vehicle, seat);
+                    var pocce = Config.PocceList[API.GetRandomIntInRange(0, Config.PocceList.Length)];
+                    await Common.RequestModel(pocce);
+                    var ped = API.CreatePedInsideVehicle(vehicle, 26, pocce, -1, true, false);
+                    API.SetEntityAsNoLongerNeeded(ref ped);
+                }
+                else
+                {
+                    Hud.Notification("Passenger seat not available");
+                }
+            }
+            else
+            {
+                Hud.Notification("Player is not in a vehicle");
+            }
         }
     }
 }
