@@ -104,13 +104,13 @@ namespace PocceMod
                 switch (other)
                 {
                     case 0:
-                        Vehicles.EMP();
-                        break;
-                    case 1:
                         await Autopilot();
                         break;
+                    case 1:
+                        Vehicles.EMP();
+                        break;
                 }
-            }, "EMP", "Autopilot");
+            }, "Autopilot", "EMP");
 
             Hud.AddMenuItem("Indentify skins", () => { skins.Push(IdentifyPedModels()); return Delay(0); });
             Hud.AddSubmenu("Change skin", async (skin) => await ChangeSkin(skin), skins);
@@ -308,13 +308,24 @@ namespace PocceMod
             if (API.IsPedInAnyVehicle(player, false))
             {
                 var vehicle = API.GetVehiclePedIsIn(player, false);
-                if (Vehicles.GetFreeSeat(vehicle, out int seat, 1))
+
+                async Task SpawnAutopilot()
                 {
-                    API.SetPedIntoVehicle(player, vehicle, seat);
-                    var pocce = Config.PocceList[API.GetRandomIntInRange(0, Config.PocceList.Length)];
-                    await Common.RequestModel(pocce);
-                    var ped = API.CreatePedInsideVehicle(vehicle, 26, pocce, -1, true, false);
+                    var autopilot = 0xA8683715; // monkey
+                    await Common.RequestModel(autopilot);
+                    var ped = API.CreatePedInsideVehicle(vehicle, 26, autopilot, -1, true, false);
                     API.SetEntityAsNoLongerNeeded(ref ped);
+                }
+
+                if (API.IsVehicleSeatFree(vehicle, -1))
+                {
+                    await SpawnAutopilot();
+                }
+                else if (Vehicles.GetFreeSeat(vehicle, out int seat, 1))
+                {
+                    var driver = API.GetPedInVehicleSeat(vehicle, -1);
+                    API.SetPedIntoVehicle(driver, vehicle, seat);
+                    await SpawnAutopilot();
                 }
                 else
                 {
