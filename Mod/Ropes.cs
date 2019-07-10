@@ -118,25 +118,5 @@ namespace PocceMod.Mod
         {
             TriggerServerEvent("PocceMod:ClearLastRope");
         }
-
-        public static void CargobobMagnet()
-        {
-            var player = Game.Player.Character.Handle;
-            if (API.IsPedInAnyHeli(player))
-            {
-                var heli = API.GetVehiclePedIsIn(player, false);
-                API.EnableCargobobHook(heli, 1);
-                API.SetCargobobPickupMagnetActive(heli, true);
-            }
-        }
-
-        public static void RappelFromHeli()
-        {
-            var player = Game.Player.Character.Handle;
-            if (API.IsPedInAnyHeli(player))
-            {
-                API.TaskRappelFromHeli(player, 0);
-            }
-        }
     }
 }

@@ -70,14 +70,11 @@ namespace PocceMod
                         RopeClosest(Props.Get());
                         break;
                     case 4:
-                        Ropes.CargobobMagnet();
-                        break;
-                    case 5:
-                        Ropes.RappelFromHeli();
+                        RappelFromHeli();
                         break;
                 }
                 return Delay(0);
-            }, "Closest ped", "Closest vehicle", "Closest vehicle tow", "Closest prop", "Cargobob magnet", "Rappel from heli");
+            }, "Closest ped", "Closest vehicle", "Closest vehicle tow", "Closest prop", "Rappel from heli");
 
             Hud.AddMenuListItem("Clear", (clear) =>
             {
@@ -109,8 +106,11 @@ namespace PocceMod
                     case 1:
                         Vehicles.EMP();
                         break;
+                    case 2:
+                        CargobobMagnet();
+                        break;
                 }
-            }, "Autopilot", "EMP");
+            }, "Autopilot", "EMP", "Cargobob magnet");
 
             Hud.AddMenuItem("Indentify skins", () => { skins.Push(IdentifyPedModels()); return Delay(0); });
             Hud.AddSubmenu("Change skin", async (skin) => await ChangeSkin(skin), skins);
@@ -304,6 +304,34 @@ namespace PocceMod
                 Ropes.PlayerAttach(closest, tow);
             else
                 Hud.Notification("Nothing in range");
+        }
+
+        public static void CargobobMagnet()
+        {
+            var player = Game.Player.Character.Handle;
+            if (API.IsPedInAnyHeli(player))
+            {
+                var heli = API.GetVehiclePedIsIn(player, false);
+                if (API.IsCargobobMagnetActive(heli))
+                {
+                    API.SetCargobobPickupMagnetActive(heli, false);
+                    API.RetractCargobobHook(heli);
+                }
+                else
+                {
+                    API.EnableCargobobHook(heli, 1);
+                    API.SetCargobobPickupMagnetActive(heli, true);
+                }
+            }
+        }
+
+        public static void RappelFromHeli()
+        {
+            var player = Game.Player.Character.Handle;
+            if (API.IsPedInAnyHeli(player))
+            {
+                API.TaskRappelFromHeli(player, 0);
+            }
         }
     }
 }
