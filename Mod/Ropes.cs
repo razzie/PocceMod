@@ -13,6 +13,7 @@ namespace PocceMod.Mod
         {
             EventHandlers["PocceMod:AddRope"] += new Action<int, int, int, bool>(AddRope);
             EventHandlers["PocceMod:ClearRopes"] += new Action<int>(ClearRopes);
+            EventHandlers["PocceMod:ClearLastRope"] += new Action<int>(ClearLastRope);
         }
 
         private static Vector3 GetAdjustedPosition(int entity, float front)
@@ -76,6 +77,19 @@ namespace PocceMod.Mod
             }
         }
 
+        private static void ClearLastRope(int player)
+        {
+            if (_ropes.TryGetValue(player, out List<int> playerRopes))
+            {
+                if (playerRopes.Count == 0)
+                    return;
+
+                var rope = playerRopes[playerRopes.Count - 1];
+                API.DeleteRope(ref rope);
+                playerRopes.RemoveAt(playerRopes.Count - 1);
+            }
+        }
+
         public static void PlayerAttach(int entity, bool tow = false)
         {
             var player = Game.Player.Character.Handle;
@@ -95,9 +109,14 @@ namespace PocceMod.Mod
             TriggerServerEvent("PocceMod:AddRope", API.ObjToNet(entity1), API.ObjToNet(entity2), tow);
         }
 
-        public static void Clear()
+        public static void ClearAll()
         {
             TriggerServerEvent("PocceMod:ClearRopes");
+        }
+
+        public static void ClearLast()
+        {
+            TriggerServerEvent("PocceMod:ClearLastRope");
         }
     }
 }

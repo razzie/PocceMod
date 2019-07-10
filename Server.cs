@@ -12,6 +12,7 @@ namespace PocceMod.Server
             EventHandlers["PocceMod:EMP"] += new Action<int>(EMP);
             EventHandlers["PocceMod:AddRope"] += new Action<Player, int, int, bool>(AddRope);
             EventHandlers["PocceMod:ClearRopes"] += new Action<Player>(ClearRopes);
+            EventHandlers["PocceMod:ClearLastRope"] += new Action<Player>(ClearLastRope);
         }
 
         private void PlayerDropped([FromSource] Player source, string reason)
@@ -37,6 +38,11 @@ namespace PocceMod.Server
         private void ClearRopes([FromSource] Player source)
         {
             TriggerClientEvent("PocceMod:ClearRopes", source.Handle);
+        }
+
+        private void ClearLastRope([FromSource] Player source)
+        {
+            TriggerClientEvent("PocceMod:ClearLastRope", source.Handle);
         }
     }
 }
