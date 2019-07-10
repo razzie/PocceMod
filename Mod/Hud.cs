@@ -95,35 +95,36 @@ namespace PocceMod.Mod
             {
                 var itemList = new List<string>();
                 string lastItemPrefix = string.Empty;
+                void addRow()
+                {
+                    if (itemList.Count > 0)
+                    {
+                        if (itemList.Count == 1)
+                        {
+                            var menuItem = new MenuItem(itemList[0]);
+                            submenu.AddMenuItem(menuItem);
+                        }
+                        else
+                        {
+                            var menuListItem = new MenuListItem(lastItemPrefix + "*", itemList, 0);
+                            submenu.AddMenuItem(menuListItem);
+                        }
+                        itemList = new List<string>();
+                    }
+                }
+
                 foreach (var item in items)
                 {
                     var itemPrefix = (item.Length > groupByLetters) ? item.Substring(0, groupByLetters) : item;
                     if (itemPrefix != lastItemPrefix)
                     {
-                        if (itemList.Count > 0)
-                        {
-                            if (itemList.Count == 1)
-                            {
-                                var menuItem = new MenuItem(itemList[0]);
-                                submenu.AddMenuItem(menuItem);
-                            }
-                            else
-                            {
-                                var menuListItem = new MenuListItem(lastItemPrefix + "*", itemList, 0);
-                                submenu.AddMenuItem(menuListItem);
-                            }
-                            itemList = new List<string>();
-                        }
+                        addRow();
                         lastItemPrefix = itemPrefix;
                     }
 
                     itemList.Add(item);
                 }
-                if (itemList.Count > 0)
-                {
-                    var menuListItem = new MenuListItem(lastItemPrefix, itemList, 0);
-                    submenu.AddMenuItem(menuListItem);
-                }
+                addRow();
             }
             else
             {
