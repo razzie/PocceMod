@@ -101,7 +101,7 @@ namespace PocceMod
                 switch (other)
                 {
                     case 0:
-                        await Autopilot.Activate();
+                        await Autopilot.Toggle();
                         break;
                     case 1:
                         Vehicles.EMP();

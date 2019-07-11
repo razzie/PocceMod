@@ -56,6 +56,59 @@ namespace PocceMod.Mod
             }
         }
 
+        public static async Task Deactivate()
+        {
+            var player = Game.Player.Character.Handle;
+            if (!API.IsPedInAnyVehicle(player, false))
+            {
+                Hud.Notification("Player is not in a vehicle");
+            }
+
+            var vehicle = API.GetVehiclePedIsIn(player, false);
+            var driver = API.GetPedInVehicleSeat(vehicle, -1);
+            if (!IsAutopilot(driver))
+            {
+                Hud.Notification("The driver is not autopilot");
+                return;
+            }
+            else if (!IsOwnedAutopilot(driver))
+            {
+                Hud.Notification("The autopilot belongs to an other player");
+                return;
+            }
+            
+            API.TaskLeaveVehicle(driver, vehicle, 4096);
+            await Delay(1000);
+
+            API.SetPedIntoVehicle(player, vehicle, -1);
+        }
+
+        public static async Task Toggle()
+        {
+            var player = Game.Player.Character.Handle;
+            if (!API.IsPedInAnyVehicle(player, false))
+            {
+                Hud.Notification("Player is not in a vehicle");
+            }
+
+            var vehicle = API.GetVehiclePedIsIn(player, false);
+            var driver = API.GetPedInVehicleSeat(vehicle, -1);
+            if (IsOwnedAutopilot(driver))
+                await Deactivate();
+            else
+                await Activate();
+        }
+
+        private static bool IsAutopilot(int driver)
+        {
+            return API.DecorGetBool(driver, FlagDecor);
+        }
+
+        private static bool IsOwnedAutopilot(int driver)
+        {
+            return IsAutopilot(driver) && API.DecorGetInt(driver, PlayerDecor) == API.PlayerId();
+        }
+
         private static async Task Spawn(int vehicle)
         {
             await Common.RequestModel(Model);
@@ -74,12 +127,21 @@ namespace PocceMod.Mod
         {
             var player = Game.Player.Character.Handle;
             if (!API.IsPedInAnyVehicle(player, false))
+            {
+                var lastVehicle = API.GetVehiclePedIsIn(player, true);
+                var lastDriver = API.GetPedInVehicleSeat(lastVehicle, -1);
+                if (IsAutopilot(lastDriver) && API.IsEntityAMissionEntity(lastDriver) &&
+                    !API.AnyPassengersRappeling(lastVehicle) && Vehicles.GetPlayers(lastVehicle).Count == 0)
+                {
+                    API.SetPedAsNoLongerNeeded(ref lastDriver);
+                }
+
                 return;
+            }
 
             var vehicle = API.GetVehiclePedIsIn(player, false);
             var driver = API.GetPedInVehicleSeat(vehicle, -1);
-
-            if (!API.DecorGetBool(driver, FlagDecor) || API.DecorGetInt(driver, PlayerDecor) != API.PlayerId())
+            if (!IsOwnedAutopilot(driver))
                 return;
 
             if (API.AnyPassengersRappeling(vehicle))
