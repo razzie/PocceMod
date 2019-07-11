@@ -46,10 +46,16 @@ namespace PocceMod.Mod
             return vehicles;
         }
 
-        public static bool GetFreeSeat(int vehicle, out int seat, int minSeat = -1)
+        public static bool GetFreeSeat(int vehicle, out int seat, bool forcePassenger = false)
         {
             var model = (uint)API.GetEntityModel(vehicle);
-            int seats = API.GetVehicleModelNumberOfSeats(model);
+            int seats = API.GetVehicleModelNumberOfSeats(model) - 1;
+            int minSeat = -1;
+
+            if (forcePassenger)
+            {
+                minSeat = (seats > 1) ? 1 : 0;
+            }
 
             for (seat = minSeat; seat < seats; ++seat)
             {
@@ -63,7 +69,7 @@ namespace PocceMod.Mod
         public static Queue<int> GetFreeSeats(int vehicle)
         {
             var model = (uint)API.GetEntityModel(vehicle);
-            int seats = API.GetVehicleModelNumberOfSeats(model);
+            int seats = API.GetVehicleModelNumberOfSeats(model) - 1;
             var freeSeats = new Queue<int>();
 
             for (int seat = -1; seat < seats; ++seat)
@@ -73,6 +79,22 @@ namespace PocceMod.Mod
             }
 
             return freeSeats;
+        }
+
+        public static List<int> GetPlayers(int vehicle)
+        {
+            var players = new List<int>();
+            var model = (uint)API.GetEntityModel(vehicle);
+            var seats = API.GetVehicleModelNumberOfSeats(model) - 1;
+
+            for (int seat = -1; seat < seats; ++seat)
+            {
+                var ped = API.GetPedInVehicleSeat(vehicle, seat);
+                if (API.IsPedAPlayer(ped))
+                    players.Add(API.NetworkGetPlayerIndexFromPed(ped));
+            }
+
+            return players;
         }
 
         public static async Task<int> Spawn(string model)
@@ -95,6 +117,10 @@ namespace PocceMod.Mod
             await Common.RequestModel(hash);
             var vehicle = API.CreateVehicle(hash, pos.X, pos.Y, pos.Z + 1.0f, Game.Player.Character.Heading, true, false);
             Game.Player.Character.SetIntoVehicle(new Vehicle(vehicle), VehicleSeat.Driver);
+
+            if (API.IsThisModelAHeli(hash) && API.GetEntityHeightAboveGround(vehicle) > 10.0f)
+                API.SetHeliBladesFullSpeed(vehicle);
+
             return vehicle;
         }
 
@@ -103,17 +129,8 @@ namespace PocceMod.Mod
             var vehicles = Get(true, rangeSquared);
             foreach (var vehicle in vehicles)
             {
-                var model = (uint)API.GetEntityModel(vehicle);
-                var seats = API.GetVehicleModelNumberOfSeats(model);
-                for (int seat = -1; seat < seats; ++seat)
-                {
-                    var ped = API.GetPedInVehicleSeat(vehicle, seat);
-                    if (API.IsPedAPlayer(ped))
-                    {
-                        TriggerServerEvent("PocceMod:EMP", API.VehToNet(vehicle));
-                        break;
-                    }
-                }
+                if (GetPlayers(vehicle).Count > 0)
+                    TriggerServerEvent("PocceMod:EMP", API.VehToNet(vehicle));
 
                 EMP(vehicle);
             }

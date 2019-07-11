@@ -1,6 +1,7 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace PocceMod.Mod
 {
@@ -14,11 +15,7 @@ namespace PocceMod.Mod
             API.DecorRegister(FlagDecor, 2);
             API.DecorRegister(PlayerDecor, 3);
 
-            Tick += async () =>
-            {
-                await Delay(2000);
-                Update();
-            };
+            Tick += Update;
         }
 
         private static bool IsCompanion(int ped)
@@ -53,7 +50,7 @@ namespace PocceMod.Mod
             API.SetPedKeepTask(ped, true);
         }
 
-        private static void Update()
+        private static Task Update()
         {
             var player = Game.Player.Character.Handle;
             var peds = Peds.Get();
@@ -66,7 +63,7 @@ namespace PocceMod.Mod
                 {
                     API.TaskCombatPed(companion, target, 0, 16);
                 }
-                return;
+                return Delay(2000);
             }
 
             foreach (var ped in peds)
@@ -83,7 +80,7 @@ namespace PocceMod.Mod
                     {
                         API.TaskCombatPed(companion, ped, 0, 16);
                     }
-                    return;
+                    return Delay(2000);
                 }
             }
 
@@ -152,6 +149,8 @@ namespace PocceMod.Mod
                     }
                 }
             }
+
+            return Delay(2000);
         }
     }
 }

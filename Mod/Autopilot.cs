@@ -8,6 +8,7 @@ namespace PocceMod.Mod
     public class Autopilot : BaseScript
     {
         private static readonly uint Model = 0xA8683715; // monkey
+        private static readonly int DrivingStyle = 156;
         private static readonly string FlagDecor = "POCCE_AUTOPILOT_FLAG";
         private static readonly string PlayerDecor = "POCCE_AUTOPILOT_PLAYER";
         private static readonly string WaypointHashDecor = "POCCE_AUTOPILOT_WAYPOINT";
@@ -18,39 +19,41 @@ namespace PocceMod.Mod
             API.DecorRegister(PlayerDecor, 3);
             API.DecorRegister(WaypointHashDecor, 3);
 
-            Tick += async () =>
-            {
-                await Delay(2000);
-                Update();
-            };
+            Tick += Update;
         }
 
         public static async Task Activate()
         {
             var player = Game.Player.Character.Handle;
-            if (API.IsPedInAnyVehicle(player, false))
-            {
-                var vehicle = API.GetVehiclePedIsIn(player, false);
-                if (API.IsVehicleSeatFree(vehicle, -1))
-                {
-                    await Spawn(vehicle);
-                }
-                else if (Vehicles.GetFreeSeat(vehicle, out int seat, 1))
-                {
-                    var driver = API.GetPedInVehicleSeat(vehicle, -1);
-                    API.SetPedIntoVehicle(driver, vehicle, seat);
-                    await Spawn(vehicle);
-                }
-                else
-                {
-                    Hud.Notification("Passenger seat not available");
-                }
-            }
-            else
+            if (!API.IsPedInAnyVehicle(player, false))
             {
                 Hud.Notification("Player is not in a vehicle");
             }
 
+            var vehicle = API.GetVehiclePedIsIn(player, false);
+            if (API.IsVehicleSeatFree(vehicle, -1))
+            {
+                await Spawn(vehicle);
+                return;
+            }
+
+            if (API.GetPedInVehicleSeat(vehicle, -1) != player)
+            {
+                Hud.Notification("You are not the driver of this vehicle");
+                return;
+            }
+
+            if (Vehicles.GetFreeSeat(vehicle, out int seat, true))
+            {
+                var driver = API.GetPedInVehicleSeat(vehicle, -1);
+                API.SetPedIntoVehicle(driver, vehicle, seat);
+
+                await Spawn(vehicle);
+            }
+            else
+            {
+                Hud.Notification("An extra seat is required");
+            }
         }
 
         private static async Task Spawn(int vehicle)
@@ -62,40 +65,48 @@ namespace PocceMod.Mod
             API.DecorSetInt(ped, PlayerDecor, playerID);
             API.SetDriverAbility(ped, 1f);
             API.SetDriverAggressiveness(ped, 0f);
-            API.SetEntityAsNoLongerNeeded(ref ped);
+            API.SetPedAsGroupMember(ped, API.GetPlayerGroup(playerID));
+            API.SetEntityAsMissionEntity(ped, true, true);
+            Wander(ped, vehicle);
         }
 
-        private static void Update()
+        private static async Task Update()
         {
             var player = Game.Player.Character.Handle;
             if (!API.IsPedInAnyVehicle(player, false))
                 return;
 
             var vehicle = API.GetVehiclePedIsIn(player, false);
-            var vehicleModel = (uint)API.GetEntityModel(vehicle);
             var driver = API.GetPedInVehicleSeat(vehicle, -1);
+
             if (!API.DecorGetBool(driver, FlagDecor) || API.DecorGetInt(driver, PlayerDecor) != API.PlayerId())
                 return;
 
-            if (API.IsWaypointActive())
+            if (API.AnyPassengersRappeling(vehicle))
             {
-                var wp = API.GetBlipInfoIdCoord(API.GetFirstBlipInfoId(8));
+                var coords = API.GetEntityCoords(vehicle, false);
+                API.TaskHeliMission(driver, vehicle, 0, 0, coords.X, coords.Y, coords.Z, 4, 0.0f, 5.0f, API.GetEntityHeading(vehicle), -1, -1, 0, 0);
+                API.DecorSetInt(driver, WaypointHashDecor, 0);
+                await Delay(1000);
+                return;
+            }
+
+            if (Common.GetWaypoint(out Vector3 wp, false))
+            {
+                // waypoint hasn't changed
                 if (API.DecorGetInt(driver, WaypointHashDecor) == wp.GetHashCode())
                     return;
 
                 API.DecorSetInt(driver, WaypointHashDecor, wp.GetHashCode());
+                GotoWaypoint(driver, vehicle, wp);
+                return;
+            }
 
-                var adjustedWp = Vector3.Zero;
-                if (API.GetClosestVehicleNode(wp.X, wp.Y, wp.Z, ref adjustedWp, 1, 100.0f, 2.5f))
-                    wp = adjustedWp;
-
-                if (API.IsThisModelAPlane(vehicleModel))
-                    API.TaskPlaneLand(driver, vehicle, wp.X, wp.Y, wp.Z, wp.X, wp.Y, wp.Z);
-                else if (API.IsThisModelAHeli(vehicleModel))
-                    API.TaskHeliMission(driver, vehicle, 0, 0, wp.X, wp.Y, wp.Z, 4, API.GetVehicleModelMaxSpeed(vehicleModel), 5.0f, GetHeading(vehicle, wp), -1, -1, 0, 32);
-                else
-                    //API.TaskVehicleGotoNavmesh(driver, vehicle, wp.X, wp.Y, wp.Z, 30.0f, 156, 5.0f);
-                    API.TaskVehicleDriveToCoordLongrange(driver, vehicle, wp.X, wp.Y, wp.Z, API.GetVehicleModelMaxSpeed(vehicleModel), 156, 5f);
+            // waypoint was removed
+            if (API.DecorGetInt(driver, WaypointHashDecor) > 0)
+            {
+                API.DecorSetInt(driver, WaypointHashDecor, 0);
+                Wander(driver, vehicle);
             }
         }
 
@@ -104,6 +115,51 @@ namespace PocceMod.Mod
             var coords = API.GetEntityCoords(vehicle, false);
             var heading = (float)Math.Atan2(wp.Y - coords.Y, wp.X - coords.X);
             return MathUtil.RadiansToDegrees(heading);
+        }
+
+        private static void GotoWaypoint(int driver, int vehicle, Vector3 wp)
+        {
+            var vehicleModel = (uint)API.GetEntityModel(vehicle);
+            if (API.IsThisModelAPlane(vehicleModel))
+            {
+                API.TaskPlaneLand(driver, vehicle, wp.X, wp.Y, wp.Z, wp.X, wp.Y, wp.Z);
+            }
+            else if (API.IsThisModelAHeli(vehicleModel))
+            {
+                var speed = API.GetVehicleModelMaxSpeed(vehicleModel);
+                var heading = GetHeading(vehicle, wp);
+                API.TaskHeliMission(driver, vehicle, 0, 0, wp.X, wp.Y, wp.Z, 4, speed, 5.0f, heading, -1, -1, 0, 32);
+            }
+            else
+            {
+                var speed = API.GetVehicleModelMaxSpeed(vehicleModel);
+                API.TaskVehicleDriveToCoordLongrange(driver, vehicle, wp.X, wp.Y, wp.Z, speed, DrivingStyle, 5f);
+            }
+        }
+
+        private static void Wander(int driver, int vehicle)
+        {
+            var vehicleModel = (uint)API.GetEntityModel(vehicle);
+            if (API.IsThisModelAPlane(vehicleModel))
+            {
+                var height = API.GetEntityHeightAboveGround(vehicle);
+                var pos = API.GetEntityCoords(vehicle, false);
+                API.TaskPlaneLand(driver, vehicle, pos.X, pos.Y, pos.Z, pos.X, pos.Y, pos.Z);
+            }
+            else if (API.IsThisModelAHeli(vehicleModel))
+            {
+                var height = API.GetEntityHeightAboveGround(vehicle);
+                var speed = API.GetVehicleModelMaxSpeed(vehicleModel);
+                var heading = API.GetEntityHeading(vehicle);
+                var pos = API.GetEntityCoords(vehicle, false);
+                pos.Z -= height;
+                API.TaskHeliMission(driver, vehicle, 0, 0, pos.X, pos.Y, pos.Z, 4, speed, 5.0f, heading, -1, -1, 0, 32);
+            }
+            else
+            {
+                var speed = API.GetVehicleModelMaxSpeed(vehicleModel);
+                API.TaskVehicleDriveWander(driver, vehicle, speed, DrivingStyle);
+            }
         }
     }
 }

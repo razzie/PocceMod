@@ -45,6 +45,25 @@ namespace PocceMod.Mod
             return found;
         }
 
+        public static bool GetWaypoint(out Vector3 wp, bool adjust = true)
+        {
+            wp = Vector3.Zero;
+
+            if (!API.IsWaypointActive())
+                return false;
+
+            wp = API.GetBlipInfoIdCoord(API.GetFirstBlipInfoId(8));
+
+            if (adjust)
+            {
+                var adjustedWp = Vector3.Zero;
+                if (API.GetClosestVehicleNode(wp.X, wp.Y, wp.Z, ref adjustedWp, 1, 100.0f, 2.5f))
+                    wp = adjustedWp;
+            }
+
+            return true;
+        }
+
         public static void Burn(int entity)
         {
             TriggerServerEvent("PocceMod:Burn", API.ObjToNet(entity));
