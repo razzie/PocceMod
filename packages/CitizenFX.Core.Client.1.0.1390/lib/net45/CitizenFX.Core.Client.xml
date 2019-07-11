@@ -26482,25 +26482,23 @@
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.APPLY_FORCE_TO_ENTITY">
             <summary>
-            Documented here:  
-            gtaforums.com/topic/885669-precisely-define-object-physics/  
-            gtaforums.com/topic/887362-apply-forces-and-momentums-to-entityobject/  
-            forceFlags:  
-            First bit (lowest): Strong force flag, factor 100  
-            Second bit: Unkown flag  
-            Third bit: Momentum flag=1 (vector (x,y,z) is a momentum, more research needed)  
-            If higher bits are unequal 0 the function doesn't applay any forces at all.  
-            (As integer possible values are 0-7)  
-            0: weak force  
-            1: strong force  
-            2: same as 0 (2nd bit?)  
-            3: same as 1  
-            4: weak momentum  
-            5: strong momentum  
-            6: same as 4  
-            7: same as 5  
-            isDirectionRel: vector defined in local (body-fixed) coordinate frame  
-            isForceRel: if true the force gets multiplied with the objects mass (this is why it was known as highForce) and different objects will have the same acceleration.
+            Applies a force to the specified entity.
+            
+            **List of force types (p1)**:
+            
+            ```
+            public enum ForceType
+            {
+                MinForce = 0,
+                MaxForceRot = 1,
+                MinForce2 = 2,
+                MaxForceRot2 = 3,
+                ForceNoRot = 4,
+                ForceRotPlusForce = 5
+            }
+            ```
+            
+            Research/documentation on the gtaforums can be found [here](https://gtaforums.com/topic/885669-precisely-define-object-physics/) and [here](https://gtaforums.com/topic/887362-apply-forces-and-momentums-to-entityobject/).
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.APPLY_PED_BLOOD">
@@ -26875,6 +26873,11 @@
             Doesn't seem like the flags are actually read by the game at all.
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.CLEAR_GPS_MULTI_ROUTE">
+            <summary>
+            Does the same as [`SET_GPS_MULTI_ROUTE_RENDER(false)`](https://runtime.fivem.net/doc/reference.html#_0x3DDA37128DD1ACA8)
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.CLEAR_PED_BLOOD_DAMAGE_BY_ZONE">
             <summary>
             Somehow related to changing ped's clothes.
@@ -27089,6 +27092,13 @@
         <member name="F:CitizenFX.Core.Native.Hash.CREATE_DUI">
             <summary>
             Creates a DUI browser. This can be used to draw on a runtime texture using CREATE_RUNTIME_TEXTURE_FROM_DUI_HANDLE.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.CREATE_FAKE_MP_GAMER_TAG">
+            <summary>
+            p0 was the return of NET_TO_PED in fm_mission_controler.  
+            p4 was always "".  
+            returns headDisplayId
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.CREATE_GROUP">
@@ -29469,6 +29479,11 @@
             SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES or _SET_NETWORK_ID_SYNC_TO_PLAYER to make it so other players can hear the sound while online? It'd be a bit troll-fun to be able to play the Zancudo UFO creepy sounds globally.
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_NETWORK_TIME_ACCURATE">
+            <summary>
+            returns the same value as NETWORK::GET_NETWORK_TIME in freemode.
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_NEXT_GPS_DISABLED_ZONE_INDEX">
             <summary>
             Gets the next zone that has been disabled using SET_GPS_DISABLED_ZONE_AT_INDEX.
@@ -31476,6 +31491,11 @@
             Definitely a hash collision, has something do to with your local player, not a vehicle
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.IS_ONLINE_POLICIES_MENU_ACTIVE">
+            <summary>
+            Returns the same as `IS_SOCIAL_CLUB_ACTIVE`.
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.IS_ORBIS_VERSION">
             <summary>
             PS4  
@@ -32890,6 +32910,13 @@
             "miss_Tower_10"
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.OPEN_SOCIAL_CLUB_MENU">
+            <summary>
+            Uses the `SOCIAL_CLUB2` scaleform. &lt;https://i.imgur.com/KleabIw.png&gt;
+            
+            Old name: `_SHOW_SOCIAL_CLUB_BANNED_SCREEN`
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.OVERRIDE_CAM_SPLINE_MOTION_BLUR">
             <summary>
             Max value for p1 is 15.
@@ -34195,6 +34222,11 @@
             Hardcoded to not work in multiplayer.
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_CAR_BOOT_OPEN">
+            <summary>
+            Opens the trunk of the vehicle. Initially used in Max Payne 3, that's why we know the name.
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_CHECKPOINT_CYLINDER_HEIGHT">
             <summary>
             Sets the cylinder height of the checkpoint.  
@@ -34454,8 +34486,9 @@
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_ENTITY_NO_COLLISION_ENTITY">
             <summary>
-            Calling this function, regardless of the "unknown" value, disabled collision between two entities.  
-            Importance of entity1 and 2 order is unclear.
+            Calling this function disables collision between two entities.
+            The importance of the order for entity1 and entity2 is unclear.
+            The third parameter, `thisFrame`, decides whether the collision is to be disabled until it is turned back on, or if it's just this frame.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_ENTITY_PROOFS">
@@ -36301,6 +36334,11 @@
             SET_VEHICLE_BOOST_ACTIVE(vehicle, 1, 0);  
             SET_VEHICLE_BOOST_ACTIVE(vehicle, 0, 0);   
             Will give a boost-soundeffect.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_VEHICLE_BULLDOZER_ARM_POSITION">
+            <summary>
+            Sets the arm position of a bulldozer. Position must be a value between 0.0 and 1.0. Ignored when `p2` is set to false, instead incrementing arm position by 0.1 (or 10%).
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_VEHICLE_BURNOUT">
@@ -38628,6 +38666,12 @@
             For a full list, see here: pastebin.com/yLNWicUi
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.TERRAINGRID_ACTIVATE">
+            <summary>
+            This native enables/disables the gold putting grid display (&lt;https://i.imgur.com/TC6cku6.png&gt;).
+            This requires these two natives to be called as well to configure the grid: [`0x1c4fc5752bcd8e48`](https://runtime.fivem.net/doc/reference.html#_0x1C4FC5752BCD8E48) and [`0x5ce62918f8d703c7`](https://runtime.fivem.net/doc/reference.html#_0x5CE62918F8D703C7).
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.TEST_VERTICAL_PROBE_AGAINST_ALL_WATER">
             <summary>
             I guess p3 is shape test flags?
@@ -39061,6 +39105,11 @@
             The number of parameters passed to the function varies, so the end of the parameter list is represented by 0 (NULL).
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash._CANCEL_ONSCREEN_KEYBOARD">
+            <summary>
+            Cancels an onscreen keyboard, if available.
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash._CAN_PED_SEE_PED">
             <summary>
             Returns true if ped1 can see ped2 in their line of vision
@@ -39097,6 +39146,11 @@
             Eg. _CLAMP_GAMEPLAY_CAM_YAW(0.0f, 0.0f) will set the horizontal angle directly behind the player.
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash._CLEAR_ALL_BLIP_ROUTES">
+            <summary>
+            Clears all active blip routes that have been set with [`SetBlipRoute`](#_0x3E160C90).
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash._CLEAR_AREA_OF_EVERYTHING">
             <summary>
             GAMEPLAY::_0x957838AAF91BD12D(x, y, z, radius, false, false, false, false); seem to make all objects go away, peds, vehicles etc. All booleans set to true doesn't seem to change anything.
@@ -39120,13 +39174,6 @@
         <member name="F:CitizenFX.Core.Native.Hash._CREATE_LIGHTNING_THUNDER">
             <summary>
             creates single lightning+thunder at random position
-            </summary>
-        </member>
-        <member name="F:CitizenFX.Core.Native.Hash._CREATE_MP_GAMER_TAG">
-            <summary>
-            p0 was the return of NET_TO_PED in fm_mission_controler.  
-            p4 was always "".  
-            returns headDisplayId
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash._DECOR_GET_FLOAT">
@@ -41207,6 +41254,11 @@
             There seem to be 26 flags
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash._RESTART_GAME">
+            <summary>
+            Shows `Disconnecting from GTA Online` HUD and then quits the game. Better name `_QUIT_GAME`?
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash._RETURN_TWO">
             <summary>
             It returns two lol  
@@ -41322,6 +41374,16 @@
             if p0 is 0, effect is cancelled  
             if p0 is 1, effect zooms in, gradually tilts cam clockwise apx 30 degrees, wobbles slowly. Motion blur is active until cancelled.  
             if p0 is 2, effect immediately tilts cam clockwise apx 30 degrees, begins to wobble slowly, then gradually tilts cam back to normal. The wobbling will continue until the effect is cancelled.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash._SET_CAN_PED_EQUIP_ALL_WEAPONS">
+            <summary>
+            Does the same as [`_SET_CAN_PED_SELECT_WEAPON`](https://runtime.fivem.net/doc/natives/#_0xB4771B9AAF4E68E4) except for all weapons.
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash._SET_CAN_PED_SELECT_WEAPON">
+            <summary>
+            For the player ped this will also gray out the weapon in the weapon wheel.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash._SET_CARGOBOB_HOOK_POSITION">
@@ -41582,6 +41644,11 @@
         <member name="F:CitizenFX.Core.Native.Hash._SET_MP_GAMER_TAG_ICONS">
             <summary>
             Displays a bunch of icons above the players name, and level, and their name twice
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash._SET_MP_GAMER_TAG_MP_BAG_LARGE_COUNT">
+            <summary>
+            displays wanted star above head
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash._SET_NETWORK_ID_SYNC_TO_PLAYER">
@@ -42112,6 +42179,11 @@
             Documented by NTAuthority (http://fivem.net/).
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash._SET_USE_HIGHER_VEHICLE_JUMP_FORCE">
+            <summary>
+            Allows vehicles with the FLAG_JUMPING_CAR flag to jump higher (i.e. Ruiner 2000).
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash._SET_VEHICLE_DOOR_CAN_BREAK">
             <summary>
             Keeps Vehicle Doors/Hood/Trunk from breaking off
@@ -42330,11 +42402,6 @@
             <summary>
             If toggle is true, the ped's head is shown in the pause menu  
             If toggle is false, the ped's head is not shown in the pause menu
-            </summary>
-        </member>
-        <member name="F:CitizenFX.Core.Native.Hash._SHOW_SOCIAL_CLUB_BANNED_SCREEN">
-            <summary>
-            Uses the `SOCIAL_CLUB2` scaleform.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash._SHOW_SOCIAL_CLUB_LEGAL_SCREEN">
@@ -42646,6 +42713,11 @@
         <member name="F:CitizenFX.Core.Native.Hash._SET_VEHICLE_LANDING_GEAR">
             <summary>
             Deprecated name, use CONTROL_LANDING_GEAR instead
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash._CREATE_MP_GAMER_TAG">
+            <summary>
+            Deprecated name, use CREATE_FAKE_MP_GAMER_TAG instead
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash._ENABLE_CARGOBOB_HOOK">
@@ -43063,6 +43135,16 @@
             Deprecated name, use _CAN_PLAY_ONLINE instead
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash._CREATE_MP_GAMER_TAG_COLOR">
+            <summary>
+            Deprecated name, use _CREATE_MP_GAMER_TAG_FOR_NET_PLAYER instead
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash._SET_MP_GAMER_TAG_COLOR">
+            <summary>
+            Deprecated name, use _CREATE_MP_GAMER_TAG_FOR_NET_PLAYER instead
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash._IS_CARGOBOB_MAGNET_ACTIVE">
             <summary>
             Deprecated name, use _DOES_CARGOBOB_HAVE_PICKUP_MAGNET instead
@@ -43161,6 +43243,11 @@
         <member name="F:CitizenFX.Core.Native.Hash._GET_PLANE_HOVER_MODE_PERCENTAGE">
             <summary>
             Deprecated name, use _GET_VEHICLE_HOVER_MODE_PERCENTAGE instead
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash._HAS_MP_GAMER_TAG_2">
+            <summary>
+            Deprecated name, use _HAS_MP_GAMER_TAG_CREW_FLAGS_SET instead
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash._IS_OUTFIT_EMPTY">
@@ -43271,11 +43358,6 @@
         <member name="F:CitizenFX.Core.Native.Hash._ENABLE_GAMEPLAY_CAM">
             <summary>
             Deprecated name, use _SET_FROZEN_RENDERING_DISABLED instead
-            </summary>
-        </member>
-        <member name="F:CitizenFX.Core.Native.Hash._CREATE_MP_GAMER_TAG_COLOR">
-            <summary>
-            Deprecated name, use _SET_MP_GAMER_TAG_COLOR instead
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash._SET_DRAW_MAP_VISIBLE">
@@ -43942,26 +44024,35 @@
         </member>
         <member name="M:CitizenFX.Core.Native.API.ApplyForceToEntity(System.Int32,System.Int32,System.Single,System.Single,System.Single,System.Single,System.Single,System.Single,System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
-            Documented here:
-            gtaforums.com/topic/885669-precisely-define-object-physics/
-            gtaforums.com/topic/887362-apply-forces-and-momentums-to-entityobject/
-            forceFlags:
-            First bit (lowest): Strong force flag, factor 100
-            Second bit: Unkown flag
-            Third bit: Momentum flag=1 (vector (x,y,z) is a momentum, more research needed)
-            If higher bits are unequal 0 the function doesn't applay any forces at all.
-            (As integer possible values are 0-7)
-            0: weak force
-            1: strong force
-            2: same as 0 (2nd bit?)
-            3: same as 1
-            4: weak momentum
-            5: strong momentum
-            6: same as 4
-            7: same as 5
-            isDirectionRel: vector defined in local (body-fixed) coordinate frame
-            isForceRel: if true the force gets multiplied with the objects mass (this is why it was known as highForce) and different objects will have the same acceleration.
+            Applies a force to the specified entity.
+            **List of force types (p1)**:
+            ```
+            public enum ForceType
+            {
+            MinForce = 0,
+            MaxForceRot = 1,
+            MinForce2 = 2,
+            MaxForceRot2 = 3,
+            ForceNoRot = 4,
+            ForceRotPlusForce = 5
+            }
+            ```
+            Research/documentation on the gtaforums can be found [here](https://gtaforums.com/topic/885669-precisely-define-object-physics/) and [here](https://gtaforums.com/topic/887362-apply-forces-and-momentums-to-entityobject/).
             </summary>
+            <param name="entity">The entity you want to apply a force on</param>
+            <param name="forceType">See native description above for a list of commonly used values</param>
+            <param name="x">Force amount (X)</param>
+            <param name="y">Force amount (Y)</param>
+            <param name="z">Force amount (Z)</param>
+            <param name="offX">Rotation/offset force (X)</param>
+            <param name="offY">Rotation/offset force (Y)</param>
+            <param name="offZ">Rotation/offset force (Z)</param>
+            <param name="boneIndex">(Often 0) Entity bone index</param>
+            <param name="isDirectionRel">(Usually false) Vector defined in local (body-fixed) coordinate frame</param>
+            <param name="ignoreUpVec">(Usually true)</param>
+            <param name="isForceRel">(Usually true) When true, force gets multiplied with the objects mass and different objects will have the same acceleration</param>
+            <param name="p12">(Usually false)</param>
+            <param name="p13">(Usually true)</param>
         </member>
         <member name="M:CitizenFX.Core.Native.API.ApplyPedBlood(System.Int32,System.Int32,System.Single,System.Single,System.Single,System.String)">
             <summary>
@@ -44768,6 +44859,16 @@
             All music event names found in the b617d scripts: pastebin.com/GnYt0R3P
             </summary>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.CancelOnscreenKeyboard">
+            <summary>
+            Cancels an onscreen keyboard, if available.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.N_0x58a39be597ce99cd">
+            <summary>
+            Cancels an onscreen keyboard, if available.
+            </summary>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.CapInterior(System.Int32,System.Boolean)">
             <summary>
             Does something similar to INTERIOR::DISABLE_INTERIOR
@@ -44807,6 +44908,16 @@
             maximum: Degrees between -180f and 180f.
             Clamps the gameplay camera's current yaw.
             Eg. _CLAMP_GAMEPLAY_CAM_YAW(0.0f, 0.0f) will set the horizontal angle directly behind the player.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.ClearAllBlipRoutes">
+            <summary>
+            Clears all active blip routes that have been set with [`SetBlipRoute`](#_0x3E160C90).
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.N_0xd12882d3ff82bf11">
+            <summary>
+            Clears all active blip routes that have been set with [`SetBlipRoute`](#_0x3E160C90).
             </summary>
         </member>
         <member name="M:CitizenFX.Core.Native.API.ClearAllBrokenGlass">
@@ -44904,6 +45015,16 @@
             <summary>
             Clears the GPS flags. Only the script that originally called SET_GPS_FLAGS can clear them.
             Doesn't seem like the flags are actually read by the game at all.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.ClearGpsMultiRoute">
+            <summary>
+            Does the same as [`SET_GPS_MULTI_ROUTE_RENDER(false)`](https://runtime.fivem.net/doc/reference.html#_0x3DDA37128DD1ACA8)
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.N_0x67eedea1b9bafd94">
+            <summary>
+            Does the same as [`SET_GPS_MULTI_ROUTE_RENDER(false)`](https://runtime.fivem.net/doc/reference.html#_0x3DDA37128DD1ACA8)
             </summary>
         </member>
         <member name="M:CitizenFX.Core.Native.API.ClearNotificationsPos(System.Single)">
@@ -45184,6 +45305,30 @@
             <param name="height">The height of the backing surface.</param>
             <returns>A DUI object.</returns>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.CreateFakeMpGamerTag(System.Int32,System.String,System.Boolean,System.Boolean,System.String,System.Int32)">
+            <summary>
+            p0 was the return of NET_TO_PED in fm_mission_controler.
+            p4 was always "".
+            returns headDisplayId
+            </summary>
+            <param name="clanFlag">takes a number 0-5</param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.N_0xbfefe3321a3f5015(System.Int32,System.String,System.Boolean,System.Boolean,System.String,System.Int32)">
+            <summary>
+            p0 was the return of NET_TO_PED in fm_mission_controler.
+            p4 was always "".
+            returns headDisplayId
+            </summary>
+            <param name="clanFlag">takes a number 0-5</param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.CreateMpGamerTag(System.Int32,System.String,System.Boolean,System.Boolean,System.String,System.Int32)">
+            <summary>
+            p0 was the return of NET_TO_PED in fm_mission_controler.
+            p4 was always "".
+            returns headDisplayId
+            </summary>
+            <param name="clanFlag">takes a number 0-5</param>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.CreateGroup(System.Int32)">
             <summary>
             Creates a new ped group.
@@ -45285,20 +45430,6 @@
             Spawns 3 spray cans that'll collectively give $1000 when picked up. (Three spray cans, each giving $334, $334, $332 = $1000).
             ==============================================
             Max is 2000 in MP. So if you put the amount to 20, but the value to $400,000 eg. They will only be able to pickup 20 - $2,000 bags. So, $40,000
-            </summary>
-        </member>
-        <member name="M:CitizenFX.Core.Native.API.CreateMpGamerTag(System.Int32,System.String,System.Boolean,System.Boolean,System.String,System.Int32)">
-            <summary>
-            p0 was the return of NET_TO_PED in fm_mission_controler.
-            p4 was always "".
-            returns headDisplayId
-            </summary>
-        </member>
-        <member name="M:CitizenFX.Core.Native.API.N_0xbfefe3321a3f5015(System.Int32,System.String,System.Boolean,System.Boolean,System.String,System.Int32)">
-            <summary>
-            p0 was the return of NET_TO_PED in fm_mission_controler.
-            p4 was always "".
-            returns headDisplayId
             </summary>
         </member>
         <member name="M:CitizenFX.Core.Native.API.CreateNmMessage(System.Boolean,System.Int32)">
@@ -46283,7 +46414,7 @@
             <param name="p8">unknown label</param>
             <param name="p9">unknown label</param>
             <param name="background">Set to anything other than 0 or false (even any string) and it will draw a background. Setting it to 0 or false will draw no background.</param>
-            <param name="p11">unknown value default false, it shows an error code at the bottom left</param>
+            <param name="errorCode">Error code, shown at the bottom left if set to value other than 0.</param>
         </member>
         <member name="M:CitizenFX.Core.Native.API.N_0x15803fec3b9a872b(System.String,System.String,System.Int32,System.Int32,System.String,System.Int32,System.Int32,System.Int32,System.String,System.String,System.Boolean,System.Int32)">
             <summary>
@@ -46344,7 +46475,7 @@
             <param name="p8">unknown label</param>
             <param name="p9">unknown label</param>
             <param name="background">Set to anything other than 0 or false (even any string) and it will draw a background. Setting it to 0 or false will draw no background.</param>
-            <param name="p11">unknown value default false, it shows an error code at the bottom left</param>
+            <param name="errorCode">Error code, shown at the bottom left if set to value other than 0.</param>
         </member>
         <member name="M:CitizenFX.Core.Native.API.DrawInteractiveSprite(System.String,System.String,System.Single,System.Single,System.Single,System.Single,System.Single,System.Int32,System.Int32,System.Int32,System.Int32)">
             <summary>
@@ -49294,6 +49425,16 @@
             <summary>
             Could this be used alongside either,
             SET_NETWORK_ID_EXISTS_ON_ALL_MACHINES or _SET_NETWORK_ID_SYNC_TO_PLAYER to make it so other players can hear the sound while online? It'd be a bit troll-fun to be able to play the Zancudo UFO creepy sounds globally.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetNetworkTimeAccurate">
+            <summary>
+            returns the same value as NETWORK::GET_NETWORK_TIME in freemode.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.N_0x89023fbbf9200e9f">
+            <summary>
+            returns the same value as NETWORK::GET_NETWORK_TIME in freemode.
             </summary>
         </member>
         <member name="M:CitizenFX.Core.Native.API.GetNextGpsDisabledZoneIndex(System.Int32)">
@@ -52557,6 +52698,16 @@
             Note:  When nightvision is actually active, this native will return TRUE!
             </summary>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.IsOnlinePoliciesMenuActive">
+            <summary>
+            Returns the same as `IS_SOCIAL_CLUB_ACTIVE`.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.N_0x6f72cd94f7b5b68c">
+            <summary>
+            Returns the same as `IS_SOCIAL_CLUB_ACTIVE`.
+            </summary>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.IsOrbisVersion">
             <summary>
             PS4
@@ -55071,13 +55222,6 @@
             SET_LOCAL_PLAYER_*
             </summary>
         </member>
-        <member name="M:CitizenFX.Core.Native.API.N_0x89023fbbf9200e9f">
-            <summary>
-            Something to do with time, used in context:
-            NETWORK::GET_TIME_DIFFERENCE(NETWORK::_89023FBBF9200E9F(), ... )
-            sfink: returns the same value as NETWORK::GET_NETWORK_TIME in freemode.
-            </summary>
-        </member>
         <member name="M:CitizenFX.Core.Native.API.N_0x8951eb9c6906d3c8">
             <summary>
             **This native does absolutely nothing, just a nullsub**
@@ -55128,11 +55272,6 @@
             ped was always PLAYER_PED_ID()
             p1 was always true
             p2 was always true
-            </summary>
-        </member>
-        <member name="M:CitizenFX.Core.Native.API.N_0x900086f371220b6f(System.Boolean,System.Int32,System.Int32)">
-            <summary>
-            SET_GPS_???
             </summary>
         </member>
         <member name="M:CitizenFX.Core.Native.API.N_0x90a78ecaa4e78453">
@@ -55306,13 +55445,6 @@
             }
             </summary>
         </member>
-        <member name="M:CitizenFX.Core.Native.API.N_0xa356990e161c9e65(System.Boolean)">
-            <summary>
-            This native enables/disables the gold putting grid display (&lt;https://i.imgur.com/TC6cku6.png&gt;).
-            This requires these two natives to be called as well to configure the grid: [`0x1c4fc5752bcd8e48`](https://runtime.fivem.net/doc/reference.html#_0x1C4FC5752BCD8E48) and [`0x5ce62918f8d703c7`](https://runtime.fivem.net/doc/reference.html#_0x5CE62918F8D703C7).
-            </summary>
-            <param name="toggle">Enables or disables the golf putting grid display.</param>
-        </member>
         <member name="M:CitizenFX.Core.Native.API.N_0xa3f3564a5b3646c0(System.Int32)">
             <summary>
             Only called once in the scripts:
@@ -55460,11 +55592,6 @@
             In "am_hold_up.ysc" used once:
             l_8d._f47 = GAMEPLAY::GET_RANDOM_FLOAT_IN_RANGE(18.0, 28.0);
             PLAYER::_B45EFF719D8427A6((l_8d._f47));
-            </summary>
-        </member>
-        <member name="M:CitizenFX.Core.Native.API.N_0xb4771b9aaf4e68e4(System.Int32,System.UInt32,System.Boolean)">
-            <summary>
-            This native is called 3 times in the decompiled scripts. Weapons hashes used are: weapon_railgun, weapon_proxmine and weapon_minigun.
             </summary>
         </member>
         <member name="M:CitizenFX.Core.Native.API.N_0xb4bbfd9cd8b3922b(System.String)">
@@ -57898,6 +58025,18 @@
             "miss_Tower_10"
             </summary>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.OpenSocialClubMenu">
+            <summary>
+            Uses the `SOCIAL_CLUB2` scaleform. &lt;https://i.imgur.com/KleabIw.png&gt;
+            Old name: `_SHOW_SOCIAL_CLUB_BANNED_SCREEN`
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.N_0x75d3691713c3b05a">
+            <summary>
+            Uses the `SOCIAL_CLUB2` scaleform. &lt;https://i.imgur.com/KleabIw.png&gt;
+            Old name: `_SHOW_SOCIAL_CLUB_BANNED_SCREEN`
+            </summary>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.OverrideCamSplineMotionBlur(System.Int32,System.Int32,System.Single,System.Single)">
             <summary>
             Max value for p1 is 15.
@@ -59151,6 +59290,16 @@
             p2 = Unknown but always works with -1.
             </summary>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.RestartGame">
+            <summary>
+            Shows `Disconnecting from GTA Online` HUD and then quits the game. Better name `_QUIT_GAME`?
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.N_0xe574a662acaefbb1">
+            <summary>
+            Shows `Disconnecting from GTA Online` HUD and then quits the game. Better name `_QUIT_GAME`?
+            </summary>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.ResurrectPed(System.Int32)">
             <summary>
             This function will simply bring the dead person back to life.
@@ -59942,9 +60091,39 @@
             p1 = true &amp; p2 = false for able to aim at.
             </summary>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.SetCanPedEquipAllWeapons(System.Int32,System.Boolean)">
+            <summary>
+            Does the same as [`_SET_CAN_PED_SELECT_WEAPON`](https://runtime.fivem.net/doc/natives/#_0xB4771B9AAF4E68E4) except for all weapons.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.N_0xeff296097ff1e509(System.Int32,System.Boolean)">
+            <summary>
+            Does the same as [`_SET_CAN_PED_SELECT_WEAPON`](https://runtime.fivem.net/doc/natives/#_0xB4771B9AAF4E68E4) except for all weapons.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetCanPedSelectWeapon(System.Int32,System.UInt32,System.Boolean)">
+            <summary>
+            For the player ped this will also gray out the weapon in the weapon wheel.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.N_0xb4771b9aaf4e68e4(System.Int32,System.UInt32,System.Boolean)">
+            <summary>
+            For the player ped this will also gray out the weapon in the weapon wheel.
+            </summary>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.SetCanResprayVehicle(System.Int32,System.Boolean)">
             <summary>
             Hardcoded to not work in multiplayer.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetCarBootOpen(System.Int32)">
+            <summary>
+            Opens the trunk of the vehicle. Initially used in Max Payne 3, that's why we know the name.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.N_0xfc40cbf7b90ca77c(System.Int32)">
+            <summary>
+            Opens the trunk of the vehicle. Initially used in Max Payne 3, that's why we know the name.
             </summary>
         </member>
         <member name="M:CitizenFX.Core.Native.API.SetCarHighSpeedBumpSeverityMultiplier(System.Single)">
@@ -60508,8 +60687,9 @@
         </member>
         <member name="M:CitizenFX.Core.Native.API.SetEntityNoCollisionEntity(System.Int32,System.Int32,System.Boolean)">
             <summary>
-            Calling this function, regardless of the "unknown" value, disabled collision between two entities.
-            Importance of entity1 and 2 order is unclear.
+            Calling this function disables collision between two entities.
+            The importance of the order for entity1 and entity2 is unclear.
+            The third parameter, `thisFrame`, decides whether the collision is to be disabled until it is turned back on, or if it's just this frame.
             </summary>
         </member>
         <member name="M:CitizenFX.Core.Native.API.SetEntityProofs(System.Int32,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
@@ -61176,6 +61356,16 @@
         <member name="M:CitizenFX.Core.Native.API.N_0xa67f9c46d612b6f1(System.Int32,System.Boolean)">
             <summary>
             Displays a bunch of icons above the players name, and level, and their name twice
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetMpGamerTagMpBagLargeCount(System.Int32,System.Int32)">
+            <summary>
+            displays wanted star above head
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.N_0x9b9aa95688f78dd3(System.Int32,System.Int32)">
+            <summary>
+            displays wanted star above head
             </summary>
         </member>
         <member name="M:CitizenFX.Core.Native.API.SetMpGamerTagVisibility(System.Int32,System.Int32,System.Boolean)">
@@ -63706,6 +63896,16 @@
             Documented by NTAuthority (http://fivem.net/).
             </summary>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.SetUseHigherVehicleJumpForce(System.Int32,System.Boolean)">
+            <summary>
+            Allows vehicles with the FLAG_JUMPING_CAR flag to jump higher (i.e. Ruiner 2000).
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.N_0xf06a16ca55d138d8(System.Int32,System.Boolean)">
+            <summary>
+            Allows vehicles with the FLAG_JUMPING_CAR flag to jump higher (i.e. Ruiner 2000).
+            </summary>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.SetUseridsUihidden(System.Int32,System.Int32@)">
             <summary>
             Hash collision! Please change back to _0xEF4CED81CEBEDC6D
@@ -63758,6 +63958,22 @@
             SET_VEHICLE_BOOST_ACTIVE(vehicle, 0, 0);
             Will give a boost-soundeffect.
             </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetVehicleBulldozerArmPosition(System.Int32,System.Single,System.Boolean)">
+            <summary>
+            Sets the arm position of a bulldozer. Position must be a value between 0.0 and 1.0. Ignored when `p2` is set to false, instead incrementing arm position by 0.1 (or 10%).
+            </summary>
+            <param name="vehicle">:</param>
+            <param name="position">:</param>
+            <param name="p2">:</param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.N_0xf8ebccc96adb9fb7(System.Int32,System.Single,System.Boolean)">
+            <summary>
+            Sets the arm position of a bulldozer. Position must be a value between 0.0 and 1.0. Ignored when `p2` is set to false, instead incrementing arm position by 0.1 (or 10%).
+            </summary>
+            <param name="vehicle">:</param>
+            <param name="position">:</param>
+            <param name="p2">:</param>
         </member>
         <member name="M:CitizenFX.Core.Native.API.SetVehicleBurnout(System.Int32,System.Boolean)">
             <summary>
@@ -65161,16 +65377,6 @@
             <summary>
             If toggle is true, the ped's head is shown in the pause menu
             If toggle is false, the ped's head is not shown in the pause menu
-            </summary>
-        </member>
-        <member name="M:CitizenFX.Core.Native.API.ShowSocialClubBannedScreen">
-            <summary>
-            Uses the `SOCIAL_CLUB2` scaleform.
-            </summary>
-        </member>
-        <member name="M:CitizenFX.Core.Native.API.N_0x75d3691713c3b05a">
-            <summary>
-            Uses the `SOCIAL_CLUB2` scaleform.
             </summary>
         </member>
         <member name="M:CitizenFX.Core.Native.API.ShowSocialClubLegalScreen">
@@ -66930,6 +67136,20 @@
             <summary>
             For a full list, see here: pastebin.com/yLNWicUi
             </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.TerraingridActivate(System.Boolean)">
+            <summary>
+            This native enables/disables the gold putting grid display (&lt;https://i.imgur.com/TC6cku6.png&gt;).
+            This requires these two natives to be called as well to configure the grid: [`0x1c4fc5752bcd8e48`](https://runtime.fivem.net/doc/reference.html#_0x1C4FC5752BCD8E48) and [`0x5ce62918f8d703c7`](https://runtime.fivem.net/doc/reference.html#_0x5CE62918F8D703C7).
+            </summary>
+            <param name="toggle">Enables or disables the golf putting grid display.</param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.N_0xa356990e161c9e65(System.Boolean)">
+            <summary>
+            This native enables/disables the gold putting grid display (&lt;https://i.imgur.com/TC6cku6.png&gt;).
+            This requires these two natives to be called as well to configure the grid: [`0x1c4fc5752bcd8e48`](https://runtime.fivem.net/doc/reference.html#_0x1C4FC5752BCD8E48) and [`0x5ce62918f8d703c7`](https://runtime.fivem.net/doc/reference.html#_0x5CE62918F8D703C7).
+            </summary>
+            <param name="toggle">Enables or disables the golf putting grid display.</param>
         </member>
         <member name="M:CitizenFX.Core.Native.API.TestVerticalProbeAgainstAllWater(System.Single,System.Single,System.Single,System.Int32,System.Single@)">
             <summary>
