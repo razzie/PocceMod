@@ -58,7 +58,7 @@ namespace PocceMod
                 switch (tow)
                 {
                     case 0:
-                        RopeClosest(Peds.Get());
+                        RopeClosest(Peds.Get(Peds.Filter.Dead | Peds.Filter.CurrentVehiclePassengers));
                         break;
                     case 1:
                         RopeClosest(Vehicles.Get());

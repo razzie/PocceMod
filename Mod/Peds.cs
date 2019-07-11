@@ -25,6 +25,7 @@ namespace PocceMod.Mod
             int handle = API.FindFirstPed(ref ped);
             var player = Game.Player.Character.Handle;
             var coords = Game.Player.Character.Position;
+            var vehicle = API.GetVehiclePedIsIn(player, false);
 
             if (handle == -1)
                 return peds;
@@ -45,6 +46,9 @@ namespace PocceMod.Mod
                     continue;
 
                 if (HasFilter(Filter.Dead) && API.IsPedDeadOrDying(ped, true))
+                    continue;
+
+                if (HasFilter(Filter.CurrentVehiclePassengers) && vehicle != -1 && API.GetVehiclePedIsIn(ped, false) == vehicle)
                     continue;
 
                 if (coords.DistanceToSquared(pos) > rangeSquared || ped == player)
