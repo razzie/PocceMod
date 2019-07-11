@@ -75,6 +75,12 @@ namespace PocceMod.Mod
                     return true;
             }
 
+            if (forcePassenger && API.IsVehicleSeatFree(vehicle, 0))
+            {
+                seat = 0;
+                return true;
+            }
+
             return false;
         }
 
