@@ -58,7 +58,7 @@ namespace PocceMod
                 switch (tow)
                 {
                     case 0:
-                        RopeClosest(Peds.Get(true, true));
+                        RopeClosest(Peds.Get());
                         break;
                     case 1:
                         RopeClosest(Vehicles.Get());
@@ -127,7 +127,7 @@ namespace PocceMod
         public static async Task PedRiot(bool useWeapons)
         {
             int i = 0;
-            var peds = Peds.Get(!useWeapons); // do not include animals when using weapons
+            var peds = Peds.Get(Peds.Filter.Dead | Peds.Filter.Players | (useWeapons ? Peds.Filter.Animals : Peds.Filter.None)); // do not include animals when using weapons
             var weapons = useWeapons ? Config.WeaponList : null;
 
             if (peds.Count < 2)
@@ -275,7 +275,7 @@ namespace PocceMod
         public static List<string> IdentifyPedModels()
         {
             var coords = Game.Player.Character.Position;
-            var peds = Peds.Get(true, true);
+            var peds = Peds.Get();
             var models = new List<string>();
 
             foreach (var ped in peds)

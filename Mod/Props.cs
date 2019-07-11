@@ -11,12 +11,19 @@ namespace PocceMod.Mod
         private static readonly string PropDecor = "POCCE_PROP";
         private static List<int> _props = new List<int>();
 
+        [Flags]
+        public enum Filter
+        {
+            None = 0,
+            Stock = 1
+        }
+
         public Props()
         {
             API.DecorRegister(PropDecor, 2);
         }
 
-        public static List<int> Get(bool playerOnly = true, float rangeSquared = 900.0f)
+        public static List<int> Get(Filter exclude = Filter.Stock, float rangeSquared = 900.0f)
         {
             var props = new List<int>();
             int prop = 0;
@@ -26,11 +33,16 @@ namespace PocceMod.Mod
             if (handle == -1)
                 return props;
 
+            bool HasFilter(Filter filter)
+            {
+                return (exclude & filter) == filter;
+            }
+
             do
             {
                 var pos = API.GetEntityCoords(prop, false);
 
-                if (playerOnly && !API.DecorGetBool(prop, PropDecor))
+                if (HasFilter(Filter.Stock) && !API.DecorGetBool(prop, PropDecor))
                     continue;
 
                 if (API.IsEntityAPed(prop) || API.IsEntityAVehicle(prop))
@@ -82,6 +94,7 @@ namespace PocceMod.Mod
 
             API.SetEntityHeading(prop, -heading);
             API.SetEntityCollision(prop, true, true);
+            API.ActivatePhysics(prop);
             API.DecorSetBool(prop, PropDecor, true);
             return prop;
         }
@@ -111,6 +124,7 @@ namespace PocceMod.Mod
             else
                 API.AttachEntityToEntityPhysically(prop, entity, 0, 0, 0.0f, 0.0f, entityMax.Z, 0.0f, 0.0f, propMin.Z, 0.0f, 0.0f, 0.0f, 100.0f, true, false, true, true, 2);
 
+            API.ActivatePhysics(prop);
             API.DecorSetBool(prop, PropDecor, true);
             return prop;
         }

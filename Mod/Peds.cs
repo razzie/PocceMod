@@ -1,5 +1,6 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -7,7 +8,17 @@ namespace PocceMod.Mod
 {
     public static class Peds
     {
-        public static List<int> Get(bool includeAnimals = true, bool includePlayers = false, bool includeDead = false, float rangeSquared = 900.0f)
+        [Flags]
+        public enum Filter
+        {
+            None = 0,
+            Animals = 1,
+            Players = 2,
+            Dead = 4,
+            CurrentVehiclePassengers = 8
+        }
+
+        public static List<int> Get(Filter exclude = Filter.Dead, float rangeSquared = 900.0f)
         {
             var peds = new List<int>();
             int ped = 0;
@@ -18,17 +29,22 @@ namespace PocceMod.Mod
             if (handle == -1)
                 return peds;
 
+            bool HasFilter(Filter filter)
+            {
+                return (exclude & filter) == filter;
+            }
+
             do
             {
                 var pos = API.GetEntityCoords(ped, true);
 
-                if (!includeAnimals && !API.IsPedHuman(ped))
+                if (HasFilter(Filter.Animals) && !API.IsPedHuman(ped))
                     continue;
 
-                if (!includePlayers && API.IsPedAPlayer(ped))
+                if (HasFilter(Filter.Players) && API.IsPedAPlayer(ped))
                     continue;
 
-                if (!includeDead && API.IsPedDeadOrDying(ped, true))
+                if (HasFilter(Filter.Dead) && API.IsPedDeadOrDying(ped, true))
                     continue;
 
                 if (coords.DistanceToSquared(pos) > rangeSquared || ped == player)

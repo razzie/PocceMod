@@ -8,12 +8,19 @@ namespace PocceMod.Mod
 {
     public class Vehicles : BaseScript
     {
+        [Flags]
+        public enum Filter
+        {
+            None = 0,
+            WithDriver = 1
+        }
+
         public Vehicles()
         {
             EventHandlers["PocceMod:EMP"] += new Action<int>(entity => EMP(API.NetToVeh(entity)));
         }
 
-        public static List<int> Get(bool includeWithDriver = true, float rangeSquared = 900.0f)
+        public static List<int> Get(Filter exclude = Filter.None, float rangeSquared = 900.0f)
         {
             var vehicles = new List<int>();
             int vehicle = 0;
@@ -25,6 +32,11 @@ namespace PocceMod.Mod
             if (handle == -1)
                 return vehicles;
 
+            bool HasFilter(Filter filter)
+            {
+                return (exclude & filter) == filter;
+            }
+
             do
             {
                 var pos = API.GetEntityCoords(vehicle, false);
@@ -32,7 +44,7 @@ namespace PocceMod.Mod
                 if (vehicle == playerVehicle)
                     continue;
 
-                if (!includeWithDriver && !API.IsVehicleSeatFree(vehicle, -1))
+                if (HasFilter(Filter.WithDriver) && !API.IsVehicleSeatFree(vehicle, -1))
                     continue;
 
                 if (coords.DistanceToSquared(pos) > rangeSquared)
@@ -128,7 +140,7 @@ namespace PocceMod.Mod
         {
             API.StartScreenEffect("RaceTurbo", 500, false);
 
-            var vehicles = Get(true, rangeSquared);
+            var vehicles = Get(Filter.None, rangeSquared);
             foreach (var vehicle in vehicles)
             {
                 if (GetPlayers(vehicle).Count > 0)
