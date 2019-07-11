@@ -126,6 +126,8 @@ namespace PocceMod.Mod
 
         public static void EMP(float rangeSquared = 900.0f)
         {
+            API.StartScreenEffect("RaceTurbo", 500, false);
+
             var vehicles = Get(true, rangeSquared);
             foreach (var vehicle in vehicles)
             {
@@ -143,6 +145,8 @@ namespace PocceMod.Mod
                 API.SetVehicleEngineHealth(vehicle, 1.0f);
             else
                 API.SetVehicleEngineHealth(vehicle, 0.0f);
+            
+            API.SetVehicleLights(vehicle, 1);
         }
     }
 }
