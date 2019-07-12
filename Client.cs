@@ -34,25 +34,6 @@ namespace PocceMod
                 }
             }, "Pocce companion", "Pet companion", "Pocce passengers", "Trash ped");
 
-            Hud.AddMenuListItem("Riot", async (riot) =>
-            {
-                switch (riot)
-                {
-                    case 0:
-                        await PocceRiot(false);
-                        break;
-                    case 1:
-                        await PocceRiot(true);
-                        break;
-                    case 2:
-                        await PedRiot(false);
-                        break;
-                    case 3:
-                        await PedRiot(true);
-                        break;
-                }
-            }, "Pocce riot", "Armed pocce riot", "Ped riot", "Armed ped riot");
-
             Hud.AddMenuListItem("Rope", (tow) =>
             {
                 switch (tow)
@@ -129,6 +110,25 @@ namespace PocceMod
                 }
                 return Delay(0);
             }, "High", "Mid", "Low", "Reset");
+
+            Hud.AddMenuListItem("Riot", async (riot) =>
+            {
+                switch (riot)
+                {
+                    case 0:
+                        await PocceRiot(false);
+                        break;
+                    case 1:
+                        await PocceRiot(true);
+                        break;
+                    case 2:
+                        await PedRiot(false);
+                        break;
+                    case 3:
+                        await PedRiot(true);
+                        break;
+                }
+            }, "Pocce riot", "Armed pocce riot", "Ped riot", "Armed ped riot");
 
             Hud.AddMenuListItem("Other", async (other) =>
             {
