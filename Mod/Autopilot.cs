@@ -204,18 +204,15 @@ namespace PocceMod.Mod
             var vehicleModel = (uint)API.GetEntityModel(vehicle);
             if (API.IsThisModelAPlane(vehicleModel))
             {
-                var height = API.GetEntityHeightAboveGround(vehicle);
                 var pos = API.GetEntityCoords(vehicle, false);
                 API.TaskPlaneLand(driver, vehicle, pos.X, pos.Y, pos.Z, pos.X, pos.Y, pos.Z);
             }
             else if (API.IsThisModelAHeli(vehicleModel))
             {
-                var height = API.GetEntityHeightAboveGround(vehicle);
                 var speed = API.GetVehicleModelMaxSpeed(vehicleModel);
                 var heading = API.GetEntityHeading(vehicle);
                 var pos = API.GetEntityCoords(vehicle, false);
-                pos.Z -= height;
-                API.TaskHeliMission(driver, vehicle, 0, 0, pos.X, pos.Y, pos.Z, 4, speed, 5.0f, heading, -1, -1, 0, 32);
+                API.TaskHeliMission(driver, vehicle, 0, 0, pos.X, pos.Y, pos.Z, 4, speed, 5.0f, heading, -1, -1, 0, 0);
             }
             else
             {
