@@ -110,6 +110,26 @@ namespace PocceMod
                 return Delay(0);
             }, "Closest vehicle", "Closest vehicle as passenger");
 
+            Hud.AddMenuListItem("Ocean waves", (waves) =>
+            {
+                switch (waves)
+                {
+                    case 0:
+                        API.SetWavesIntensity(8f);
+                        break;
+                    case 1:
+                        API.SetWavesIntensity(2f);
+                        break;
+                    case 2:
+                        API.SetWavesIntensity(0f);
+                        break;
+                    case 3:
+                        API.ResetWavesIntensity();
+                        break;
+                }
+                return Delay(0);
+            }, "High", "Mid", "Low", "Reset");
+
             Hud.AddMenuListItem("Other", async (other) =>
             {
                 switch (other)
