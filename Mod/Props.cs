@@ -15,15 +15,17 @@ namespace PocceMod.Mod
         public enum Filter
         {
             None = 0,
-            Stock = 1
+            Stock = 1 // props that weren't placed by players
         }
+
+        public const Filter DefaultFilters = Filter.Stock;
 
         public Props()
         {
             API.DecorRegister(PropDecor, 2);
         }
 
-        public static List<int> Get(Filter exclude = Filter.Stock, float rangeSquared = 3600.0f)
+        public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 3600.0f)
         {
             var props = new List<int>();
             int prop = 0;

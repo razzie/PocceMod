@@ -15,12 +15,14 @@ namespace PocceMod.Mod
             WithDriver = 1
         }
 
+        public const Filter DefaultFilters = Filter.None;
+
         public Vehicles()
         {
             EventHandlers["PocceMod:EMP"] += new Action<int>(entity => EMP(API.NetToVeh(entity)));
         }
 
-        public static List<int> Get(Filter exclude = Filter.None, float rangeSquared = 3600.0f)
+        public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 3600.0f)
         {
             var vehicles = new List<int>();
             int vehicle = 0;
