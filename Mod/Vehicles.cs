@@ -12,10 +12,11 @@ namespace PocceMod.Mod
         public enum Filter
         {
             None = 0,
-            WithDriver = 1
+            WithDriver = 1,
+            PlayerVehicle = 2
         }
 
-        public const Filter DefaultFilters = Filter.None;
+        public const Filter DefaultFilters = Filter.PlayerVehicle;
 
         public Vehicles()
         {
@@ -43,7 +44,7 @@ namespace PocceMod.Mod
             {
                 var pos = API.GetEntityCoords(vehicle, false);
 
-                if (vehicle == playerVehicle)
+                if (HasFilter(Filter.PlayerVehicle) && vehicle == playerVehicle)
                     continue;
 
                 if (HasFilter(Filter.WithDriver) && !API.IsVehicleSeatFree(vehicle, -1))

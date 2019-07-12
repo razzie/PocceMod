@@ -96,6 +96,20 @@ namespace PocceMod
                 return Delay(0);
             }, "Ropes", "Last rope", "Props", "Last prop");
 
+            Hud.AddMenuListItem("Teleport", (teleport) =>
+            {
+                switch (teleport)
+                {
+                    case 0:
+                        TeleportToClosestVehicle();
+                        break;
+                    case 1:
+                        TeleportToClosestVehicle(true);
+                        break;
+                }
+                return Delay(0);
+            }, "Closest vehicle", "Closest vehicle as passenger");
+
             Hud.AddMenuListItem("Other", async (other) =>
             {
                 switch (other)
@@ -331,6 +345,27 @@ namespace PocceMod
             if (API.IsPedInAnyHeli(player))
             {
                 API.TaskRappelFromHeli(player, 0);
+            }
+        }
+
+        public static void TeleportToClosestVehicle(bool forcePassenger = false)
+        {
+            var vehicles = Vehicles.Get();
+            if (Common.GetClosestEntity(vehicles, out int vehicle))
+            {
+                if (Vehicles.GetFreeSeat(vehicle, out int seat, forcePassenger))
+                {
+                    var player = Game.Player.Character.Handle;
+                    API.SetPedIntoVehicle(player, vehicle, seat);
+                }
+                else
+                {
+                    Hud.Notification("Closest vehicle doesn't have a free seat");
+                }
+            }
+            else
+            {
+                Hud.Notification("No vehicles in range");
             }
         }
     }
