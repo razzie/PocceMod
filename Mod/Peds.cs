@@ -18,7 +18,7 @@ namespace PocceMod.Mod
             CurrentVehiclePassengers = 8
         }
 
-        public static List<int> Get(Filter exclude = Filter.Dead, float rangeSquared = 900.0f)
+        public static List<int> Get(Filter exclude = Filter.Dead, float rangeSquared = 1600.0f)
         {
             var peds = new List<int>();
             int ped = 0;

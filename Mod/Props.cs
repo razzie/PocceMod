@@ -23,7 +23,7 @@ namespace PocceMod.Mod
             API.DecorRegister(PropDecor, 2);
         }
 
-        public static List<int> Get(Filter exclude = Filter.Stock, float rangeSquared = 900.0f)
+        public static List<int> Get(Filter exclude = Filter.Stock, float rangeSquared = 3600.0f)
         {
             var props = new List<int>();
             int prop = 0;
