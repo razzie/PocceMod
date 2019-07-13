@@ -66,6 +66,9 @@ namespace PocceMod.Mod
 
         public static async Task<int> Spawn(uint[] modelList, int pedType = 26)
         {
+            if (modelList.Length == 0)
+                return -1;
+
             var model = modelList[API.GetRandomIntInRange(0, modelList.Length)];
             var coords = Game.Player.Character.Position;
             var pos = new Vector3();
@@ -98,7 +101,7 @@ namespace PocceMod.Mod
             API.SetPedFleeAttributes(ped, 0, false);
             API.SetEntityHealth(ped, 200);
 
-            if (weaponList != null)
+            if (weaponList != null && weaponList.Length > 0)
             {
                 API.SetPedArmour(ped, 200);
                 var weapon = weaponList[API.GetRandomIntInRange(0, weaponList.Length)];

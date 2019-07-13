@@ -10,12 +10,14 @@ namespace PocceMod
     {
         public Client()
         {
-            var skins = new DataSource<string>();
+            if (Config.GetConfigBool("spawn_vehicle"))
+                Hud.AddSubmenu("Spawn vehicle", async (vehicle) => await Vehicles.Spawn(vehicle), Config.VehicleList);
 
-            Hud.AddSubmenu("Spawn vehicle", async (vehicle) => await Vehicles.Spawn(vehicle), Config.VehicleList);
-            Hud.AddSubmenu("Spawn prop", async (prop) => await Props.Spawn(prop), Config.PropList, 10);
+            if (Config.GetConfigBool("spawn_prop"))
+                Hud.AddSubmenu("Spawn prop", async (prop) => await Props.Spawn(prop), Config.PropList, 10);
 
-            Hud.AddMenuListItem("Spawn", async (spawn) =>
+            if (Config.GetConfigBool("spawn_ped"))
+                Hud.AddMenuListItem("Spawn ped", async (spawn) =>
             {
                 switch (spawn)
                 {
@@ -34,7 +36,8 @@ namespace PocceMod
                 }
             }, "Pocce companion", "Pet companion", "Pocce passengers", "Trash ped");
 
-            Hud.AddMenuListItem("Rope", (tow) =>
+            if (Config.GetConfigBool("rope"))
+                Hud.AddMenuListItem("Rope", (tow) =>
             {
                 switch (tow)
                 {
@@ -57,7 +60,8 @@ namespace PocceMod
                 return Delay(0);
             }, "Closest ped", "Closest vehicle", "Closest vehicle tow", "Closest prop", "Rappel from heli");
 
-            Hud.AddMenuListItem("Clear", (clear) =>
+            if (Config.GetConfigBool("rope") || Config.GetConfigBool("spawn_prop"))
+                Hud.AddMenuListItem("Clear", (clear) =>
             {
                 switch (clear)
                 {
@@ -77,7 +81,8 @@ namespace PocceMod
                 return Delay(0);
             }, "Ropes", "Last rope", "Props", "Last prop");
 
-            Hud.AddMenuListItem("Teleport", (teleport) =>
+            if (Config.GetConfigBool("teleport"))
+                Hud.AddMenuListItem("Teleport", (teleport) =>
             {
                 switch (teleport)
                 {
@@ -91,7 +96,8 @@ namespace PocceMod
                 return Delay(0);
             }, "Closest vehicle", "Closest vehicle as passenger");
 
-            Hud.AddMenuListItem("Ocean waves", (waves) =>
+            if (Config.GetConfigBool("wave"))
+                Hud.AddMenuListItem("Ocean waves", (waves) =>
             {
                 switch (waves)
                 {
@@ -111,7 +117,8 @@ namespace PocceMod
                 return Delay(0);
             }, "High", "Mid", "Low", "Reset");
 
-            Hud.AddMenuListItem("Riot", async (riot) =>
+            if (Config.GetConfigBool("riot"))
+                Hud.AddMenuListItem("Riot", async (riot) =>
             {
                 switch (riot)
                 {
@@ -130,7 +137,8 @@ namespace PocceMod
                 }
             }, "Pocce riot", "Armed pocce riot", "Ped riot", "Armed ped riot");
 
-            Hud.AddMenuListItem("Other", async (other) =>
+            if (Config.GetConfigBool("other"))
+                Hud.AddMenuListItem("Other", async (other) =>
             {
                 switch (other)
                 {
@@ -146,8 +154,18 @@ namespace PocceMod
                 }
             }, "Autopilot", "EMP", "Cargobob magnet");
 
-            Hud.AddMenuItem("Indentify skins", () => { skins.Push(IdentifyPedModels()); return Delay(0); });
-            Hud.AddSubmenu("Change skin", async (skin) => await ChangeSkin(skin), skins);
+            if (Config.GetConfigBool("skin"))
+            {
+                var skins = new DataSource<string>();
+                Hud.AddMenuItem("Indentify skins", () => { skins.Push(IdentifyPedModels()); return Delay(0); });
+                Hud.AddSubmenu("Change skin", async (skin) => await ChangeSkin(skin), skins);
+            }
+
+            var menukey = Config.GetConfigInt("menu_key");
+            if (menukey > 0)
+            {
+                Hud.SetMenuKey(menukey);
+            }
         }
 
         public static async Task SpawnTrashPed()

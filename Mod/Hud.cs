@@ -53,6 +53,10 @@ namespace PocceMod.Mod
             API.DrawNotification(blink, saveToBrief);
         }
 
+        public static void SetMenuKey(int key)
+        {
+            MenuController.MenuToggleKey = (Control)key;
+        }
 
         public static void AddMenuItem(string item, Func<Task> onSelect)
         {

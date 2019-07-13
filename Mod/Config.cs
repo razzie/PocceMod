@@ -1,10 +1,52 @@
 ﻿using CitizenFX.Core.Native;
 using System;
+using System.Collections.Generic;
 
 namespace PocceMod.Mod
 {
     public static class Config
     {
+        private static Dictionary<string, string> _config;
+        private static Dictionary<string, string> Configuration
+        {
+            get
+            {
+                if (_config == null)
+                {
+                    _config = new Dictionary<string, string>();
+                    var items = GetConfigList("config");
+                    foreach (var item in items)
+                    {
+                        if (item.StartsWith(";") || !item.Contains("="))
+                            continue;
+
+                        var pair = item.Split('=');
+                        _config.Add(pair[0].Trim(), pair[1].Trim());
+                    }
+                }
+                return _config;
+            }
+        }
+
+        public static bool GetConfigBool(string item)
+        {
+            if (Configuration.TryGetValue(item, out string value))
+                return bool.TryParse(value, out bool result) && result;
+            else
+                return false;
+        }
+
+        public static int GetConfigInt(string item)
+        {
+            if (Configuration.TryGetValue(item, out string value))
+            {
+                int.TryParse(value, out int result);
+                return result;
+            }
+
+            return 0;
+        }
+
         private static uint[] _weaponList = null;
         public static uint[] WeaponList
         {
