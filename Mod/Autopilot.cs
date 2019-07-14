@@ -123,7 +123,7 @@ namespace PocceMod.Mod
             Wander(ped, vehicle);
         }
 
-        private static async Task Update()
+        private static Task Update()
         {
             var player = Game.Player.Character.Handle;
             if (!API.IsPedInAnyVehicle(player, false))
@@ -136,32 +136,31 @@ namespace PocceMod.Mod
                     API.SetPedAsNoLongerNeeded(ref lastDriver);
                 }
 
-                return;
+                return Delay(1000);
             }
 
             var vehicle = API.GetVehiclePedIsIn(player, false);
             var driver = API.GetPedInVehicleSeat(vehicle, -1);
             if (!IsOwnedAutopilot(driver))
-                return;
+                return Delay(1000);
 
             if (API.AnyPassengersRappeling(vehicle))
             {
                 var coords = API.GetEntityCoords(vehicle, false);
                 API.TaskHeliMission(driver, vehicle, 0, 0, coords.X, coords.Y, coords.Z, 4, 0.0f, 5.0f, API.GetEntityHeading(vehicle), -1, -1, 0, 0);
                 API.DecorSetInt(driver, WaypointHashDecor, 0);
-                await Delay(1000);
-                return;
+                return Delay(1000);
             }
 
             if (Common.GetWaypoint(out Vector3 wp, false))
             {
                 // waypoint hasn't changed
                 if (API.DecorGetInt(driver, WaypointHashDecor) == wp.GetHashCode())
-                    return;
+                    return Delay(1000);
 
                 API.DecorSetInt(driver, WaypointHashDecor, wp.GetHashCode());
                 GotoWaypoint(driver, vehicle, wp);
-                return;
+                return Delay(1000);
             }
 
             // waypoint was removed
@@ -170,6 +169,8 @@ namespace PocceMod.Mod
                 API.DecorSetInt(driver, WaypointHashDecor, 0);
                 Wander(driver, vehicle);
             }
+
+            return Delay(1000);
         }
 
         private static float GetHeading(int vehicle, Vector3 wp)
