@@ -238,7 +238,7 @@ namespace PocceMod
                 int ped = await Peds.Spawn(Config.PocceList);
                 peds.Add(ped);
                 await Peds.Arm(ped, weapons);
-                API.TaskCombatPed(ped, Game.Player.Character.Handle, 0, 16);
+                API.TaskCombatPed(ped, API.GetPlayerPed(-1), 0, 16);
             }
 
             foreach (int ped in peds)
@@ -250,7 +250,7 @@ namespace PocceMod
 
         public static async Task PoccePassengers()
         {
-            int player = Game.Player.Character.Handle;
+            int player = API.GetPlayerPed(-1);
             if (!API.IsPedInAnyVehicle(player, true))
             {
                 Hud.Notification("Player is not in a vehicle");
@@ -270,7 +270,7 @@ namespace PocceMod
         public static async Task PocceCompanion()
         {
             int ped;
-            int player = Game.Player.Character.Handle;
+            int player = API.GetPlayerPed(-1);
             if (API.IsPedInAnyVehicle(player, false))
             {
                 var vehicle = API.GetVehiclePedIsIn(player, false);
@@ -302,7 +302,7 @@ namespace PocceMod
 
         public static async Task PetCompanion()
         {
-            int player = Game.Player.Character.Handle;
+            int player = API.GetPlayerPed(-1);
             if (API.IsPedInAnyHeli(player))
             {
                 Hud.Notification("Don't spawn that poor pet on a heli");
@@ -326,13 +326,13 @@ namespace PocceMod
 
         public static List<string> IdentifyPedModels()
         {
-            var coords = Game.Player.Character.Position;
+            var coords = API.GetEntityCoords(API.GetPlayerPed(-1), true);
             var peds = Peds.Get();
             var models = new List<string>();
 
             foreach (var ped in peds)
             {
-                var pos = new Ped(ped).Position;
+                var pos = API.GetEntityCoords(ped, true);
                 if (coords.DistanceToSquared(pos) < 4.0f)
                 {
                     var model = string.Format("0x{0:X8}", API.GetEntityModel(ped));
@@ -360,7 +360,7 @@ namespace PocceMod
 
         public static void CargobobMagnet()
         {
-            var player = Game.Player.Character.Handle;
+            var player = API.GetPlayerPed(-1);
             if (API.IsPedInAnyHeli(player))
             {
                 var heli = API.GetVehiclePedIsIn(player, false);
@@ -379,7 +379,7 @@ namespace PocceMod
 
         public static void RappelFromHeli()
         {
-            var player = Game.Player.Character.Handle;
+            var player = API.GetPlayerPed(-1);
             if (API.IsPedInAnyHeli(player))
             {
                 API.TaskRappelFromHeli(player, 0);
@@ -393,7 +393,7 @@ namespace PocceMod
             {
                 if (Vehicles.GetFreeSeat(vehicle, out int seat, forcePassenger))
                 {
-                    var player = Game.Player.Character.Handle;
+                    var player = API.GetPlayerPed(-1);
                     API.SetPedIntoVehicle(player, vehicle, seat);
                 }
                 else

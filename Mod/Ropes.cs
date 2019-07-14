@@ -92,7 +92,7 @@ namespace PocceMod.Mod
 
         public static void PlayerAttach(int entity, bool tow = false)
         {
-            var player = Game.Player.Character.Handle;
+            var player = API.GetPlayerPed(-1);
             if (API.IsPedInAnyVehicle(player, false))
             {
                 var vehicle = API.GetVehiclePedIsIn(player, false);

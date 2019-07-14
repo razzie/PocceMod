@@ -25,8 +25,8 @@ namespace PocceMod.Mod
             var peds = new List<int>();
             int ped = 0;
             int handle = API.FindFirstPed(ref ped);
-            var player = Game.Player.Character.Handle;
-            var coords = Game.Player.Character.Position;
+            var player = API.GetPlayerPed(-1);
+            var coords = API.GetEntityCoords(player, true);
             var vehicle = API.GetVehiclePedIsIn(player, false);
 
             if (handle == -1)
@@ -70,7 +70,7 @@ namespace PocceMod.Mod
                 return -1;
 
             var model = modelList[API.GetRandomIntInRange(0, modelList.Length)];
-            var coords = Game.Player.Character.Position;
+            var coords = API.GetEntityCoords(API.GetPlayerPed(-1), true);
             var pos = new Vector3();
 
             if (!API.GetSafeCoordForPed(coords.X, coords.Y, coords.Z, true, ref pos, 16))

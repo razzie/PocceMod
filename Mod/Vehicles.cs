@@ -28,9 +28,9 @@ namespace PocceMod.Mod
             var vehicles = new List<int>();
             int vehicle = 0;
             int handle = API.FindFirstVehicle(ref vehicle);
-            var player = Game.Player.Character.Handle;
+            var player = API.GetPlayerPed(-1);
             var playerVehicle = API.GetVehiclePedIsIn(player, false);
-            var coords = Game.Player.Character.Position;
+            var coords = API.GetEntityCoords(player, true);
 
             if (handle == -1)
                 return vehicles;
@@ -120,7 +120,8 @@ namespace PocceMod.Mod
 
         public static async Task<int> Spawn(string model)
         {
-            var pos = Game.Player.Character.Position;
+            var player = API.GetPlayerPed(-1);
+            var pos = API.GetEntityCoords(player, true);
             var hash = (uint)API.GetHashKey(model);
 
             if (!API.IsModelValid(hash))
@@ -129,14 +130,14 @@ namespace PocceMod.Mod
                 return -1;
             }
 
-            if (API.IsPedInAnyVehicle(Game.Player.Character.Handle, false))
+            if (API.IsPedInAnyVehicle(API.GetPlayerPed(-1), false))
             {
                 Hud.Notification("Player is in a vehicle");
                 return -1;
             }
 
             await Common.RequestModel(hash);
-            var vehicle = API.CreateVehicle(hash, pos.X, pos.Y, pos.Z + 1.0f, Game.Player.Character.Heading, true, false);
+            var vehicle = API.CreateVehicle(hash, pos.X, pos.Y, pos.Z + 1.0f, API.GetEntityHeading(player), true, false);
             Game.Player.Character.SetIntoVehicle(new Vehicle(vehicle), VehicleSeat.Driver);
 
             if (API.IsThisModelAHeli(hash) && API.GetEntityHeightAboveGround(vehicle) > 10.0f)

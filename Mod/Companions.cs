@@ -39,7 +39,7 @@ namespace PocceMod.Mod
         public static void Add(int ped)
         {
             var playerID = API.PlayerId();
-            var player = Game.Player.Character.Handle;
+            var player = API.GetPlayerPed(-1);
 
             API.DecorSetBool(ped, FlagDecor, true);
             API.DecorSetInt(ped, PlayerDecor, playerID);
@@ -52,7 +52,7 @@ namespace PocceMod.Mod
 
         private static Task Update()
         {
-            var player = Game.Player.Character.Handle;
+            var player = API.GetPlayerPed(-1);
             var peds = Peds.Get();
             var companions = Get(peds);
 

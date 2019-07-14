@@ -30,7 +30,7 @@ namespace PocceMod.Mod
             var props = new List<int>();
             int prop = 0;
             int handle = API.FindFirstObject(ref prop);
-            var coords = Game.Player.Character.Position;
+            var coords = API.GetEntityCoords(API.GetPlayerPed(-1), true);
 
             if (handle == -1)
                 return props;
@@ -63,7 +63,7 @@ namespace PocceMod.Mod
 
         public static Task<int> Spawn(string model)
         {
-            var player = Game.Player.Character.Handle;
+            var player = API.GetPlayerPed(-1);
             var hash = (uint)API.GetHashKey(model);
 
             if (!API.IsModelValid(hash))

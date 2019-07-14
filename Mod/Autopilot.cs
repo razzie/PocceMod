@@ -24,7 +24,7 @@ namespace PocceMod.Mod
 
         public static async Task Activate()
         {
-            var player = Game.Player.Character.Handle;
+            var player = API.GetPlayerPed(-1);
             if (!API.IsPedInAnyVehicle(player, false))
             {
                 Hud.Notification("Player is not in a vehicle");
@@ -58,7 +58,7 @@ namespace PocceMod.Mod
 
         public static async Task Deactivate()
         {
-            var player = Game.Player.Character.Handle;
+            var player = API.GetPlayerPed(-1);
             if (!API.IsPedInAnyVehicle(player, false))
             {
                 Hud.Notification("Player is not in a vehicle");
@@ -85,7 +85,7 @@ namespace PocceMod.Mod
 
         public static async Task Toggle()
         {
-            var player = Game.Player.Character.Handle;
+            var player = API.GetPlayerPed(-1);
             if (!API.IsPedInAnyVehicle(player, false))
             {
                 Hud.Notification("Player is not in a vehicle");
@@ -125,7 +125,7 @@ namespace PocceMod.Mod
 
         private static Task Update()
         {
-            var player = Game.Player.Character.Handle;
+            var player = API.GetPlayerPed(-1);
             if (!API.IsPedInAnyVehicle(player, false))
             {
                 var lastVehicle = API.GetVehiclePedIsIn(player, true);

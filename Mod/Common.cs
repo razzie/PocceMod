@@ -27,7 +27,7 @@ namespace PocceMod.Mod
             closest = -1;
             bool found = false;
             float minDist = float.MaxValue;
-            var coords = Game.Player.Character.Position;
+            var coords = API.GetEntityCoords(API.GetPlayerPed(-1), true);
 
             foreach (var entity in entities)
             {
