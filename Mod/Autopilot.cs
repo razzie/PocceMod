@@ -126,21 +126,24 @@ namespace PocceMod.Mod
         private static Task Update()
         {
             var player = API.GetPlayerPed(-1);
-            if (!API.IsPedInAnyVehicle(player, false))
-            {
-                var lastVehicle = API.GetVehiclePedIsIn(player, true);
-                var lastDriver = API.GetPedInVehicleSeat(lastVehicle, -1);
-                if (IsAutopilot(lastDriver) && API.IsEntityAMissionEntity(lastDriver) &&
-                    !API.AnyPassengersRappeling(lastVehicle) && Vehicles.GetPlayers(lastVehicle).Count == 0)
-                {
-                    API.SetPedAsNoLongerNeeded(ref lastDriver);
-                }
+            var inVehicle = API.IsPedInAnyVehicle(player, false);
+            var vehicle = API.GetVehiclePedIsIn(player, !inVehicle);
+            var driver = API.GetPedInVehicleSeat(vehicle, -1);
 
-                return Delay(1000);
+            if (!inVehicle)
+            {
+                if (IsAutopilot(driver) && API.IsEntityAMissionEntity(driver) &&
+                    !API.AnyPassengersRappeling(vehicle) && Vehicles.GetPlayers(vehicle).Count == 0)
+                {
+                    var tmp_driver = driver;
+                    API.SetEntityAsMissionEntity(tmp_driver, false, false);
+                    API.SetPedAsNoLongerNeeded(ref tmp_driver);
+
+                    API.DecorSetInt(driver, WaypointHashDecor, 0);
+                    Wander(driver, vehicle);
+                }
             }
 
-            var vehicle = API.GetVehiclePedIsIn(player, false);
-            var driver = API.GetPedInVehicleSeat(vehicle, -1);
             if (!IsOwnedAutopilot(driver))
                 return Delay(1000);
 
