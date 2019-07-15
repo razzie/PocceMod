@@ -3,7 +3,7 @@ using CitizenFX.Core.Native;
 using System;
 using System.Threading.Tasks;
 
-namespace PocceMod.Mod
+namespace PocceMod.Client
 {
     public class Autopilot : BaseScript
     {

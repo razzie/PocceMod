@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace PocceMod.Mod
+namespace PocceMod.Shared
 {
     public static class Config
     {

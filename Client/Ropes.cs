@@ -3,7 +3,7 @@ using CitizenFX.Core.Native;
 using System;
 using System.Collections.Generic;
 
-namespace PocceMod.Mod
+namespace PocceMod.Client
 {
     public class Ropes : BaseScript
     {

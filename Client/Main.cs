@@ -1,14 +1,14 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
-using PocceMod.Mod;
+using PocceMod.Shared;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace PocceMod
+namespace PocceMod.Client
 {
-    public sealed class Client : BaseScript
+    public sealed class Main : BaseScript
     {
-        public Client()
+        public Main()
         {
             if (Config.GetConfigBool("spawn_vehicle"))
                 Hud.AddSubmenu("Spawn vehicle", async (vehicle) => await Vehicles.Spawn(vehicle), Config.VehicleList);

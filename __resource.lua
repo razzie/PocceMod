@@ -10,5 +10,5 @@ files {
 	"config/scenarios.ini",
     "MenuAPI.dll"
 }
-client_script 'PocceMod.net.dll'
+client_script 'PocceMod.Client.net.dll'
 server_script 'PocceMod.Server.net.dll'

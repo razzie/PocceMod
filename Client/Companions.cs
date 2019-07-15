@@ -1,9 +1,10 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using PocceMod.Shared;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace PocceMod.Mod
+namespace PocceMod.Client
 {
     public class Companions : BaseScript
     {

@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace PocceMod.Mod
+namespace PocceMod.Client
 {
     public static class Hud
     {

@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PocceMod</RootNamespace>
-    <AssemblyName>PocceMod.net</AssemblyName>
+    <AssemblyName>PocceMod.Client.net</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -48,17 +48,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Mod\Autopilot.cs" />
-    <Compile Include="Mod\Common.cs" />
-    <Compile Include="Mod\Config.cs" />
-    <Compile Include="Mod\DataSource.cs" />
-    <Compile Include="Client.cs" />
-    <Compile Include="Mod\Companions.cs" />
-    <Compile Include="Mod\Hud.cs" />
-    <Compile Include="Mod\Peds.cs" />
-    <Compile Include="Mod\Props.cs" />
-    <Compile Include="Mod\Ropes.cs" />
-    <Compile Include="Mod\Vehicles.cs" />
+    <Compile Include="Client\Autopilot.cs" />
+    <Compile Include="Client\Common.cs" />
+    <Compile Include="Shared\Config.cs" />
+    <Compile Include="Client\DataSource.cs" />
+    <Compile Include="Client\Main.cs" />
+    <Compile Include="Client\Companions.cs" />
+    <Compile Include="Client\Hud.cs" />
+    <Compile Include="Client\Peds.cs" />
+    <Compile Include="Client\Props.cs" />
+    <Compile Include="Client\Ropes.cs" />
+    <Compile Include="Client\Vehicles.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

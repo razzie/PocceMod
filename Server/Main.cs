@@ -3,9 +3,9 @@ using System;
 
 namespace PocceMod.Server
 {
-    public class Server : BaseScript
+    public class Main : BaseScript
     {
-        public Server()
+        public Main()
         {
             EventHandlers["playerDropped"] += new Action<Player, string>(PlayerDropped);
             EventHandlers["PocceMod:Burn"] += new Action<int>(Burn);
