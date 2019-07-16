@@ -11,7 +11,7 @@ namespace PocceMod.Client
     {
         private static Menu _menu;
         private static Dictionary<int, Func<Task>> _menuItemActions;
-        private static Dictionary<int, Func<int, Task>> _menuListItemActions;
+        private static Dictionary<int, List<Func<Task>>> _menuListItemActions;
 
         static Hud()
         {
@@ -22,7 +22,7 @@ namespace PocceMod.Client
             _menu = new Menu("PocceMod", "menu");
             MenuController.AddMenu(_menu);
             _menuItemActions = new Dictionary<int, Func<Task>>();
-            _menuListItemActions = new Dictionary<int, Func<int, Task>>();
+            _menuListItemActions = new Dictionary<int, List<Func<Task>>>();
 
             _menu.OnItemSelect += async (_menu, _item, _index) =>
             {
@@ -35,9 +35,9 @@ namespace PocceMod.Client
 
             _menu.OnListItemSelect += async (_menu, _listItem, _listIndex, _itemIndex) =>
             {
-                if (_menuListItemActions.TryGetValue(_itemIndex, out Func<int, Task> action))
+                if (_menuListItemActions.TryGetValue(_itemIndex, out List<Func<Task>> actions))
                 {
-                    await action(_listIndex);
+                    await actions[_listIndex]();
                     _menu.CloseMenu();
                 }
             };
@@ -65,11 +65,32 @@ namespace PocceMod.Client
             _menuItemActions.Add(menuItem.Index, onSelect);
         }
 
-        public static void AddMenuListItem(string name, Func<int, Task> onSelect, params string[] items)
+        public static void AddMenuItem(string item, Action onSelect)
         {
-            var menuListItem = new MenuListItem(name, new List<string>(items), 0);
+            AddMenuItem(item, () => { onSelect(); return BaseScript.Delay(0); });
+        }
+
+        public static void AddMenuListItem(string item, string subitem, Func<Task> onSelect)
+        {
+            foreach (var menuItem in _menu.GetMenuItems())
+            {
+                if (menuItem is MenuListItem && menuItem.Text == item)
+                {
+                    var items = ((MenuListItem)menuItem).ListItems;
+                    items.Add(subitem);
+                    _menuListItemActions[menuItem.Index].Add(onSelect);
+                    return;
+                }
+            }
+
+            var menuListItem = new MenuListItem(item, new List<string> { subitem }, 0);
             _menu.AddMenuItem(menuListItem);
-            _menuListItemActions.Add(menuListItem.Index, onSelect);
+            _menuListItemActions.Add(menuListItem.Index, new List<Func<Task>> { onSelect });
+        }
+
+        public static void AddMenuListItem(string item, string subitem, Action onSelect)
+        {
+            AddMenuListItem(item, subitem, () => { onSelect(); return BaseScript.Delay(0); });
         }
 
         public static void AddSubmenu(string name, Func<string, Task> onSelect, IEnumerable<string> items, int groupByLetters = 0)

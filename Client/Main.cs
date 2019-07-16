@@ -17,142 +17,58 @@ namespace PocceMod.Client
                 Hud.AddSubmenu("Spawn prop", async (prop) => await Props.Spawn(prop), Config.PropList, 10);
 
             if (Config.GetConfigBool("spawn_ped"))
-                Hud.AddMenuListItem("Spawn ped", async (spawn) =>
             {
-                switch (spawn)
-                {
-                    case 0:
-                        await PocceCompanion();
-                        break;
-                    case 1:
-                        await PetCompanion();
-                        break;
-                    case 2:
-                        await PoccePassengers();
-                        break;
-                    case 3:
-                        await SpawnTrashPed();
-                        break;
-                }
-            }, "Pocce companion", "Pet companion", "Pocce passengers", "Trash ped");
+                Hud.AddMenuListItem("Spawn ped", "Pocce companion", PocceCompanion);
+                Hud.AddMenuListItem("Spawn ped", "Pet companion", PetCompanion);
+                Hud.AddMenuListItem("Spawn ped", "Pocce passengers", PoccePassengers);
+                Hud.AddMenuListItem("Spawn ped", "Trash ped", SpawnTrashPed);
+            }
 
             if (Config.GetConfigBool("rope"))
-                Hud.AddMenuListItem("Rope", (tow) =>
             {
-                switch (tow)
-                {
-                    case 0:
-                        RopeClosest(Peds.Get(Peds.Filter.Dead | Peds.Filter.CurrentVehiclePassengers));
-                        break;
-                    case 1:
-                        RopeClosest(Vehicles.Get());
-                        break;
-                    case 2:
-                        RopeClosest(Vehicles.Get(), true);
-                        break;
-                    case 3:
-                        RopeClosest(Props.Get());
-                        break;
-                    case 4:
-                        RappelFromHeli();
-                        break;
-                }
-                return Delay(0);
-            }, "Closest ped", "Closest vehicle", "Closest vehicle tow", "Closest prop", "Rappel from heli");
+                Hud.AddMenuListItem("Rope", "Closest ped", () => RopeClosest(Peds.Get(Peds.Filter.Dead | Peds.Filter.CurrentVehiclePassengers)));
+                Hud.AddMenuListItem("Rope", "Closest vehicle", () => RopeClosest(Vehicles.Get()));
+                Hud.AddMenuListItem("Rope", "Closest vehicle tow", () => RopeClosest(Vehicles.Get(), true));
+                Hud.AddMenuListItem("Rope", "Closest prop", () => RopeClosest(Props.Get()));
+                Hud.AddMenuListItem("Rope", "Rappel from heli", () => RappelFromHeli());
+            }
 
             if (Config.GetConfigBool("rope") || Config.GetConfigBool("spawn_prop"))
-                Hud.AddMenuListItem("Clear", (clear) =>
             {
-                switch (clear)
-                {
-                    case 0:
-                        Ropes.ClearAll();
-                        break;
-                    case 1:
-                        Ropes.ClearLast();
-                        break;
-                    case 2:
-                        Props.ClearAll();
-                        break;
-                    case 3:
-                        Props.ClearLast();
-                        break;
-                }
-                return Delay(0);
-            }, "Ropes", "Last rope", "Props", "Last prop");
+                Hud.AddMenuListItem("Clear", "Ropes", () => Ropes.ClearAll());
+                Hud.AddMenuListItem("Clear", "Last rope", () => Ropes.ClearLast());
+                Hud.AddMenuListItem("Clear", "Props", () => Props.ClearAll());
+                Hud.AddMenuListItem("Clear", "Last prop", () => Props.ClearLast());
+            }
 
             if (Config.GetConfigBool("teleport"))
-                Hud.AddMenuListItem("Teleport", (teleport) =>
             {
-                switch (teleport)
-                {
-                    case 0:
-                        TeleportToClosestVehicle();
-                        break;
-                    case 1:
-                        TeleportToClosestVehicle(true);
-                        break;
-                }
-                return Delay(0);
-            }, "Closest vehicle", "Closest vehicle as passenger");
+                Hud.AddMenuListItem("Teleport", "Closest vehicle", () => TeleportToClosestVehicle());
+                Hud.AddMenuListItem("Teleport", "Closest vehicle as passenger", () => TeleportToClosestVehicle(true));
+            }
 
             if (Config.GetConfigBool("wave"))
-                Hud.AddMenuListItem("Ocean waves", (waves) =>
             {
-                switch (waves)
-                {
-                    case 0:
-                        API.SetWavesIntensity(8f);
-                        break;
-                    case 1:
-                        API.SetWavesIntensity(2f);
-                        break;
-                    case 2:
-                        API.SetWavesIntensity(0f);
-                        break;
-                    case 3:
-                        API.ResetWavesIntensity();
-                        break;
-                }
-                return Delay(0);
-            }, "High", "Mid", "Low", "Reset");
+                Hud.AddMenuListItem("Ocean waves", "High", () => API.SetWavesIntensity(8f));
+                Hud.AddMenuListItem("Ocean waves", "Mid", () => API.SetWavesIntensity(2f));
+                Hud.AddMenuListItem("Ocean waves", "Low", () => API.SetWavesIntensity(0f));
+                Hud.AddMenuListItem("Ocean waves", "Reset", () => API.ResetWavesIntensity());
+            }
 
             if (Config.GetConfigBool("riot"))
-                Hud.AddMenuListItem("Riot", async (riot) =>
             {
-                switch (riot)
-                {
-                    case 0:
-                        await PocceRiot(false);
-                        break;
-                    case 1:
-                        await PocceRiot(true);
-                        break;
-                    case 2:
-                        await PedRiot(false);
-                        break;
-                    case 3:
-                        await PedRiot(true);
-                        break;
-                }
-            }, "Pocce riot", "Armed pocce riot", "Ped riot", "Armed ped riot");
+                Hud.AddMenuListItem("Riot", "Pocce riot", async () => await PocceRiot(false));
+                Hud.AddMenuListItem("Riot", "Armed pocce riot", async () => await PocceRiot(true));
+                Hud.AddMenuListItem("Riot", "Ped riot", async () => await PedRiot(false));
+                Hud.AddMenuListItem("Riot", "Armed ped riot", async () => await PedRiot(true));
+            }
 
             if (Config.GetConfigBool("other"))
-                Hud.AddMenuListItem("Other", async (other) =>
             {
-                switch (other)
-                {
-                    case 0:
-                        await Autopilot.Toggle();
-                        break;
-                    case 1:
-                        Vehicles.EMP();
-                        break;
-                    case 2:
-                        CargobobMagnet();
-                        break;
-                }
-            }, "Autopilot", "EMP", "Cargobob magnet");
+                Hud.AddMenuListItem("Other", "Autopilot", Autopilot.Toggle);
+                Hud.AddMenuListItem("Other", "EMP", () => Vehicles.EMP());
+                Hud.AddMenuListItem("Other", "Cargobob magnet", () => CargobobMagnet());
+            }
 
             if (Config.GetConfigBool("skin"))
             {
