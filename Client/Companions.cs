@@ -139,7 +139,6 @@ namespace PocceMod.Client
                     {
                         if (!API.IsPedActiveInScenario(companion))
                         {
-                            var heading = API.GetEntityHeading(companion);
                             var scenario = Config.ScenarioList[API.GetRandomIntInRange(0, Config.ScenarioList.Length)];
                             API.TaskStartScenarioInPlace(companion, scenario, 0, true);
                         }
