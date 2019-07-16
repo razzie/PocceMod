@@ -6,48 +6,63 @@ using System.Threading.Tasks;
 
 namespace PocceMod.Client
 {
-    public sealed class Main : BaseScript
+    public class Main : BaseScript
     {
-        public Main()
+        static Main()
         {
-            if (Config.GetConfigBool("spawn_vehicle"))
+            Permission.Granted += (player, group) => SetupMenu();
+        }
+
+        private static void SetupMenu()
+        {
+            if (Permission.CanDo(Ability.SpawnVehicle))
                 Hud.AddSubmenu("Spawn vehicle", async (vehicle) => await Vehicles.Spawn(vehicle), Config.VehicleList);
 
-            if (Config.GetConfigBool("spawn_prop"))
+            if (Permission.CanDo(Ability.SpawnProp))
                 Hud.AddSubmenu("Spawn prop", async (prop) => await Props.Spawn(prop), Config.PropList, 10);
 
-            if (Config.GetConfigBool("spawn_ped"))
-            {
+            if (Permission.CanDo(Ability.SpawnPocceCompanion))
                 Hud.AddMenuListItem("Spawn ped", "Pocce companion", PocceCompanion);
-                Hud.AddMenuListItem("Spawn ped", "Pet companion", PetCompanion);
-                Hud.AddMenuListItem("Spawn ped", "Pocce passengers", PoccePassengers);
-                Hud.AddMenuListItem("Spawn ped", "Trash ped", SpawnTrashPed);
-            }
 
-            if (Config.GetConfigBool("rope"))
+            if (Permission.CanDo(Ability.SpawnPetCompanion))
+                Hud.AddMenuListItem("Spawn ped", "Pet companion", PetCompanion);
+
+            if (Permission.CanDo(Ability.SpawnPoccePassengers))
+                Hud.AddMenuListItem("Spawn ped", "Pocce passengers", PoccePassengers);
+
+            if (Permission.CanDo(Ability.SpawnTrashPed))
+                Hud.AddMenuListItem("Spawn ped", "Trash ped", SpawnTrashPed);
+
+            if (Permission.CanDo(Ability.Rope))
             {
                 Hud.AddMenuListItem("Rope", "Closest ped", () => RopeClosest(Peds.Get(Peds.Filter.Dead | Peds.Filter.CurrentVehiclePassengers)));
                 Hud.AddMenuListItem("Rope", "Closest vehicle", () => RopeClosest(Vehicles.Get()));
                 Hud.AddMenuListItem("Rope", "Closest vehicle tow", () => RopeClosest(Vehicles.Get(), true));
                 Hud.AddMenuListItem("Rope", "Closest prop", () => RopeClosest(Props.Get()));
-                Hud.AddMenuListItem("Rope", "Rappel from heli", () => RappelFromHeli());
             }
 
-            if (Config.GetConfigBool("rope") || Config.GetConfigBool("spawn_prop"))
+            if (Permission.CanDo(Ability.RappelFromHeli))
+                Hud.AddMenuListItem("Rope", "Rappel from heli", () => RappelFromHeli());
+
+            if (Permission.CanDo(Ability.Rope))
             {
                 Hud.AddMenuListItem("Clear", "Ropes", () => Ropes.ClearAll());
                 Hud.AddMenuListItem("Clear", "Last rope", () => Ropes.ClearLast());
+            }
+
+            if (Permission.CanDo(Ability.SpawnProp))
+            {
                 Hud.AddMenuListItem("Clear", "Props", () => Props.ClearAll());
                 Hud.AddMenuListItem("Clear", "Last prop", () => Props.ClearLast());
             }
 
-            if (Config.GetConfigBool("teleport"))
+            if (Permission.CanDo(Ability.TeleportToClosestVehicle))
             {
                 Hud.AddMenuListItem("Teleport", "Closest vehicle", () => TeleportToClosestVehicle());
                 Hud.AddMenuListItem("Teleport", "Closest vehicle as passenger", () => TeleportToClosestVehicle(true));
             }
 
-            if (Config.GetConfigBool("wave"))
+            if (Permission.CanDo(Ability.OceanWaves))
             {
                 Hud.AddMenuListItem("Ocean waves", "High", () => API.SetWavesIntensity(8f));
                 Hud.AddMenuListItem("Ocean waves", "Mid", () => API.SetWavesIntensity(2f));
@@ -55,29 +70,42 @@ namespace PocceMod.Client
                 Hud.AddMenuListItem("Ocean waves", "Reset", () => API.ResetWavesIntensity());
             }
 
-            if (Config.GetConfigBool("riot"))
-            {
+            if (Permission.CanDo(Ability.PocceRiot))
                 Hud.AddMenuListItem("Riot", "Pocce riot", async () => await PocceRiot(false));
+
+            if (Permission.CanDo(Ability.PocceRiotArmed))
                 Hud.AddMenuListItem("Riot", "Armed pocce riot", async () => await PocceRiot(true));
+
+            if (Permission.CanDo(Ability.PedRiot))
                 Hud.AddMenuListItem("Riot", "Ped riot", async () => await PedRiot(false));
+
+            if (Permission.CanDo(Ability.PedRiotArmed))
                 Hud.AddMenuListItem("Riot", "Armed ped riot", async () => await PedRiot(true));
-            }
 
-            if (Config.GetConfigBool("other"))
-            {
+            if (Permission.CanDo(Ability.Autopilot))
                 Hud.AddMenuListItem("Other", "Autopilot", Autopilot.Toggle);
+
+            if (Permission.CanDo(Ability.EMP))
                 Hud.AddMenuListItem("Other", "EMP", () => Vehicles.EMP());
+
+            if (Permission.CanDo(Ability.CargobobMagnet))
                 Hud.AddMenuListItem("Other", "Cargobob magnet", () => CargobobMagnet());
-            }
 
-            if (Config.GetConfigBool("skin"))
+            if (Permission.CanDo(Ability.IdentifySkins))
             {
-                var skins = new DataSource<string>();
-                Hud.AddMenuItem("Indentify skins", () => { skins.Push(IdentifyPedModels()); return Delay(0); });
-                Hud.AddSubmenu("Change skin", async (skin) => await ChangeSkin(skin), skins);
+                if (Permission.CanDo(Ability.ChangeSkin))
+                {
+                    var skins = new DataSource<string>();
+                    Hud.AddMenuItem("Indentify skins", () => skins.Push(IdentifyPedModels()));
+                    Hud.AddSubmenu("Change skin", async (skin) => await ChangeSkin(skin), skins);
+                }
+                else
+                {
+                    Hud.AddMenuItem("Indentify skins", () => IdentifyPedModels());
+                }
             }
 
-            var menukey = Config.GetConfigInt("menu_key");
+            var menukey = Config.GetConfigInt("MenuKey");
             if (menukey > 0)
             {
                 Hud.SetMenuKey(menukey);
@@ -87,7 +115,7 @@ namespace PocceMod.Client
         public static async Task SpawnTrashPed()
         {
             var ped = await Peds.Spawn(Config.TrashPedList);
-            await Delay(500);
+            await BaseScript.Delay(500);
             Common.Burn(ped);
             API.SetEntityAsNoLongerNeeded(ref ped);
         }
@@ -109,7 +137,7 @@ namespace PocceMod.Client
                     API.TaskLeaveVehicle(ped, vehicle, 1);
                 }
 
-                await Delay(1000); // let them get out of vehicles
+                await BaseScript.Delay(1000); // let them get out of vehicles
                 API.ClearPedTasks(ped);
 
                 await Peds.Arm(ped, weapons);

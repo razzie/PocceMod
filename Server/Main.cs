@@ -1,4 +1,5 @@
 ﻿using CitizenFX.Core;
+using PocceMod.Shared;
 using System;
 
 namespace PocceMod.Server
@@ -8,8 +9,8 @@ namespace PocceMod.Server
         public Main()
         {
             EventHandlers["playerDropped"] += new Action<Player, string>(PlayerDropped);
-            EventHandlers["PocceMod:Burn"] += new Action<int>(Burn);
-            EventHandlers["PocceMod:EMP"] += new Action<int>(EMP);
+            EventHandlers["PocceMod:Burn"] += new Action<Player, int>(Burn);
+            EventHandlers["PocceMod:EMP"] += new Action<Player, int>(EMP);
             EventHandlers["PocceMod:AddRope"] += new Action<Player, int, int, bool>(AddRope);
             EventHandlers["PocceMod:ClearRopes"] += new Action<Player>(ClearRopes);
             EventHandlers["PocceMod:ClearLastRope"] += new Action<Player>(ClearLastRope);
@@ -20,19 +21,22 @@ namespace PocceMod.Server
             ClearRopes(source);
         }
 
-        private void Burn(int entity)
+        private void Burn([FromSource] Player source, int entity)
         {
-            TriggerClientEvent("PocceMod:Burn", entity);
+            if (Permission.CanDo(source, Ability.SpawnTrashPed))
+                TriggerClientEvent("PocceMod:Burn", entity);
         }
 
-        private void EMP(int entity)
+        private void EMP([FromSource] Player source, int entity)
         {
-            TriggerClientEvent("PocceMod:EMP", entity);
+            if (Permission.CanDo(source, Ability.EMPOtherPlayer))
+                TriggerClientEvent("PocceMod:EMP", entity);
         }
 
         private void AddRope([FromSource] Player source, int entity1, int entity2, bool tow)
         {
-            TriggerClientEvent("PocceMod:AddRope", source.Handle, entity1, entity2, tow);
+            if (Permission.CanDo(source, Ability.Rope))
+                TriggerClientEvent("PocceMod:AddRope", source.Handle, entity1, entity2, tow);
         }
 
         private void ClearRopes([FromSource] Player source)

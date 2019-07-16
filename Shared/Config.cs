@@ -28,14 +28,6 @@ namespace PocceMod.Shared
             }
         }
 
-        public static bool GetConfigBool(string item)
-        {
-            if (Configuration.TryGetValue(item, out string value))
-                return bool.TryParse(value, out bool result) && result;
-            else
-                return false;
-        }
-
         public static int GetConfigInt(string item)
         {
             if (Configuration.TryGetValue(item, out string value))

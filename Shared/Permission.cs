@@ -15,8 +15,8 @@ namespace PocceMod.Shared
             Noone = 3
         }
 
-        public delegate void GrantedEvent(Player player, Group group);
-        public static event GrantedEvent Granted;
+        public delegate void GrantedDelegate(Player player, Group group);
+        public static event GrantedDelegate Granted;
 
         private static readonly Dictionary<Ability, Group> _permissions = new Dictionary<Ability, Group>();
         private static readonly Dictionary<Player, Group> _playerGroups = new Dictionary<Player, Group>();
@@ -30,18 +30,20 @@ namespace PocceMod.Shared
             }
 
 #if CLIENT
-            EventHandlers["PocceMod:Permission"] += new Action<Group>(group => AddPlayer(Game.Player, group));
+            EventHandlers["PocceMod:Permission"] += new Action<int>(group => AddPlayer(Game.Player, (Group)group));
+            TriggerServerEvent("PocceMod:RequestPermission");
 #endif
 
 #if SERVER
             API.ExecuteCommand("add_ace group.moderator \"PocceMod.Moderator\" allow");
             API.ExecuteCommand("add_ace group.admin \"PocceMod.Admin\" allow");
+            EventHandlers["PocceMod:RequestPermission"] += new Action<Player>(RequestPermission);
 #endif
         }
 
-        public static void AddPlayer(Player player, Group playerGroup)
+        private static void AddPlayer(Player player, Group playerGroup)
         {
-            _playerGroups.Add(player, playerGroup);
+            _playerGroups[player] = playerGroup;
             Granted?.Invoke(player, playerGroup);
         }
 
@@ -74,11 +76,11 @@ namespace PocceMod.Shared
                 return Group.User;
         }
 
-        public static void AddPlayer(Player player)
+        private static void RequestPermission([FromSource] Player source)
         {
-            var group = GetPlayerGroup(player);
-            AddPlayer(player, group);
-            TriggerClientEvent(player, "PocceMod:Permission", group);
+            var group = GetPlayerGroup(source);
+            AddPlayer(source, group);
+            TriggerClientEvent(source, "PocceMod:Permission", (int)group);
         }
 #endif
     }
