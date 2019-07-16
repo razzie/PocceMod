@@ -1,5 +1,6 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using PocceMod.Shared;
 using System;
 using System.Collections.Generic;
 
@@ -106,6 +107,17 @@ namespace PocceMod.Client
 
         public static void Attach(int entity1, int entity2, bool tow = false)
         {
+            if (!Permission.CanDo(Ability.RopeOtherPlayer))
+            {
+                var player = API.GetPlayerPed(-1);
+                if ((API.IsEntityAPed(entity1) && API.IsPedAPlayer(entity1) && entity1 != player) ||
+                    (API.IsEntityAPed(entity2) && API.IsPedAPlayer(entity2) && entity2 != player))
+                {
+                    Hud.Notification("You are not allowed to attach rope to another player");
+                    return;
+                }
+            }
+
             TriggerServerEvent("PocceMod:AddRope", API.ObjToNet(entity1), API.ObjToNet(entity2), tow);
         }
 

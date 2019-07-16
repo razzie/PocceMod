@@ -9,6 +9,7 @@
         SpawnPoccePassengers,
         SpawnTrashPed,
         Rope,
+        RopeOtherPlayer,
         RappelFromHeli,
         TeleportToClosestVehicle,
         OceanWaves,
