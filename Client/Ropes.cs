@@ -159,22 +159,19 @@ namespace PocceMod.Client
             if (!API.GetEntityPlayerIsFreeAimingAt(playerID, ref target))
                 return;
 
+            if (API.IsEntityAPed(target) && API.IsPedInAnyVehicle(target, false))
+                target = API.GetVehiclePedIsIn(target, false);
+
             if (API.IsPedInAnyVehicle(player, false))
             {
                 var vehicle = API.GetVehiclePedIsIn(player, false);
-                if (API.IsControlJustPressed(0, 69))
-                {
-                    await Delay(500);
+                if (API.IsControlJustPressed(0, 69)) // vehicle attack
                     Attach(vehicle, target);
-                }
             }
             else
             {
-                if (API.IsControlJustPressed(0, 24))
-                {
-                    await Delay(500);
+                if (API.IsControlJustPressed(0, 24)) // attack
                     Attach(player, target);
-                }
             }
         }
     }
