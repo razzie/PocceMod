@@ -61,12 +61,9 @@ namespace PocceMod.Client
             API.SetBlipAsFriendly(blip, true);
         }
 
-        private static Task Update()
+        private static bool CheckAndHandlePlayerCombat(IEnumerable<int> peds, IEnumerable<int> companions)
         {
             var player = API.GetPlayerPed(-1);
-            var peds = Peds.Get(Peds.Filter.None);
-            var companions = Get(peds);
-
             int target = 0;
             if (API.GetEntityPlayerIsFreeAimingAt(API.PlayerId(), ref target) || API.GetPlayerTargetEntity(API.PlayerId(), ref target))
             {
@@ -74,7 +71,7 @@ namespace PocceMod.Client
                 {
                     API.TaskCombatPed(companion, target, 0, 16);
                 }
-                return Delay(2000);
+                return true;
             }
 
             foreach (var ped in peds)
@@ -91,74 +88,92 @@ namespace PocceMod.Client
                     {
                         API.TaskCombatPed(companion, ped, 0, 16);
                     }
-                    return Delay(2000);
+                    return true;
                 }
             }
+
+            return false;
+        }
+
+        private static void FollorPlayerToVehicle(int player, IEnumerable<int> companions)
+        {
+            var vehicle = API.GetVehiclePedIsIn(player, false);
+            var seats = Vehicles.GetFreeSeats(vehicle);
+
+            foreach (var companion in companions)
+            {
+                if (seats.Count == 0)
+                    break;
+
+                if (!API.IsPedHuman(companion))
+                    continue;
+
+                if (API.IsPedInAnyVehicle(companion, true))
+                {
+                    var otherVehicle = API.GetVehiclePedIsUsing(companion);
+                    if (otherVehicle != vehicle)
+                        API.TaskLeaveVehicle(companion, otherVehicle, 0);
+
+                    continue;
+                }
+
+                var seat = seats.Dequeue();
+                API.TaskEnterVehicle(companion, vehicle, -1, seat, 2.0f, 1, 0);
+            }
+        }
+
+        private static void FollowPlayer(int player, IEnumerable<int> companions)
+        {
+            var coords = API.GetEntityCoords(player, true);
+            foreach (var companion in companions)
+            {
+                var pos = API.GetEntityCoords(companion, true);
+                if (API.IsPedInAnyVehicle(companion, true))
+                {
+                    var vehicle = API.GetVehiclePedIsIn(companion, false);
+                    if (API.GetEntitySpeed(vehicle) < 0.1f)
+                        API.TaskLeaveVehicle(companion, vehicle, 0);
+                    else
+                        API.TaskLeaveVehicle(companion, vehicle, 4096);
+                }
+                else if (pos.DistanceToSquared(coords) > 25.0f)
+                {
+                    if (API.IsPedActiveInScenario(companion))
+                    {
+                        API.ClearPedTasks(companion);
+                        API.ClearPedTasksImmediately(companion);
+                    }
+
+                    API.TaskGoToEntity(companion, player, -1, 5.0f, 2.0f, 0, 0);
+                }
+                else if (API.IsPedHuman(companion))
+                {
+                    if (API.IsPedOnFoot(companion) && !API.IsPedActiveInScenario(companion))
+                    {
+                        var scenario = Config.ScenarioList[API.GetRandomIntInRange(0, Config.ScenarioList.Length)];
+                        API.TaskStartScenarioInPlace(companion, scenario, 0, true);
+                    }
+                }
+                else
+                {
+                    API.TaskLookAtEntity(companion, player, -1, 2048, 3);
+                }
+            }
+        }
+
+        private static Task Update()
+        {
+            var player = API.GetPlayerPed(-1);
+            var peds = Peds.Get(Peds.Filter.None);
+            var companions = Get(peds);
+
+            if (companions.Count == 0 || CheckAndHandlePlayerCombat(peds, companions))
+                return Delay(2000);
 
             if (API.IsPedInAnyVehicle(player, false))
-            {
-                var vehicle = API.GetVehiclePedIsIn(player, false);
-                var seats = Vehicles.GetFreeSeats(vehicle);
-
-                foreach (var companion in companions)
-                {
-                    if (seats.Count == 0)
-                        break;
-
-                    if (!API.IsPedHuman(companion))
-                        continue;
-
-                    if (API.IsPedInAnyVehicle(companion, true))
-                    {
-                        var otherVehicle = API.GetVehiclePedIsUsing(companion);
-                        if (otherVehicle != vehicle)
-                            API.TaskLeaveVehicle(companion, otherVehicle, 0);
-
-                        continue;
-                    }
-
-                    var seat = seats.Dequeue();
-                    API.TaskEnterVehicle(companion, vehicle, -1, seat, 2.0f, 1, 0);
-                }
-            }
-            else // player is not in vehicle
-            {
-                var coords = API.GetEntityCoords(player, true);
-                foreach (var companion in companions)
-                {
-                    var pos = API.GetEntityCoords(companion, true);
-                    if (API.IsPedInAnyVehicle(companion, true))
-                    {
-                        var vehicle = API.GetVehiclePedIsIn(companion, false);
-                        if (API.GetEntitySpeed(vehicle) < 0.1f)
-                            API.TaskLeaveVehicle(companion, vehicle, 0);
-                        else
-                            API.TaskLeaveVehicle(companion, vehicle, 4096);
-                    }
-                    else if (pos.DistanceToSquared(coords) > 25.0f)
-                    {
-                        if (API.IsPedActiveInScenario(companion))
-                        {
-                            API.ClearPedTasks(companion);
-                            API.ClearPedTasksImmediately(companion);
-                        }
-
-                        API.TaskGoToEntity(companion, player, -1, 5.0f, 2.0f, 0, 0);
-                    }
-                    else if (API.IsPedHuman(companion))
-                    {
-                        if (API.IsPedOnFoot(companion) && !API.IsPedActiveInScenario(companion))
-                        {
-                            var scenario = Config.ScenarioList[API.GetRandomIntInRange(0, Config.ScenarioList.Length)];
-                            API.TaskStartScenarioInPlace(companion, scenario, 0, true);
-                        }
-                    }
-                    else
-                    {
-                        API.TaskLookAtEntity(companion, player, -1, 2048, 3);
-                    }
-                }
-            }
+                FollorPlayerToVehicle(player, companions);
+            else
+                FollowPlayer(player, companions);
 
             return Delay(2000);
         }

@@ -109,6 +109,7 @@ namespace PocceMod.Client
             API.SetPedCombatMovement(ped, 2);
             API.SetPedCombatRange(ped, 2);
             API.SetPedHearingRange(ped, float.MaxValue);
+            API.SetPedCombatAttributes(ped, 2, true);
             API.SetPedCombatAttributes(ped, 5, true);
             API.SetPedCombatAttributes(ped, 17, true);
             API.SetPedCombatAttributes(ped, 46, true);
