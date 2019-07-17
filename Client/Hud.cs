@@ -95,7 +95,7 @@ namespace PocceMod.Client
 
         public static void AddSubmenu(string name, Func<string, Task> onSelect, IEnumerable<string> items, int groupByLetters = 0)
         {
-            var submenuItem = new MenuItem(name);
+            var submenuItem = new MenuItem(name) { Label = "→→→" };
             var submenu = new Menu("PocceMod", name);
 
             _menu.AddMenuItem(submenuItem);
@@ -162,7 +162,7 @@ namespace PocceMod.Client
 
         public static void AddSubmenu(string name, Func<string, Task> onSelect, DataSource<string> dataSource)
         {
-            var submenuItem = new MenuItem(name);
+            var submenuItem = new MenuItem(name) { Label = "→→→" };
             var submenu = new Menu("PocceMod", name);
 
             _menu.AddMenuItem(submenuItem);

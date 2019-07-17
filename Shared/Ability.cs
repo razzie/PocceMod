@@ -10,6 +10,7 @@
         SpawnTrashPed,
         Rope,
         RopeOtherPlayer,
+        RopeGun,
         RappelFromHeli,
         TeleportToClosestVehicle,
         OceanWaves,

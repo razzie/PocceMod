@@ -64,6 +64,26 @@ namespace PocceMod.Client
             return true;
         }
 
+        public static List<int> GetObjects()
+        {
+            var objs = new List<int>();
+            int obj = 0;
+            int handle = API.FindFirstObject(ref obj);
+            var coords = API.GetEntityCoords(API.GetPlayerPed(-1), true);
+
+            if (handle == -1)
+                return objs;
+
+            do
+            {
+                objs.Add(obj);
+
+            } while (API.FindNextObject(handle, ref obj));
+
+            API.EndFindObject(handle);
+            return objs;
+        }
+
         public static void Burn(int entity)
         {
             TriggerServerEvent("PocceMod:Burn", API.ObjToNet(entity));

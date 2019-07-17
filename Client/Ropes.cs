@@ -3,11 +3,13 @@ using CitizenFX.Core.Native;
 using PocceMod.Shared;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace PocceMod.Client
 {
     public class Ropes : BaseScript
     {
+        private static readonly uint _ropegun = 0x44AE7910; // WEAPON_POCCE_ROPEGUN
         private static Dictionary<int, List<int>> _ropes = new Dictionary<int, List<int>>();
 
         public Ropes()
@@ -15,6 +17,10 @@ namespace PocceMod.Client
             EventHandlers["PocceMod:AddRope"] += new Action<int, int, int, bool>(AddRope);
             EventHandlers["PocceMod:ClearRopes"] += new Action<int>(ClearRopes);
             EventHandlers["PocceMod:ClearLastRope"] += new Action<int>(ClearLastRope);
+
+            API.AddTextEntryByHash(0x6FCC4E8A, "Pocce Ropegun"); // WT_POCCE_ROPEGUN
+
+            Tick += Update;
         }
 
         private static Vector3 GetAdjustedPosition(int entity, float front)
@@ -129,6 +135,41 @@ namespace PocceMod.Client
         public static void ClearLast()
         {
             TriggerServerEvent("PocceMod:ClearLastRope");
+        }
+
+        public static void EquipRopeGun()
+        {
+            Peds.GiveWeapon(API.GetPlayerPed(-1), _ropegun);
+            //Game.PlayerPed.Weapons.Give((WeaponHash)_ropegun, int.MaxValue, true, true);
+        }
+
+        private static Task Update()
+        {
+            var playerID = API.PlayerId();
+            var player = API.GetPlayerPed(-1);
+            if (API.GetSelectedPedWeapon(player) != (int)_ropegun)
+                return Delay(100);
+
+            if (!API.IsPlayerFreeAiming(playerID))
+                return Delay(10);
+
+            int target = 0;
+            if (!API.GetEntityPlayerIsFreeAimingAt(playerID, ref target))
+                return Delay(0);
+
+            if (API.IsPedInAnyVehicle(player, false))
+            {
+                var vehicle = API.GetVehiclePedIsIn(player, false);
+                if (API.IsControlJustPressed(0, 69))
+                    Attach(vehicle, target);
+            }
+            else
+            {
+                if (API.IsControlJustPressed(0, 24))
+                    Attach(player, target);
+            }
+
+            return Delay(0);
         }
     }
 }

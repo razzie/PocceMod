@@ -41,10 +41,13 @@ namespace PocceMod.Client
                 Hud.AddMenuListItem("Rope", "Closest prop", () => RopeClosest(Props.Get()));
             }
 
+            if (Permission.CanDo(Ability.RopeGun))
+                Hud.AddMenuListItem("Rope", "Equip rope gun", () => Ropes.EquipRopeGun());
+
             if (Permission.CanDo(Ability.RappelFromHeli))
                 Hud.AddMenuListItem("Rope", "Rappel from heli", () => RappelFromHeli());
 
-            if (Permission.CanDo(Ability.Rope))
+            if (Permission.CanDo(Ability.Rope) || Permission.CanDo(Ability.RopeGun))
             {
                 Hud.AddMenuListItem("Clear", "Ropes", () => Ropes.ClearAll());
                 Hud.AddMenuListItem("Clear", "Last rope", () => Ropes.ClearLast());
