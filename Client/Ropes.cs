@@ -140,36 +140,42 @@ namespace PocceMod.Client
         public static void EquipRopeGun()
         {
             Peds.GiveWeapon(API.GetPlayerPed(-1), _ropegun);
-            //Game.PlayerPed.Weapons.Give((WeaponHash)_ropegun, int.MaxValue, true, true);
         }
 
-        private static Task Update()
+        private static async Task Update()
         {
             var playerID = API.PlayerId();
             var player = API.GetPlayerPed(-1);
             if (API.GetSelectedPedWeapon(player) != (int)_ropegun)
-                return Delay(100);
+            {
+                await Delay(100);
+                return;
+            }
 
             if (!API.IsPlayerFreeAiming(playerID))
-                return Delay(10);
+                return;
 
             int target = 0;
             if (!API.GetEntityPlayerIsFreeAimingAt(playerID, ref target))
-                return Delay(0);
+                return;
 
             if (API.IsPedInAnyVehicle(player, false))
             {
                 var vehicle = API.GetVehiclePedIsIn(player, false);
                 if (API.IsControlJustPressed(0, 69))
+                {
+                    await Delay(500);
                     Attach(vehicle, target);
+                }
             }
             else
             {
                 if (API.IsControlJustPressed(0, 24))
+                {
+                    await Delay(500);
                     Attach(player, target);
+                }
             }
-
-            return Delay(0);
         }
     }
 }
