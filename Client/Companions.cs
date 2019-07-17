@@ -31,7 +31,16 @@ namespace PocceMod.Client
             foreach (var ped in peds)
             {
                 if (IsCompanion(ped))
+                {
+                    if (API.IsPedDeadOrDying(ped, true))
+                    {
+                        var blip = API.GetBlipFromEntity(ped);
+                        API.RemoveBlip(ref blip);
+                        continue;
+                    }
+
                     companions.Add(ped);
+                }
             }
 
             return companions;
@@ -45,16 +54,17 @@ namespace PocceMod.Client
             API.DecorSetBool(ped, FlagDecor, true);
             API.DecorSetInt(ped, PlayerDecor, playerID);
             API.SetPedRelationshipGroupHash(ped, (uint)API.GetPedRelationshipGroupHash(player));
-            var blip = API.AddBlipForEntity(ped);
-            API.SetBlipAsFriendly(blip, true);
             API.TaskSetBlockingOfNonTemporaryEvents(ped, true);
             API.SetPedKeepTask(ped, true);
+
+            var blip = API.AddBlipForEntity(ped);
+            API.SetBlipAsFriendly(blip, true);
         }
 
         private static Task Update()
         {
             var player = API.GetPlayerPed(-1);
-            var peds = Peds.Get();
+            var peds = Peds.Get(Peds.Filter.None);
             var companions = Get(peds);
 
             int target = 0;
@@ -137,7 +147,7 @@ namespace PocceMod.Client
                     }
                     else if (API.IsPedHuman(companion))
                     {
-                        if (!API.IsPedActiveInScenario(companion))
+                        if (API.IsPedOnFoot(companion) && !API.IsPedActiveInScenario(companion))
                         {
                             var scenario = Config.ScenarioList[API.GetRandomIntInRange(0, Config.ScenarioList.Length)];
                             API.TaskStartScenarioInPlace(companion, scenario, 0, true);
