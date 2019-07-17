@@ -396,7 +396,7 @@
           </AttachPoints>
           <GunFeedBone />
           <TargetSequenceGroup>Pistol</TargetSequenceGroup>
-          <WeaponFlags>CarriedInHand Gun CanLockonOnFoot CanLockonInVehicle CanFreeAim AnimCrouchFire UsableOnFoot UsableClimbing UsableInCover DisplayRechargeTimeHUD OnlyFireOneShot AllowCloseQuarterKills HasLowCoverReloads HasLowCoverSwaps QuitTransitionToIdleIntroOnWeaponChange DisableLeftHandIkWhenOnFoot TorsoIKForWeaponBlock UseFPSAimIK UseFPSSecondaryMotion DontPlayDryFireAnim DisableTorsoIKAboveAngleThreshold NotAllowedForDriveby</WeaponFlags>
+          <WeaponFlags>CarriedInHand Gun CanLockonOnFoot CanLockonInVehicle CanFreeAim AnimCrouchFire UsableOnFoot UsableUnderwater UsableClimbing UsableInCover NonViolent DisplayRechargeTimeHUD OnlyFireOneShot AllowCloseQuarterKills HasLowCoverReloads HasLowCoverSwaps QuitTransitionToIdleIntroOnWeaponChange DisableLeftHandIkWhenOnFoot TorsoIKForWeaponBlock UseFPSAimIK UseFPSSecondaryMotion DontPlayDryFireAnim DisableTorsoIKAboveAngleThreshold</WeaponFlags>
           <TintSpecValues ref="TINT_SCIFI" />
           <FiringPatternAliases ref="FIRING_PATTERN_PISTOL" />
           <ReloadUpperBodyFixupExpressionData ref="default" />
