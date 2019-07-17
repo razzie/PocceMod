@@ -10,6 +10,7 @@ namespace PocceMod.Client
     {
         private const string FlagDecor = "POCCE_COMPANION_FLAG";
         private const string PlayerDecor = "POCCE_COMPANION_PLAYER";
+        private const uint Parachute = 0xFBAB5776; // gadget_parachute
 
         public Companions()
         {
@@ -95,6 +96,31 @@ namespace PocceMod.Client
             return false;
         }
 
+        private static bool CheckAndHandleFreefall(int companion, Vector3 coords)
+        {
+            var paraState = API.GetPedParachuteState(companion);
+            if (paraState == 1 || paraState == 2)
+            {
+                API.SetParachuteTaskTarget(companion, coords.X, coords.Y, coords.Z);
+                return true;
+            }
+
+            if ((API.IsPedFalling(companion) || API.IsPedInParachuteFreeFall(companion)) &&
+                !API.IsPedInAnyVehicle(companion, false))
+            {
+                API.SetPedSeeingRange(companion, 1f);
+                API.SetPedHearingRange(companion, 1f);
+                API.SetPedKeepTask(companion, true);
+                API.GiveWeaponToPed(companion, Parachute, 1, false, true);
+                API.TaskParachuteToTarget(companion, coords.X, coords.Y, coords.Z);
+                return true;
+            }
+
+            API.SetPedSeeingRange(companion, 100f);
+            API.SetPedHearingRange(companion, 100f);
+            return false;
+        }
+
         private static void FollorPlayerToVehicle(int player, IEnumerable<int> companions)
         {
             var vehicle = API.GetVehiclePedIsIn(player, false);
@@ -127,6 +153,9 @@ namespace PocceMod.Client
             var coords = API.GetEntityCoords(player, true);
             foreach (var companion in companions)
             {
+                if (CheckAndHandleFreefall(companion, coords))
+                    continue;
+
                 var pos = API.GetEntityCoords(companion, true);
                 if (API.IsPedInAnyVehicle(companion, true))
                 {
