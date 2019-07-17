@@ -8,8 +8,8 @@ namespace PocceMod.Client
 {
     public class Props : BaseScript
     {
-        private static readonly string PropDecor = "POCCE_PROP";
-        private static List<int> _props = new List<int>();
+        private const string PropDecor = "POCCE_PROP";
+        private static readonly List<int> _props = new List<int>();
 
         [Flags]
         public enum Filter

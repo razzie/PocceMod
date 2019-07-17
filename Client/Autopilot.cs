@@ -7,11 +7,11 @@ namespace PocceMod.Client
 {
     public class Autopilot : BaseScript
     {
-        private static readonly uint Model = 0xA8683715; // monkey
-        private static readonly int DrivingStyle = 156;
-        private static readonly string FlagDecor = "POCCE_AUTOPILOT_FLAG";
-        private static readonly string PlayerDecor = "POCCE_AUTOPILOT_PLAYER";
-        private static readonly string WaypointHashDecor = "POCCE_AUTOPILOT_WAYPOINT";
+        private const uint Model = 0xA8683715; // monkey
+        private const int DrivingStyle = 156;
+        private const string FlagDecor = "POCCE_AUTOPILOT_FLAG";
+        private const string PlayerDecor = "POCCE_AUTOPILOT_PLAYER";
+        private const string WaypointHashDecor = "POCCE_AUTOPILOT_WAYPOINT";
 
         public Autopilot()
         {

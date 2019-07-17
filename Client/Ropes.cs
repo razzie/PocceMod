@@ -9,7 +9,7 @@ namespace PocceMod.Client
 {
     public class Ropes : BaseScript
     {
-        private static readonly uint _ropegun = 0x44AE7910; // WEAPON_POCCE_ROPEGUN
+        private const uint Ropegun = 0x44AE7910; // WEAPON_POCCE_ROPEGUN
         private static Dictionary<int, List<int>> _ropes = new Dictionary<int, List<int>>();
 
         public Ropes()
@@ -139,14 +139,14 @@ namespace PocceMod.Client
 
         public static void EquipRopeGun()
         {
-            Peds.GiveWeapon(API.GetPlayerPed(-1), _ropegun);
+            Peds.GiveWeapon(API.GetPlayerPed(-1), Ropegun);
         }
 
         private static async Task Update()
         {
             var playerID = API.PlayerId();
             var player = API.GetPlayerPed(-1);
-            if (API.GetSelectedPedWeapon(player) != (int)_ropegun)
+            if (API.GetSelectedPedWeapon(player) != (int)Ropegun)
             {
                 await Delay(100);
                 return;

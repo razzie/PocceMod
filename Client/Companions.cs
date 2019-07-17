@@ -8,8 +8,8 @@ namespace PocceMod.Client
 {
     public class Companions : BaseScript
     {
-        private static readonly string FlagDecor = "POCCE_COMPANION_FLAG";
-        private static readonly string PlayerDecor = "POCCE_COMPANION_PLAYER";
+        private const string FlagDecor = "POCCE_COMPANION_FLAG";
+        private const string PlayerDecor = "POCCE_COMPANION_PLAYER";
 
         public Companions()
         {
