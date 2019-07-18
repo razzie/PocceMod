@@ -104,7 +104,7 @@ namespace PocceMod.Client
         {
             position = API.GetGameplayCamCoords();
             var rot = API.GetGameplayCamRot(2);
-            var forward = RotationToDirection(rot) * 10f;
+            var forward = RotationToDirection(rot) * distance;
             target = position + forward;
         }
 
