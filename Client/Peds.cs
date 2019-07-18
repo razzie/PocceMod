@@ -20,7 +20,7 @@ namespace PocceMod.Client
 
         public const Filter DefaultFilters = Filter.Dead;
 
-        public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 1600.0f)
+        public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 1600f)
         {
             var peds = new List<int>();
             int ped = 0;
@@ -80,11 +80,11 @@ namespace PocceMod.Client
             {
                 pos.X = coords.X;
                 pos.Y = coords.Y;
-                pos.Z = coords.Z + 1.0f;
+                pos.Z = coords.Z + 1f;
             }
 
             await Common.RequestModel(model);
-            return API.CreatePed(pedType, model, pos.X, pos.Y, pos.Z, 0.0f, true, false);
+            return API.CreatePed(pedType, model, pos.X, pos.Y, pos.Z, 0f, true, false);
         }
 
         public static void GiveWeapon(int ped, uint weapon)

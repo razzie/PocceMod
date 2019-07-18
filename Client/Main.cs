@@ -283,7 +283,7 @@ namespace PocceMod.Client
             foreach (var ped in peds)
             {
                 var pos = API.GetEntityCoords(ped, true);
-                if (coords.DistanceToSquared(pos) < 4.0f)
+                if (coords.DistanceToSquared(pos) < 4f)
                 {
                     var model = string.Format("0x{0:X8}", API.GetEntityModel(ped));
                     models.Add(model);

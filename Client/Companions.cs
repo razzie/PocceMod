@@ -144,7 +144,7 @@ namespace PocceMod.Client
                 }
 
                 var seat = seats.Dequeue();
-                API.TaskEnterVehicle(companion, vehicle, -1, seat, 2.0f, 1, 0);
+                API.TaskEnterVehicle(companion, vehicle, -1, seat, 2f, 1, 0);
             }
         }
 
@@ -165,7 +165,7 @@ namespace PocceMod.Client
                     else
                         API.TaskLeaveVehicle(companion, vehicle, 4096);
                 }
-                else if (pos.DistanceToSquared(coords) > 25.0f)
+                else if (pos.DistanceToSquared(coords) > 25f)
                 {
                     if (API.IsPedActiveInScenario(companion))
                     {
@@ -173,7 +173,7 @@ namespace PocceMod.Client
                         API.ClearPedTasksImmediately(companion);
                     }
 
-                    API.TaskGoToEntity(companion, player, -1, 5.0f, 2.0f, 0, 0);
+                    API.TaskGoToEntity(companion, player, -1, 5f, 2f, 0, 0);
                 }
                 else if (API.IsPedHuman(companion))
                 {

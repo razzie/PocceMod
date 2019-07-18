@@ -64,7 +64,7 @@ namespace PocceMod.Client
             if (adjust)
             {
                 var adjustedWp = Vector3.Zero;
-                if (API.GetClosestVehicleNode(wp.X, wp.Y, wp.Z, ref adjustedWp, 1, 100.0f, 2.5f))
+                if (API.GetClosestVehicleNode(wp.X, wp.Y, wp.Z, ref adjustedWp, 1, 100f, 2.5f))
                     wp = adjustedWp;
             }
 

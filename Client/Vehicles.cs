@@ -23,7 +23,7 @@ namespace PocceMod.Client
             EventHandlers["PocceMod:EMP"] += new Action<int>(entity => EMP(API.NetToVeh(entity)));
         }
 
-        public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 3600.0f)
+        public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 3600f)
         {
             var vehicles = new List<int>();
             int vehicle = 0;
@@ -137,16 +137,16 @@ namespace PocceMod.Client
             }
 
             await Common.RequestModel(hash);
-            var vehicle = API.CreateVehicle(hash, pos.X, pos.Y, pos.Z + 1.0f, API.GetEntityHeading(player), true, false);
+            var vehicle = API.CreateVehicle(hash, pos.X, pos.Y, pos.Z + 1f, API.GetEntityHeading(player), true, false);
             API.SetPedIntoVehicle(player, vehicle, -1);
 
-            if (API.IsThisModelAHeli(hash) && API.GetEntityHeightAboveGround(vehicle) > 10.0f)
+            if (API.IsThisModelAHeli(hash) && API.GetEntityHeightAboveGround(vehicle) > 10f)
                 API.SetHeliBladesFullSpeed(vehicle);
 
             return vehicle;
         }
 
-        public static void EMP(float rangeSquared = 900.0f)
+        public static void EMP(float rangeSquared = 900f)
         {
             API.StartScreenEffect("RaceTurbo", 500, false);
 
@@ -164,9 +164,9 @@ namespace PocceMod.Client
         {
             var model = (uint)API.GetEntityModel(vehicle);
             if (API.IsThisModelAHeli(model) || API.IsThisModelAPlane(model))
-                API.SetVehicleEngineHealth(vehicle, 1.0f);
+                API.SetVehicleEngineHealth(vehicle, 1f);
             else
-                API.SetVehicleEngineHealth(vehicle, 0.0f);
+                API.SetVehicleEngineHealth(vehicle, 0f);
             
             API.SetVehicleLights(vehicle, 1);
         }

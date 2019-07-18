@@ -28,7 +28,7 @@ namespace PocceMod.Client
             Tick += Update;
         }
 
-        public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 3600.0f)
+        public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 3600f)
         {
             var props = new List<int>();
             int prop = 0;
@@ -119,7 +119,7 @@ namespace PocceMod.Client
             var headingRad = (Math.PI / 180) * heading;
 
             await Common.RequestModel(model);
-            var prop = API.CreateObject((int)model, pos.X - (float)Math.Sin(headingRad), pos.Y + (float)Math.Cos(headingRad), pos.Z - 1.0f, true, false, true);
+            var prop = API.CreateObject((int)model, pos.X - (float)Math.Sin(headingRad), pos.Y + (float)Math.Cos(headingRad), pos.Z - 1f, true, false, true);
             _props.Add(prop);
 
             API.SetEntityHeading(prop, -heading);
@@ -149,10 +149,10 @@ namespace PocceMod.Client
             var prop = API.CreateObject((int)model, pos.X, pos.Y, pos.Z + entityMax.Z - propMin.Z, true, false, true);
             _props.Add(prop);
 
-            if (!API.DoesEntityHavePhysics(prop) || propMax.Z - propMin.Z > 3.0f) // large objects glitch too much
-                API.AttachEntityToEntity(prop, entity, 0, 0.0f, 0.0f, -propMin.Z, 0.0f, 0.0f, 0.0f, false, false, false, false, 0, true);
+            if (!API.DoesEntityHavePhysics(prop) || propMax.Z - propMin.Z > 3f) // large objects glitch too much
+                API.AttachEntityToEntity(prop, entity, 0, 0f, 0f, -propMin.Z, 0f, 0f, 0f, false, false, false, false, 0, true);
             else
-                API.AttachEntityToEntityPhysically(prop, entity, 0, 0, 0.0f, 0.0f, entityMax.Z, 0.0f, 0.0f, propMin.Z, 0.0f, 0.0f, 0.0f, 100.0f, true, false, true, true, 2);
+                API.AttachEntityToEntityPhysically(prop, entity, 0, 0, 0f, 0f, entityMax.Z, 0f, 0f, propMin.Z, 0f, 0f, 0f, 100f, true, false, true, true, 2);
 
             API.ActivatePhysics(prop);
             API.DecorSetBool(prop, PropDecor, true);

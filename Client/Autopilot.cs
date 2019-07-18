@@ -150,7 +150,7 @@ namespace PocceMod.Client
             if (API.AnyPassengersRappeling(vehicle))
             {
                 var coords = API.GetEntityCoords(vehicle, false);
-                API.TaskHeliMission(driver, vehicle, 0, 0, coords.X, coords.Y, coords.Z, 4, 0.0f, 5.0f, API.GetEntityHeading(vehicle), -1, -1, 0, 0);
+                API.TaskHeliMission(driver, vehicle, 0, 0, coords.X, coords.Y, coords.Z, 4, 0f, 5f, API.GetEntityHeading(vehicle), -1, -1, 0, 0);
                 API.DecorSetInt(driver, WaypointHashDecor, 0);
                 return Delay(1000);
             }
@@ -194,7 +194,7 @@ namespace PocceMod.Client
             {
                 var speed = API.GetVehicleModelMaxSpeed(vehicleModel);
                 var heading = GetHeading(vehicle, wp);
-                API.TaskHeliMission(driver, vehicle, 0, 0, wp.X, wp.Y, wp.Z, 4, speed, 5.0f, heading, -1, -1, 0, 32);
+                API.TaskHeliMission(driver, vehicle, 0, 0, wp.X, wp.Y, wp.Z, 4, speed, 5f, heading, -1, -1, 0, 32);
             }
             else
             {
@@ -216,7 +216,7 @@ namespace PocceMod.Client
                 var speed = API.GetVehicleModelMaxSpeed(vehicleModel);
                 var heading = API.GetEntityHeading(vehicle);
                 var pos = API.GetEntityCoords(vehicle, false);
-                API.TaskHeliMission(driver, vehicle, 0, 0, pos.X, pos.Y, pos.Z, 4, speed, 5.0f, heading, -1, -1, 0, 0);
+                API.TaskHeliMission(driver, vehicle, 0, 0, pos.X, pos.Y, pos.Z, 4, speed, 5f, heading, -1, -1, 0, 0);
             }
             else
             {
