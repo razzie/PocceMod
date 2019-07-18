@@ -245,7 +245,7 @@ namespace PocceMod.Client
                 else if (Permission.CanDo(Ability.RopeGunStaticObjects))
                 {
                     player = GetPlayerEntity();
-                    Common.GetAimCoords(out Vector3 rayBegin, out Vector3 rayEnd, 50f);
+                    Common.GetAimCoords(out Vector3 rayBegin, out Vector3 rayEnd, 128f);
                     var ray = API.CastRayPointToPoint(rayBegin.X, rayBegin.Y, rayBegin.Z, rayEnd.X, rayEnd.Y, rayEnd.Z, -1, player, 0);
 
                     bool hit = false;
