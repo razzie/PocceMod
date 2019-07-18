@@ -11,6 +11,7 @@
         Rope,
         RopeOtherPlayer,
         RopeGun,
+        RopeGunStaticObjects,
         RappelFromHeli,
         TeleportToClosestVehicle,
         OceanWaves,

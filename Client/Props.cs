@@ -92,6 +92,24 @@ namespace PocceMod.Client
             }
         }
 
+        public static async Task<int> SpawnAtCoords(string model, Vector3 coords, Vector3 rotation)
+        {
+            var hash = (uint)API.GetHashKey(model);
+            if (!API.IsModelValid(hash))
+            {
+                Hud.Notification(string.Format("Invalid model hash: 0x{0:X8} ({1})", hash, model));
+                return -1;
+            }
+
+            await Common.RequestModel(hash);
+            var prop = API.CreateObject((int)hash, coords.X, coords.Y, coords.Z, true, false, false);
+            _props.Add(prop);
+
+            API.SetEntityRotation(prop, rotation.X, rotation.Y, rotation.Z, 0, true);
+            API.DecorSetBool(prop, PropDecor, true);
+            return prop;
+        }
+
         private static async Task<int> SpawnInFrontOfPed(int ped, uint model)
         {
             var pedModel = (uint)API.GetEntityModel(ped);

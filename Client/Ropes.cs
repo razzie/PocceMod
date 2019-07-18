@@ -32,14 +32,11 @@ namespace PocceMod.Client
 
             public void Update(ref int entity1, ref int entity2, out bool clearLast)
             {
+                clearLast = false;
+
                 var player = GetPlayerEntity();
                 if (entity1 != player && entity2 != player)
-                {
-                    clearLast = false;
                     return;
-                }
-
-                clearLast = (_lastRopegunEntity1 == player || _lastRopegunEntity2 == player);
 
                 if (_ropegunFirstUse)
                 {
@@ -50,6 +47,8 @@ namespace PocceMod.Client
                 var timestamp = DateTime.Now;
                 if (_lastRopegunEntity1 != -1 && _lastRopegunEntity2 != -1 && (timestamp - _lastRopegunFire) < TimeSpan.FromSeconds(2f))
                 {
+                    clearLast = (_lastRopegunEntity1 == player || _lastRopegunEntity2 == player);
+
                     if (entity1 == player)
                         entity1 = _lastRopegunEntity2;
                     else
@@ -231,17 +230,38 @@ namespace PocceMod.Client
             if (!API.IsPlayerFreeAiming(playerID))
                 return;
 
-            int target = 0;
-            if (!API.GetEntityPlayerIsFreeAimingAt(playerID, ref target))
-                return;
-
-            if (API.IsEntityAPed(target) && API.IsPedInAnyVehicle(target, false))
-                target = API.GetVehiclePedIsIn(target, false);
-
             var attackControl = API.IsPedInAnyVehicle(player, false) ? 69 : 24;  // vehicle attack; attack
             if (API.IsControlJustPressed(0, attackControl))
             {
-                PlayerAttach(target, Mode.Ropegun);
+                int target = 0;
+                if (API.GetEntityPlayerIsFreeAimingAt(playerID, ref target) &&
+                    (API.IsEntityAPed(target) || API.IsEntityAVehicle(target) || API.DoesEntityBelongToThisScript(target, true)))
+                {
+                    if (API.IsEntityAPed(target) && API.IsPedInAnyVehicle(target, false))
+                        target = API.GetVehiclePedIsIn(target, false);
+
+                    PlayerAttach(target, Mode.Ropegun);
+                }
+                else if (Permission.CanDo(Ability.RopeGunStaticObjects))
+                {
+                    player = GetPlayerEntity();
+                    Common.GetAimCoords(out Vector3 rayBegin, out Vector3 rayEnd, 50f);
+                    var ray = API.CastRayPointToPoint(rayBegin.X, rayBegin.Y, rayBegin.Z, rayEnd.X, rayEnd.Y, rayEnd.Z, -1, player, 0);
+
+                    bool hit = false;
+                    var endCoords = Vector3.Zero;
+                    var surfaceNormal = Vector3.Zero;
+                    int entityHit = -1;
+                    API.GetRaycastResult(ray, ref hit, ref endCoords, ref surfaceNormal, ref entityHit);
+
+                    if (hit)
+                    {
+                        var prop = await Props.SpawnAtCoords("prop_devin_rope_01", endCoords, surfaceNormal);
+                        API.FreezeEntityPosition(prop, true);
+                        PlayerAttach(prop, Mode.Ropegun);
+                        API.SetEntityAsNoLongerNeeded(ref prop);
+                    }
+                }
             }
         }
     }

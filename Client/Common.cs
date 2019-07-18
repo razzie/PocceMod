@@ -45,6 +45,13 @@ namespace PocceMod.Client
             return found;
         }
 
+        public static bool IsEntityInRangeSquared(int entity, float rangeSquared)
+        {
+            var playerPos = API.GetEntityCoords(API.GetPlayerPed(-1), true);
+            var entityPos = API.GetEntityCoords(entity, false);
+            return playerPos.DistanceToSquared(entityPos) <= rangeSquared;
+        }
+
         public static bool GetWaypoint(out Vector3 wp, bool adjust = true)
         {
             wp = Vector3.Zero;
@@ -87,6 +94,27 @@ namespace PocceMod.Client
         public static void Burn(int entity)
         {
             TriggerServerEvent("PocceMod:Burn", API.ObjToNet(entity));
+        }
+
+        public static void GetAimCoords(out Vector3 position, out Vector3 target, float distance)
+        {
+            position = API.GetGameplayCamCoords();
+            var rot = API.GetGameplayCamRot(2);
+            var forward = RotationToDirection(rot) * 10f;
+            target = position + forward;
+        }
+
+        public static Vector3 RotationToDirection(Vector3 rot)
+        {
+            float radiansZ = rot.Z * 0.0174532924f;
+            float radiansX = rot.X * 0.0174532924f;
+            float num = Math.Abs((float)Math.Cos(radiansX));
+            return new Vector3
+            {
+                X = -(float)Math.Sin(radiansZ) * num,
+                Y = (float)Math.Cos(radiansZ) * num,
+                Z = (float)Math.Sin(radiansX)
+            };
         }
     }
 }
