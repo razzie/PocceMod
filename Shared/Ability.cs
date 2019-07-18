@@ -23,6 +23,7 @@
         EMP,
         EMPOtherPlayer,
         CargobobMagnet,
+        UltrabrightHeadlight,
         IdentifySkins,
         ChangeSkin
     }

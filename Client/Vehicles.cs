@@ -17,10 +17,15 @@ namespace PocceMod.Client
         }
 
         public const Filter DefaultFilters = Filter.PlayerVehicle;
+        private const string LightMultiplierDecor = "POCCE_VEHICLE_LIGHT_MULTIPLIER";
 
         public Vehicles()
         {
+            API.DecorRegister(LightMultiplierDecor, 1);
+
             EventHandlers["PocceMod:EMP"] += new Action<int>(entity => EMP(API.NetToVeh(entity)));
+
+            Tick += Update;
         }
 
         public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 3600f)
@@ -169,6 +174,53 @@ namespace PocceMod.Client
                 API.SetVehicleEngineHealth(vehicle, 0f);
             
             API.SetVehicleLights(vehicle, 1);
+        }
+
+        public static void EnableUltrabrightHeadlight(int vehicle)
+        {
+            if (!API.IsEntityAVehicle(vehicle))
+                return;
+
+            if (!API.DecorExistOn(vehicle, LightMultiplierDecor))
+                API.DecorSetFloat(vehicle, LightMultiplierDecor, 1f);
+        }
+
+        private static float GetLightMultiplier(int vehicle)
+        {
+            if (!API.DecorExistOn(vehicle, LightMultiplierDecor))
+                return 1f;
+
+            return API.DecorGetFloat(vehicle, LightMultiplierDecor);
+        }
+
+        private static void SetLightMultiplier(int vehicle, float multiplier)
+        {
+            if (multiplier < 0.25f)
+                multiplier = 0.25f;
+
+            API.DecorSetFloat(vehicle, LightMultiplierDecor, multiplier);
+            API.SetVehicleLightMultiplier(vehicle, multiplier);
+        }
+
+        private static Task Update()
+        {
+            var player = API.GetPlayerPed(-1);
+            if (!API.IsPedInAnyVehicle(player, false))
+                return Delay(1000);
+
+            var vehicle = API.GetVehiclePedIsIn(player, false);
+            if (API.GetPedInVehicleSeat(vehicle, -1) != player)
+                return Delay(1000);
+
+            if (API.DecorExistOn(vehicle, LightMultiplierDecor))
+            {
+                if (API.IsControlPressed(0, 172)) // up
+                    SetLightMultiplier(vehicle, GetLightMultiplier(vehicle) + 0.1f);
+                else if (API.IsControlPressed(0, 173)) // down
+                    SetLightMultiplier(vehicle, GetLightMultiplier(vehicle) - 0.1f);
+            }
+
+            return Delay(0);
         }
     }
 }

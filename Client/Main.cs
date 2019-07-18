@@ -103,6 +103,9 @@ namespace PocceMod.Client
             if (Permission.CanDo(Ability.CargobobMagnet))
                 Hud.AddMenuListItem("Other", "Cargobob magnet", () => CargobobMagnet());
 
+            if (Permission.CanDo(Ability.UltrabrightHeadlight))
+                Hud.AddMenuListItem("Other", "Ultrabright headlight", () => UltrabrightHeadlight());
+
             if (Permission.CanDo(Ability.IdentifySkins))
             {
                 if (Permission.CanDo(Ability.ChangeSkin))
@@ -330,6 +333,20 @@ namespace PocceMod.Client
                     API.SetCargobobPickupMagnetActive(heli, true);
                 }
             }
+        }
+
+        public static void UltrabrightHeadlight()
+        {
+            var player = API.GetPlayerPed(-1);
+            if (!API.IsPedInAnyVehicle(player, true))
+            {
+                Hud.Notification("Player is not in a vehicle");
+                return;
+            }
+
+            var vehicle = API.GetVehiclePedIsIn(player, false);
+            Vehicles.EnableUltrabrightHeadlight(vehicle);
+            Hud.Notification("Use arrow up/down keys to change brightness");
         }
 
         public static void RappelFromHeli()
