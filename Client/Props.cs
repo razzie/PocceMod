@@ -186,13 +186,13 @@ namespace PocceMod.Client
                 return Delay(1000);
 
             var player = API.GetPlayerPed(-1);
-            var coords = API.GetEntityCoords(player, true);
+            var coords = (Vector2)API.GetEntityCoords(player, true);
 
             var prop = _props[_props.Count - 1];
             var pos = API.GetEntityCoords(prop, false);
             var rotation = API.GetEntityRotation(prop, 0);
 
-            if (coords.DistanceToSquared(pos) < 100f)
+            if (Vector2.DistanceSquared(coords, (Vector2)pos) < 100f)
             {
                 if (API.IsControlPressed(0, 172)) // up
                     API.SetEntityCoords(prop, pos.X, pos.Y, pos.Z + 0.01f, false, false, true, false);
