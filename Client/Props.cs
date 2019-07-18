@@ -77,6 +77,7 @@ namespace PocceMod.Client
 
             if (_firstSpawn)
             {
+                Hud.Notification("First time spawning prop, yay! Try /prop [search] command for filtered props");
                 Hud.Notification("Use the arrow keys to correct the position of the prop");
                 _firstSpawn = false;
             }
