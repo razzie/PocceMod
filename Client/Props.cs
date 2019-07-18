@@ -10,6 +10,7 @@ namespace PocceMod.Client
     {
         private const string PropDecor = "POCCE_PROP";
         private static readonly List<int> _props = new List<int>();
+        private static bool _firstSpawn = true;
 
         [Flags]
         public enum Filter
@@ -23,6 +24,8 @@ namespace PocceMod.Client
         public Props()
         {
             API.DecorRegister(PropDecor, 2);
+
+            Tick += Update;
         }
 
         public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 3600.0f)
@@ -71,7 +74,13 @@ namespace PocceMod.Client
                 Hud.Notification(string.Format("Invalid model hash: 0x{0:X8} ({1})", hash, model));
                 return Task.FromResult(-1);
             }
-            
+
+            if (_firstSpawn)
+            {
+                Hud.Notification("Use the arrow keys to correct the position of the prop");
+                _firstSpawn = false;
+            }
+
             if (API.IsPedInAnyVehicle(player, false))
             {
                 var vehicle = API.GetVehiclePedIsIn(player, false);
@@ -150,6 +159,36 @@ namespace PocceMod.Client
             var prop = _props[_props.Count - 1];
             API.DeleteObject(ref prop);
             _props.RemoveAt(_props.Count - 1);
+        }
+
+        private static Task Update()
+        {
+            if (_props.Count == 0)
+                return Delay(1000);
+
+            var player = API.GetPlayerPed(-1);
+            var coords = API.GetEntityCoords(player, true);
+
+            var prop = _props[_props.Count - 1];
+            var pos = API.GetEntityCoords(prop, false);
+            var rotation = API.GetEntityRotation(prop, 0);
+
+            if (coords.DistanceToSquared(pos) < 100f)
+            {
+                if (API.IsControlPressed(0, 172)) // up
+                    API.SetEntityCoords(prop, pos.X, pos.Y, pos.Z + 0.01f, false, false, true, false);
+                else if (API.IsControlPressed(0, 173)) // down
+                    API.SetEntityCoords(prop, pos.X, pos.Y, pos.Z - 0.01f, false, false, true, false);
+
+                if (API.IsControlPressed(0, 174)) // left
+                    API.SetEntityRotation(prop, rotation.X, rotation.Y, rotation.Z + 1f, 0, true);
+                else if (API.IsControlPressed(0, 175)) // right
+                    API.SetEntityRotation(prop, rotation.X, rotation.Y, rotation.Z - 1f, 0, true);
+
+                return Delay(0);
+            }
+
+            return Delay(1000);
         }
     }
 }
