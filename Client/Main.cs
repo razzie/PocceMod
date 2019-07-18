@@ -17,8 +17,6 @@ namespace PocceMod.Client
             {
                 API.StartEntityFire(await Common.WaitForNetEntity(entity));
             });
-
-            API.RegisterCommand("prop", new Action<int, List<object>, string>(Prop), false);
         }
 
         private static void SetupMenu()
@@ -27,7 +25,10 @@ namespace PocceMod.Client
                 Hud.AddSubmenu("Spawn vehicle", async (vehicle) => await Vehicles.Spawn(vehicle), Config.VehicleList);
 
             if (Permission.CanDo(Ability.SpawnProp))
+            {
                 Hud.AddSubmenu("Spawn prop", async (prop) => await Props.Spawn(prop), Config.PropList, 10);
+                API.RegisterCommand("prop", new Action<int, List<object>, string>(PropCmd), false);
+            }
 
             if (Permission.CanDo(Ability.SpawnPocceCompanion))
                 Hud.AddMenuListItem("Spawn ped", "Pocce companion", PocceCompanion);
@@ -361,7 +362,7 @@ namespace PocceMod.Client
             }
         }
 
-        private static void Prop(int source, List<object> args, string raw)
+        private static void PropCmd(int source, List<object> args, string raw)
         {
             if (args.Count == 0)
                 return;
