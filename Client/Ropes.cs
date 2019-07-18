@@ -14,7 +14,8 @@ namespace PocceMod.Client
         {
             Normal = 0,
             Tow = 1,
-            Ropegun = 2
+            Ropegun = 2,
+            Grapple = 4
         }
 
         private class RopegunState
@@ -70,18 +71,26 @@ namespace PocceMod.Client
         }
 
         private const uint Ropegun = 0x44AE7910; // WEAPON_POCCE_ROPEGUN
+        private static readonly int RopegunWindKey;
         private static readonly Dictionary<int, List<int>> _ropes = new Dictionary<int, List<int>>();
+        private static readonly List<int> _windingRopes = new List<int>();
         private static readonly RopegunState _ropegunState = new RopegunState();
+
+        static Ropes()
+        {
+            RopegunWindKey = Config.GetConfigInt("RopegunWindKey");
+        }
 
         public Ropes()
         {
-            EventHandlers["PocceMod:AddRope"] += new Func<int, int, int, bool, Task>(AddRope);
+            EventHandlers["PocceMod:AddRope"] += new Func<int, int, int, int, Task>(AddRope);
             EventHandlers["PocceMod:ClearRopes"] += new Action<int>(ClearRopes);
             EventHandlers["PocceMod:ClearLastRope"] += new Action<int>(ClearLastRope);
 
             API.AddTextEntryByHash(0x6FCC4E8A, "Pocce Ropegun"); // WT_POCCE_ROPEGUN
 
             Tick += Update;
+            Tick += RopeWindUpdate;
         }
 
         private static int GetPlayerEntity()
@@ -115,7 +124,7 @@ namespace PocceMod.Client
             return pos;
         }
 
-        private static async Task AddRope(int player, int entity1, int entity2, bool tow)
+        private static async Task AddRope(int player, int entity1, int entity2, int mode)
         {
             if (entity1 == entity2)
                 return;
@@ -123,6 +132,7 @@ namespace PocceMod.Client
             entity1 = await Common.WaitForNetEntity(entity1);
             entity2 = await Common.WaitForNetEntity(entity2);
 
+            bool tow = ((Mode)mode & Mode.Tow) == Mode.Tow;
             var pos1 = tow ? GetAdjustedPosition(entity1, -0.75f) : API.GetEntityCoords(entity1, API.IsEntityAPed(entity1));
             var pos2 = tow ? GetAdjustedPosition(entity2, 0.75f) : API.GetEntityCoords(entity2, API.IsEntityAPed(entity2));
             var length = (float)Math.Sqrt(pos1.DistanceToSquared(pos2));
@@ -135,6 +145,12 @@ namespace PocceMod.Client
                 playerRopes.Add(rope);
             else
                 _ropes.Add(player, new List<int> { rope });
+
+            if (((Mode)mode & Mode.Grapple) == Mode.Grapple)
+            {
+                API.StartRopeWinding(rope);
+                _windingRopes.Add(rope);
+            }
 
             if (!API.RopeAreTexturesLoaded())
                 API.RopeLoadTextures();
@@ -199,7 +215,7 @@ namespace PocceMod.Client
             if (entity1 == entity2)
                 return;
 
-            TriggerServerEvent("PocceMod:AddRope", API.ObjToNet(entity1), API.ObjToNet(entity2), (mode & Mode.Tow) == Mode.Tow);
+            TriggerServerEvent("PocceMod:AddRope", API.ObjToNet(entity1), API.ObjToNet(entity2), (int)mode);
         }
 
         public static void ClearAll()
@@ -230,9 +246,11 @@ namespace PocceMod.Client
             if (!API.IsPlayerFreeAiming(playerID))
                 return;
 
-            var attackControl = API.IsPedInAnyVehicle(player, false) ? 69 : 24;  // vehicle attack; attack
+            var attackControl = API.IsPedInAnyVehicle(player, false) ? 69 : 24;  // INPUT_VEH_ATTACK; INPUT_ATTACK
             if (API.IsControlJustPressed(0, attackControl))
             {
+                Mode mode = (RopegunWindKey > 0 && API.IsControlPressed(0, RopegunWindKey)) ? Mode.Ropegun | Mode.Grapple : Mode.Ropegun;
+
                 int target = 0;
                 if (API.GetEntityPlayerIsFreeAimingAt(playerID, ref target) &&
                     (API.IsEntityAPed(target) || API.IsEntityAVehicle(target) || API.DoesEntityBelongToThisScript(target, true)))
@@ -240,7 +258,7 @@ namespace PocceMod.Client
                     if (API.IsEntityAPed(target) && API.IsPedInAnyVehicle(target, false))
                         target = API.GetVehiclePedIsIn(target, false);
 
-                    PlayerAttach(target, Mode.Ropegun);
+                    PlayerAttach(target, mode);
                 }
                 else if (Permission.CanDo(Ability.RopeGunStaticObjects))
                 {
@@ -258,10 +276,32 @@ namespace PocceMod.Client
                     {
                         var prop = await Props.SpawnAtCoords("prop_devin_rope_01", endCoords, surfaceNormal);
                         API.FreezeEntityPosition(prop, true);
-                        PlayerAttach(prop, Mode.Ropegun);
+                        PlayerAttach(prop, mode);
                         API.SetEntityAsNoLongerNeeded(ref prop);
                     }
                 }
+            }
+        }
+
+        private static async Task RopeWindUpdate()
+        {
+            await Delay(10);
+
+            if (_windingRopes.Count == 0)
+                return;
+
+            foreach (var rope in _windingRopes.ToArray())
+            {
+                int tmp_rope = rope;
+                if (!API.DoesRopeExist(ref tmp_rope))
+                {
+                    _windingRopes.Remove(rope);
+                    continue;
+                }
+
+                var length = API.GetRopeLength(rope);
+                if (length > 1f)
+                    API.RopeForceLength(rope, length - 0.2f);
             }
         }
     }
