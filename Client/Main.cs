@@ -13,6 +13,11 @@ namespace PocceMod.Client
         {
             Permission.Granted += (player, group) => SetupMenu();
 
+            EventHandlers["PocceMod:Burn"] += new Action<int>(async entity =>
+            {
+                API.StartEntityFire(await Common.WaitForNetEntity(entity));
+            });
+
             API.RegisterCommand("prop", new Action<int, List<object>, string>(Prop), false);
         }
 
@@ -121,8 +126,7 @@ namespace PocceMod.Client
         public static async Task SpawnTrashPed()
         {
             var ped = await Peds.Spawn(Config.TrashPedList);
-            await Delay(500);
-            Common.Burn(ped);
+            TriggerServerEvent("PocceMod:Burn", API.PedToNet(ped));
             API.SetEntityAsNoLongerNeeded(ref ped);
         }
 

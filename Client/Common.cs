@@ -6,19 +6,14 @@ using System.Threading.Tasks;
 
 namespace PocceMod.Client
 {
-    public class Common : BaseScript
+    public static class Common
     {
-        public Common()
-        {
-            EventHandlers["PocceMod:Burn"] += new Action<int>(entity => API.StartEntityFire(API.NetToEnt(entity)));
-        }
-
         public static async Task RequestModel(uint model)
         {
             while (!API.HasModelLoaded(model))
             {
                 API.RequestModel(model);
-                await Delay(10);
+                await BaseScript.Delay(10);
             }
         }
 
@@ -29,7 +24,7 @@ namespace PocceMod.Client
 
             while (!API.DoesEntityExist(entity) && DateTime.Now < timeout)
             {
-                await Delay(100);
+                await BaseScript.Delay(100);
                 entity = API.NetToEnt(netEntity);
             }
 
@@ -103,11 +98,6 @@ namespace PocceMod.Client
 
             API.EndFindObject(handle);
             return objs;
-        }
-
-        public static void Burn(int entity)
-        {
-            TriggerServerEvent("PocceMod:Burn", API.ObjToNet(entity));
         }
 
         public static void GetAimCoords(out Vector3 position, out Vector3 target, float distance)
