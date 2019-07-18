@@ -95,16 +95,16 @@ namespace PocceMod.Client
                 Hud.AddMenuListItem("Riot", "Armed ped riot", async () => await PedRiot(true));
 
             if (Permission.CanDo(Ability.Autopilot))
-                Hud.AddMenuListItem("Other", "Autopilot", Autopilot.Toggle);
+                Hud.AddMenuListItem("Vehicle", "Autopilot", Autopilot.Toggle);
 
             if (Permission.CanDo(Ability.EMP))
-                Hud.AddMenuListItem("Other", "EMP", () => Vehicles.EMP());
+                Hud.AddMenuListItem("Vehicle", "EMP", () => Vehicles.EMP());
 
             if (Permission.CanDo(Ability.CargobobMagnet))
-                Hud.AddMenuListItem("Other", "Cargobob magnet", () => CargobobMagnet());
+                Hud.AddMenuListItem("Vehicle", "Cargobob magnet", () => CargobobMagnet());
 
             if (Permission.CanDo(Ability.UltrabrightHeadlight))
-                Hud.AddMenuListItem("Other", "Ultrabright headlight", () => UltrabrightHeadlight());
+                Hud.AddMenuListItem("Vehicle", "Ultrabright headlight", () => UltrabrightHeadlight());
 
             if (Permission.CanDo(Ability.IdentifySkins))
             {
