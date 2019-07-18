@@ -18,12 +18,15 @@ namespace PocceMod.Client
 
         public const Filter DefaultFilters = Filter.PlayerVehicle;
         private const string LightMultiplierDecor = "POCCE_VEHICLE_LIGHT_MULTIPLIER";
+        private const string AutoHazardLightDecor = "POCCE_AUTO_HAZARD_LIGHT";
 
         public Vehicles()
         {
             API.DecorRegister(LightMultiplierDecor, 1);
+            API.DecorRegister(AutoHazardLightDecor, 2);
 
-            EventHandlers["PocceMod:EMP"] += new Action<int>(entity => EMP(API.NetToVeh(entity)));
+            EventHandlers["PocceMod:EMP"] += new Action<int>(vehicle => EMP(API.NetToVeh(vehicle)));
+            EventHandlers["PocceMod:SetIndicator"] += new Action<int, int>((vehicle, state) => SetIndicator(API.NetToVeh(vehicle), state));
 
             Tick += Update;
         }
@@ -202,25 +205,83 @@ namespace PocceMod.Client
             API.SetVehicleLightMultiplier(vehicle, multiplier);
         }
 
+        private static void SetIndicator(int vehicle, int state)
+        {
+            switch (state)
+            {
+                case 0:
+                    API.SetVehicleIndicatorLights(vehicle, 0, false);
+                    API.SetVehicleIndicatorLights(vehicle, 1, false);
+                    break;
+
+                case 1:
+                    API.SetVehicleIndicatorLights(vehicle, 0, false);
+                    API.SetVehicleIndicatorLights(vehicle, 1, true);
+                    break;
+
+                case 2:
+                    API.SetVehicleIndicatorLights(vehicle, 0, true);
+                    API.SetVehicleIndicatorLights(vehicle, 1, false);
+                    break;
+
+                case 3:
+                    API.SetVehicleIndicatorLights(vehicle, 0, true);
+                    API.SetVehicleIndicatorLights(vehicle, 1, true);
+                    break;
+            }
+        }
+
         private static Task Update()
         {
             var player = API.GetPlayerPed(-1);
             if (!API.IsPedInAnyVehicle(player, false))
+            {
+                var lastVehicle = API.GetVehiclePedIsIn(player, true);
+                if (API.GetEntitySpeed(lastVehicle) > 1f && !API.DecorGetBool(lastVehicle, AutoHazardLightDecor))
+                {
+                    API.DecorSetBool(lastVehicle, AutoHazardLightDecor, true);
+                    TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(lastVehicle), 3);
+                }
+
                 return Delay(1000);
+            }
 
             var vehicle = API.GetVehiclePedIsIn(player, false);
             if (API.GetPedInVehicleSeat(vehicle, -1) != player)
                 return Delay(1000);
 
+            if (API.IsEntityUpsidedown(vehicle) ||
+                (API.IsEntityInAir(vehicle) && !API.IsPedInFlyingVehicle(player)) ||
+                (API.IsEntityInWater(vehicle) && !API.IsPedInAnyBoat(player)) ||
+                API.IsEntityOnFire(vehicle))
+            {
+                if (API.GetVehicleIndicatorLights(vehicle) != 3)
+                {
+                    API.DecorSetBool(vehicle, AutoHazardLightDecor, true);
+                    TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(vehicle), 3);
+                }
+            }
+            else if (API.DecorGetBool(vehicle, AutoHazardLightDecor))
+            {
+                API.DecorSetBool(vehicle, AutoHazardLightDecor, false);
+                TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(vehicle), 0);
+            }
+
             if (API.DecorExistOn(vehicle, LightMultiplierDecor))
             {
                 if (API.IsControlPressed(0, 172)) // up
+                {
                     SetLightMultiplier(vehicle, GetLightMultiplier(vehicle) + 0.1f);
+                    return Delay(0);
+                }
                 else if (API.IsControlPressed(0, 173)) // down
+                {
                     SetLightMultiplier(vehicle, GetLightMultiplier(vehicle) - 0.1f);
+                    return Delay(0);
+                }
             }
 
-            return Delay(0);
+            return Delay(100);
         }
     }
 }

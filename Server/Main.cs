@@ -11,6 +11,7 @@ namespace PocceMod.Server
             EventHandlers["playerDropped"] += new Action<Player, string>(PlayerDropped);
             EventHandlers["PocceMod:Burn"] += new Action<Player, int>(Burn);
             EventHandlers["PocceMod:EMP"] += new Action<Player, int>(EMP);
+            EventHandlers["PocceMod:SetIndicator"] += new Action<Player, int, int>(SetIndicator);
             EventHandlers["PocceMod:AddRope"] += new Action<Player, int, int, int>(AddRope);
             EventHandlers["PocceMod:ClearRopes"] += new Action<Player>(ClearRopes);
             EventHandlers["PocceMod:ClearLastRope"] += new Action<Player>(ClearLastRope);
@@ -31,6 +32,11 @@ namespace PocceMod.Server
         {
             if (Permission.CanDo(source, Ability.EMPOtherPlayer))
                 TriggerClientEvent("PocceMod:EMP", vehicle);
+        }
+
+        private void SetIndicator([FromSource] Player source, int vehicle, int state)
+        {
+            TriggerClientEvent("PocceMod:SetIndicator", vehicle, state);
         }
 
         private void AddRope([FromSource] Player source, int entity1, int entity2, int mode)
