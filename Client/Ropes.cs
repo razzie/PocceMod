@@ -75,7 +75,7 @@ namespace PocceMod.Client
 
         public Ropes()
         {
-            EventHandlers["PocceMod:AddRope"] += new Action<int, int, int, bool>(AddRope);
+            EventHandlers["PocceMod:AddRope"] += new Func<int, int, int, bool, Task>(AddRope);
             EventHandlers["PocceMod:ClearRopes"] += new Action<int>(ClearRopes);
             EventHandlers["PocceMod:ClearLastRope"] += new Action<int>(ClearLastRope);
 
@@ -115,13 +115,13 @@ namespace PocceMod.Client
             return pos;
         }
 
-        private static void AddRope(int player, int entity1, int entity2, bool tow)
+        private static async Task AddRope(int player, int entity1, int entity2, bool tow)
         {
             if (entity1 == entity2)
                 return;
 
-            entity1 = API.NetToEnt(entity1);
-            entity2 = API.NetToEnt(entity2);
+            entity1 = await Common.WaitForNetEntity(entity1);
+            entity2 = await Common.WaitForNetEntity(entity2);
 
             var pos1 = tow ? GetAdjustedPosition(entity1, -0.75f) : API.GetEntityCoords(entity1, API.IsEntityAPed(entity1));
             var pos2 = tow ? GetAdjustedPosition(entity2, 0.75f) : API.GetEntityCoords(entity2, API.IsEntityAPed(entity2));

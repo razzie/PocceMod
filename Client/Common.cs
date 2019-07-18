@@ -22,6 +22,20 @@ namespace PocceMod.Client
             }
         }
 
+        public static async Task<int> WaitForNetEntity(int netEntity)
+        {
+            var timeout = DateTime.Now + TimeSpan.FromSeconds(2);
+            var entity = API.NetToEnt(netEntity);
+
+            while (!API.DoesEntityExist(entity) && DateTime.Now < timeout)
+            {
+                await Delay(100);
+                entity = API.NetToEnt(netEntity);
+            }
+
+            return entity;
+        }
+
         public static bool GetClosestEntity(IEnumerable<int> entities, out int closest)
         {
             closest = -1;
