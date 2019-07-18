@@ -9,8 +9,70 @@ namespace PocceMod.Client
 {
     public class Ropes : BaseScript
     {
+        [Flags]
+        public enum Mode
+        {
+            Normal = 0,
+            Tow = 1,
+            Ropegun = 2
+        }
+
+        private class RopegunState
+        {
+            private bool _ropegunFirstUse;
+            private int _lastRopegunEntity1;
+            private int _lastRopegunEntity2;
+            private DateTime _lastRopegunFire;
+
+            public RopegunState()
+            {
+                _ropegunFirstUse = true;
+                Clear();
+            }
+
+            public void Update(ref int entity1, ref int entity2, out bool clearLast)
+            {
+                var player = GetPlayerEntity();
+                if (entity1 != player && entity2 != player)
+                {
+                    clearLast = false;
+                    return;
+                }
+
+                clearLast = (_lastRopegunEntity1 == player || _lastRopegunEntity2 == player);
+
+                if (_ropegunFirstUse)
+                {
+                    Hud.Notification("First time using ropegun, yay! You can connect 2 entities in 2 seconds");
+                    _ropegunFirstUse = false;
+                }
+
+                var timestamp = DateTime.Now;
+                if (_lastRopegunEntity1 != -1 && _lastRopegunEntity2 != -1 && (timestamp - _lastRopegunFire) < TimeSpan.FromSeconds(2f))
+                {
+                    if (entity1 == player)
+                        entity1 = _lastRopegunEntity2;
+                    else
+                        entity2 = _lastRopegunEntity2;
+                }
+
+                _lastRopegunEntity1 = entity1;
+                _lastRopegunEntity2 = entity2;
+                _lastRopegunFire = timestamp;
+
+            }
+
+            public void Clear()
+            {
+                _lastRopegunEntity1 = -1;
+                _lastRopegunEntity2 = -1;
+                _lastRopegunFire = DateTime.MinValue;
+            }
+        }
+
         private const uint Ropegun = 0x44AE7910; // WEAPON_POCCE_ROPEGUN
-        private static Dictionary<int, List<int>> _ropes = new Dictionary<int, List<int>>();
+        private static readonly Dictionary<int, List<int>> _ropes = new Dictionary<int, List<int>>();
+        private static readonly RopegunState _ropegunState = new RopegunState();
 
         public Ropes()
         {
@@ -21,6 +83,12 @@ namespace PocceMod.Client
             API.AddTextEntryByHash(0x6FCC4E8A, "Pocce Ropegun"); // WT_POCCE_ROPEGUN
 
             Tick += Update;
+        }
+
+        private static int GetPlayerEntity()
+        {
+            var player = API.GetPlayerPed(-1);
+            return API.IsPedInAnyVehicle(player, false) ? API.GetVehiclePedIsIn(player, false) : player;
         }
 
         private static Vector3 GetAdjustedPosition(int entity, float front)
@@ -50,6 +118,9 @@ namespace PocceMod.Client
 
         private static void AddRope(int player, int entity1, int entity2, bool tow)
         {
+            if (entity1 == entity2)
+                return;
+
             entity1 = API.NetToEnt(entity1);
             entity2 = API.NetToEnt(entity2);
 
@@ -97,21 +168,12 @@ namespace PocceMod.Client
             }
         }
 
-        public static void PlayerAttach(int entity, bool tow = false)
+        public static void PlayerAttach(int entity, Mode mode = Mode.Normal)
         {
-            var player = API.GetPlayerPed(-1);
-            if (API.IsPedInAnyVehicle(player, false))
-            {
-                var vehicle = API.GetVehiclePedIsIn(player, false);
-                Attach(vehicle, entity, tow);
-            }
-            else
-            {
-                Attach(player, entity, tow);
-            }
+            Attach(GetPlayerEntity(), entity, mode);
         }
 
-        public static void Attach(int entity1, int entity2, bool tow = false)
+        public static void Attach(int entity1, int entity2, Mode mode = Mode.Normal)
         {
             if (!Permission.CanDo(Ability.RopeOtherPlayer))
             {
@@ -124,7 +186,21 @@ namespace PocceMod.Client
                 }
             }
 
-            TriggerServerEvent("PocceMod:AddRope", API.ObjToNet(entity1), API.ObjToNet(entity2), tow);
+            if ((mode & Mode.Ropegun) == Mode.Ropegun)
+            {
+                _ropegunState.Update(ref entity1, ref entity2, out bool clearLast);
+                if (clearLast)
+                    ClearLast();
+            }
+            else
+            {
+                _ropegunState.Clear();
+            }
+
+            if (entity1 == entity2)
+                return;
+
+            TriggerServerEvent("PocceMod:AddRope", API.ObjToNet(entity1), API.ObjToNet(entity2), (mode & Mode.Tow) == Mode.Tow);
         }
 
         public static void ClearAll()
@@ -162,16 +238,10 @@ namespace PocceMod.Client
             if (API.IsEntityAPed(target) && API.IsPedInAnyVehicle(target, false))
                 target = API.GetVehiclePedIsIn(target, false);
 
-            if (API.IsPedInAnyVehicle(player, false))
+            var attackControl = API.IsPedInAnyVehicle(player, false) ? 69 : 24;  // vehicle attack; attack
+            if (API.IsControlJustPressed(0, attackControl))
             {
-                var vehicle = API.GetVehiclePedIsIn(player, false);
-                if (API.IsControlJustPressed(0, 69)) // vehicle attack
-                    Attach(vehicle, target);
-            }
-            else
-            {
-                if (API.IsControlJustPressed(0, 24)) // attack
-                    Attach(player, target);
+                PlayerAttach(target, Mode.Ropegun);
             }
         }
     }

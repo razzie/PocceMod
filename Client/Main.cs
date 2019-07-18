@@ -300,7 +300,7 @@ namespace PocceMod.Client
         public static void RopeClosest(IEnumerable<int> entities, bool tow = false)
         {
             if (Common.GetClosestEntity(entities, out int closest))
-                Ropes.PlayerAttach(closest, tow);
+                Ropes.PlayerAttach(closest, tow ? Ropes.Mode.Tow : Ropes.Mode.Normal);
             else
                 Hud.Notification("Nothing in range");
         }
