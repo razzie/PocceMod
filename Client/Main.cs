@@ -1,6 +1,7 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
 using PocceMod.Shared;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -8,9 +9,11 @@ namespace PocceMod.Client
 {
     public class Main : BaseScript
     {
-        static Main()
+        public Main()
         {
             Permission.Granted += (player, group) => SetupMenu();
+
+            API.RegisterCommand("prop", new Action<int, List<object>, string>(Prop), false);
         }
 
         private static void SetupMenu()
@@ -118,7 +121,7 @@ namespace PocceMod.Client
         public static async Task SpawnTrashPed()
         {
             var ped = await Peds.Spawn(Config.TrashPedList);
-            await BaseScript.Delay(500);
+            await Delay(500);
             Common.Burn(ped);
             API.SetEntityAsNoLongerNeeded(ref ped);
         }
@@ -140,7 +143,7 @@ namespace PocceMod.Client
                     API.TaskLeaveVehicle(ped, vehicle, 1);
                 }
 
-                await BaseScript.Delay(1000); // let them get out of vehicles
+                await Delay(1000); // let them get out of vehicles
                 API.ClearPedTasks(ped);
 
                 await Peds.Arm(ped, weapons);
@@ -352,6 +355,22 @@ namespace PocceMod.Client
             {
                 Hud.Notification("No vehicles in range");
             }
+        }
+
+        private static void Prop(int source, List<object> args, string raw)
+        {
+            if (args.Count == 0)
+                return;
+
+            Prop(args[0].ToString());
+        }
+
+        public static void Prop(string prop)
+        {
+            if (!Permission.CanDo(Ability.SpawnProp))
+                return;
+
+            Hud.FilterSubmenu("Spawn prop", prop);
         }
     }
 }

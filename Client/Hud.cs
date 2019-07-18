@@ -76,8 +76,8 @@ namespace PocceMod.Client
             {
                 if (menuItem is MenuListItem && menuItem.Text == item)
                 {
-                    var items = ((MenuListItem)menuItem).ListItems;
-                    items.Add(subitem);
+                    var subitems = ((MenuListItem)menuItem).ListItems;
+                    subitems.Add(subitem);
                     _menuListItemActions[menuItem.Index].Add(onSelect);
                     return;
                 }
@@ -114,6 +114,11 @@ namespace PocceMod.Client
                 var item = _listItem.ListItems[_listIndex];
                 await onSelect(item);
                 submenu.CloseMenu();
+            };
+
+            submenu.OnMenuClose += (_menu) =>
+            {
+                submenu.ResetFilter();
             };
 
             if (groupByLetters > 0)
@@ -204,6 +209,86 @@ namespace PocceMod.Client
                     }
                 }
             };
+
+            submenu.OnMenuClose += (_menu) =>
+            {
+                submenu.ResetFilter();
+            };
+        }
+
+        public static void FilterSubmenu(string submenu, string item)
+        {
+            bool filter(MenuItem menuItem)
+            {
+                if (menuItem is MenuListItem)
+                {
+                    var menuListItem = (MenuListItem)menuItem;
+                    var subitems = menuListItem.ListItems;
+                    for (int i = 0; i < subitems.Count; ++i)
+                    {
+                        if (subitems[i].Contains(item))
+                            return true;
+                    }
+                }
+                else
+                {
+                    if (menuItem.Text.Contains(item))
+                        return true;
+                }
+
+                return false;
+            }
+
+            foreach (var menu in MenuController.Menus)
+            {
+                if (menu.MenuSubtitle == submenu)
+                {
+                    menu.FilterMenuItems(filter);
+                    menu.OpenMenu();
+                    return;
+                }
+            }
+        }
+
+        public static bool JumpToSubmenuItem(string submenu, string item)
+        {
+            foreach (var menu in MenuController.Menus)
+            {
+                if (menu.MenuSubtitle == submenu)
+                {
+                    foreach (var menuItem in menu.GetMenuItems())
+                    {
+                        if (menuItem is MenuListItem)
+                        {
+                            var menuListItem = (MenuListItem)menuItem;
+                            var subitems = menuListItem.ListItems;
+                            for (int i = 0; i < subitems.Count; ++i)
+                            {
+                                if (subitems[i] == item)
+                                {
+                                    menuListItem.ListIndex = i;
+                                    var index = menuItem.Index;
+                                    menu.RefreshIndex(index, index > menu.MaxItemsOnScreen ? index - menu.MaxItemsOnScreen - 1 : 0);
+                                    menu.OpenMenu();
+                                    return true;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (menuItem.Text == item)
+                            {
+                                var index = menuItem.Index;
+                                menu.RefreshIndex(index, index > menu.MaxItemsOnScreen ? index - menu.MaxItemsOnScreen -1 : 0);
+                                menu.OpenMenu();
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
     }
 }
