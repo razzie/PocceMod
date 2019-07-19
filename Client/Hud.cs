@@ -18,6 +18,7 @@ namespace PocceMod.Client
             MenuController.MenuToggleKey = Control.SelectCharacterMichael;
             MenuController.EnableMenuToggleKeyOnController = false;
             MenuController.MenuAlignment = MenuController.MenuAlignmentOption.Right;
+            MenuController.DontOpenAnyMenu = true;
 
             _menu = new Menu("PocceMod", "menu");
             MenuController.AddMenu(_menu);
@@ -60,6 +61,7 @@ namespace PocceMod.Client
 
         public static void AddMenuItem(string item, Func<Task> onSelect)
         {
+            MenuController.DontOpenAnyMenu = false;
             var menuItem = new MenuItem(item);
             _menu.AddMenuItem(menuItem);
             _menuItemActions.Add(menuItem.Index, onSelect);
@@ -72,6 +74,8 @@ namespace PocceMod.Client
 
         public static void AddMenuListItem(string item, string subitem, Func<Task> onSelect)
         {
+            MenuController.DontOpenAnyMenu = false;
+
             foreach (var menuItem in _menu.GetMenuItems())
             {
                 if (menuItem is MenuListItem && menuItem.Text == item)
@@ -101,6 +105,7 @@ namespace PocceMod.Client
             _menu.AddMenuItem(submenuItem);
             MenuController.AddSubmenu(_menu, submenu);
             MenuController.BindMenuItem(_menu, submenu, submenuItem);
+            MenuController.DontOpenAnyMenu = false;
 
             submenu.OnItemSelect += async (_menu, _item, _index) =>
             {
@@ -173,6 +178,7 @@ namespace PocceMod.Client
             _menu.AddMenuItem(submenuItem);
             MenuController.AddSubmenu(_menu, submenu);
             MenuController.BindMenuItem(_menu, submenu, submenuItem);
+            MenuController.DontOpenAnyMenu = false;
 
             submenu.OnItemSelect += async (_menu, _item, _index) =>
             {
