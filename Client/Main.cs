@@ -54,7 +54,7 @@ namespace PocceMod.Client
                 Hud.AddMenuListItem("Rope", "Equip rope gun", () => Ropes.EquipRopeGun());
 
             if (Permission.CanDo(Ability.RappelFromHeli))
-                Hud.AddMenuListItem("Rope", "Rappel from heli", () => RappelFromHeli());
+                Hud.AddMenuListItem("Rope", "Rappel from heli", RappelFromHeli);
 
             if (Permission.CanDo(Ability.Rope) || Permission.CanDo(Ability.RopeGun))
             {
@@ -349,12 +349,41 @@ namespace PocceMod.Client
             Common.Notification("Use arrow up/down keys to change brightness");
         }
 
-        public static void RappelFromHeli()
+        public static async Task RappelFromHeli()
         {
             var player = API.GetPlayerPed(-1);
             if (API.IsPedInAnyHeli(player))
             {
-                API.TaskRappelFromHeli(player, 0);
+                var heli = API.GetVehiclePedIsIn(player, false);
+                if (!Vehicles.GetPedSeat(heli, player, out int seat))
+                    return;
+
+                switch (seat)
+                {
+                    case -1:
+                        if (API.AreAnyVehicleSeatsFree(heli))
+                        {
+                            await Autopilot.Activate();
+                            API.TaskRappelFromHeli(player, 0);
+                        }
+                        break;
+
+                    case 0:
+                        if (Vehicles.GetFreeSeat(heli, out int goodSeat, true))
+                        {
+                            API.SetPedIntoVehicle(player, heli, goodSeat);
+                            API.TaskRappelFromHeli(player, 0);
+                        }
+                        break;
+
+                    default:
+                        API.TaskRappelFromHeli(player, 0);
+                        break;
+                }
+            }
+            else
+            {
+                Common.Notification("Player is not in a heli");
             }
         }
 

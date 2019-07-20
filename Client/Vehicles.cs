@@ -110,6 +110,21 @@ namespace PocceMod.Client
             return freeSeats;
         }
 
+        public static bool GetPedSeat(int vehicle, int ped, out int seat)
+        {
+            var model = (uint)API.GetEntityModel(vehicle);
+            var seats = API.GetVehicleModelNumberOfSeats(model) - 1;
+
+            for (seat = -1; seat < seats; ++seat)
+            {
+                var seatPed = API.GetPedInVehicleSeat(vehicle, seat);
+                if (seatPed == ped)
+                    return true;
+            }
+
+            return false;
+        }
+
         public static List<int> GetPlayers(int vehicle)
         {
             var players = new List<int>();
