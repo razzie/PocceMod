@@ -8,7 +8,7 @@ namespace PocceMod.Client
     public class Autopilot : BaseScript
     {
         private const uint Model = 0xA8683715; // monkey
-        private const int DrivingStyle = 156;
+        private const int DrivingStyle = 537133886;
         private const string FlagDecor = "POCCE_AUTOPILOT_FLAG";
         private const string PlayerDecor = "POCCE_AUTOPILOT_PLAYER";
         private const string WaypointHashDecor = "POCCE_AUTOPILOT_WAYPOINT";
@@ -120,6 +120,10 @@ namespace PocceMod.Client
             API.SetDriverAggressiveness(ped, 0f);
             API.SetPedAsGroupMember(ped, API.GetPlayerGroup(playerID));
             API.SetEntityAsMissionEntity(ped, true, true);
+            API.TaskSetBlockingOfNonTemporaryEvents(ped, true);
+            API.SetPedKeepTask(ped, true);
+            await Delay(10);
+
             Wander(ped, vehicle);
         }
 
