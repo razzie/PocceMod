@@ -59,7 +59,13 @@ namespace PocceMod.Client
                 _lastRopegunEntity1 = entity1;
                 _lastRopegunEntity2 = entity2;
                 _lastRopegunFire = timestamp;
+            }
 
+            public void Undo(out bool clearLast)
+            {
+                var player = GetPlayerEntity();
+                clearLast = (_lastRopegunEntity1 == player || _lastRopegunEntity2 == player);
+                Clear();
             }
 
             public void Clear()
@@ -72,6 +78,7 @@ namespace PocceMod.Client
 
         private const uint Ropegun = 0x44AE7910; // WEAPON_POCCE_ROPEGUN
         private static readonly int RopegunWindKey;
+        private static readonly int RopegunUndoKey;
         private static readonly Dictionary<int, List<int>> _ropes = new Dictionary<int, List<int>>();
         private static readonly List<int> _windingRopes = new List<int>();
         private static readonly RopegunState _ropegunState = new RopegunState();
@@ -79,6 +86,7 @@ namespace PocceMod.Client
         static Ropes()
         {
             RopegunWindKey = Config.GetConfigInt("RopegunWindKey");
+            RopegunUndoKey = Config.GetConfigInt("RopegunUndoKey");
         }
 
         public Ropes()
@@ -242,6 +250,12 @@ namespace PocceMod.Client
             {
                 await Delay(100);
                 return;
+            }
+
+            if (RopegunUndoKey > 0 && API.IsControlJustPressed(0, RopegunUndoKey))
+            {
+                _ropegunState.Undo(out bool clearLast);
+                if (clearLast) ClearLast();
             }
 
             if (!API.IsPlayerFreeAiming(playerID))
