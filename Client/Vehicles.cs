@@ -134,13 +134,13 @@ namespace PocceMod.Client
 
             if (!API.IsModelValid(hash))
             {
-                Hud.Notification(string.Format("Invalid model hash: 0x{0:X8} ({1})", hash, model));
+                Common.Notification(string.Format("Invalid model hash: 0x{0:X8} ({1})", hash, model));
                 return -1;
             }
 
             if (API.IsPedInAnyVehicle(API.GetPlayerPed(-1), false))
             {
-                Hud.Notification("Player is in a vehicle");
+                Common.Notification("Player is in a vehicle");
                 return -1;
             }
 

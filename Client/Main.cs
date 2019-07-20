@@ -211,7 +211,7 @@ namespace PocceMod.Client
             int player = API.GetPlayerPed(-1);
             if (!API.IsPedInAnyVehicle(player, true))
             {
-                Hud.Notification("Player is not in a vehicle");
+                Common.Notification("Player is not in a vehicle");
                 return;
             }
 
@@ -240,7 +240,7 @@ namespace PocceMod.Client
                 }
                 else if (API.GetEntitySpeed(vehicle) > 0.1f)
                 {
-                    Hud.Notification("Player is in a moving vehicle and there are no free seats");
+                    Common.Notification("Player is in a moving vehicle and there are no free seats");
                     return;
                 }
                 else
@@ -263,7 +263,7 @@ namespace PocceMod.Client
             int player = API.GetPlayerPed(-1);
             if (API.IsPedInAnyHeli(player))
             {
-                Hud.Notification("Don't spawn that poor pet on a heli");
+                Common.Notification("Don't spawn that poor pet on a heli");
                 return;
             }
             else if (API.IsPedInAnyVehicle(player, false))
@@ -271,7 +271,7 @@ namespace PocceMod.Client
                 var vehicle = API.GetVehiclePedIsIn(player, false);
                 if (API.GetVehicleDashboardSpeed(vehicle) > 0.1f)
                 {
-                    Hud.Notification("Player is in a moving vehicle");
+                    Common.Notification("Player is in a moving vehicle");
                     return;
                 }
             }
@@ -295,7 +295,7 @@ namespace PocceMod.Client
                 {
                     var model = string.Format("0x{0:X8}", API.GetEntityModel(ped));
                     models.Add(model);
-                    Hud.Notification("ped:" + model);
+                    Common.Notification("ped:" + model);
                 }
             }
 
@@ -313,7 +313,7 @@ namespace PocceMod.Client
             if (Common.GetClosestEntity(entities, out int closest))
                 Ropes.PlayerAttach(closest, tow ? Ropes.Mode.Tow : Ropes.Mode.Normal);
             else
-                Hud.Notification("Nothing in range");
+                Common.Notification("Nothing in range");
         }
 
         public static void CargobobMagnet()
@@ -340,13 +340,13 @@ namespace PocceMod.Client
             var player = API.GetPlayerPed(-1);
             if (!API.IsPedInAnyVehicle(player, true))
             {
-                Hud.Notification("Player is not in a vehicle");
+                Common.Notification("Player is not in a vehicle");
                 return;
             }
 
             var vehicle = API.GetVehiclePedIsIn(player, false);
             Vehicles.EnableUltrabrightHeadlight(vehicle);
-            Hud.Notification("Use arrow up/down keys to change brightness");
+            Common.Notification("Use arrow up/down keys to change brightness");
         }
 
         public static void RappelFromHeli()
@@ -370,12 +370,12 @@ namespace PocceMod.Client
                 }
                 else
                 {
-                    Hud.Notification("Closest vehicle doesn't have a free seat");
+                    Common.Notification("Closest vehicle doesn't have a free seat");
                 }
             }
             else
             {
-                Hud.Notification("No vehicles in range");
+                Common.Notification("No vehicles in range");
             }
         }
 

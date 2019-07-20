@@ -27,7 +27,7 @@ namespace PocceMod.Client
             var player = API.GetPlayerPed(-1);
             if (!API.IsPedInAnyVehicle(player, false))
             {
-                Hud.Notification("Player is not in a vehicle");
+                Common.Notification("Player is not in a vehicle");
             }
 
             var vehicle = API.GetVehiclePedIsIn(player, false);
@@ -39,7 +39,7 @@ namespace PocceMod.Client
 
             if (API.GetPedInVehicleSeat(vehicle, -1) != player)
             {
-                Hud.Notification("You are not the driver of this vehicle");
+                Common.Notification("You are not the driver of this vehicle");
                 return;
             }
 
@@ -52,7 +52,7 @@ namespace PocceMod.Client
             }
             else
             {
-                Hud.Notification("An extra seat is required");
+                Common.Notification("An extra seat is required");
             }
         }
 
@@ -61,19 +61,19 @@ namespace PocceMod.Client
             var player = API.GetPlayerPed(-1);
             if (!API.IsPedInAnyVehicle(player, false))
             {
-                Hud.Notification("Player is not in a vehicle");
+                Common.Notification("Player is not in a vehicle");
             }
 
             var vehicle = API.GetVehiclePedIsIn(player, false);
             var driver = API.GetPedInVehicleSeat(vehicle, -1);
             if (!IsAutopilot(driver))
             {
-                Hud.Notification("The driver is not autopilot");
+                Common.Notification("The driver is not autopilot");
                 return;
             }
             else if (!IsOwnedAutopilot(driver))
             {
-                Hud.Notification("The autopilot belongs to an other player");
+                Common.Notification("The autopilot belongs to an other player");
                 return;
             }
             
@@ -88,7 +88,7 @@ namespace PocceMod.Client
             var player = API.GetPlayerPed(-1);
             if (!API.IsPedInAnyVehicle(player, false))
             {
-                Hud.Notification("Player is not in a vehicle");
+                Common.Notification("Player is not in a vehicle");
             }
 
             var vehicle = API.GetVehiclePedIsIn(player, false);

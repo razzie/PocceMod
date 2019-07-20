@@ -44,16 +44,6 @@ namespace PocceMod.Client
             };
         }
 
-        public static void Notification(string message, bool blink = false, bool saveToBrief = false)
-        {
-            API.SetNotificationTextEntry("CELL_EMAIL_BCON");
-            foreach (string s in CitizenFX.Core.UI.Screen.StringToArray(message))
-            {
-                API.AddTextComponentSubstringPlayerName(s);
-            }
-            API.DrawNotification(blink, saveToBrief);
-        }
-
         public static void SetMenuKey(int key)
         {
             MenuController.MenuToggleKey = (Control)key;

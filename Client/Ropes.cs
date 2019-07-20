@@ -41,7 +41,7 @@ namespace PocceMod.Client
 
                 if (_ropegunFirstUse)
                 {
-                    Hud.Notification("First time using ropegun, yay! You can connect 2 entities in 2 seconds");
+                    Common.Notification("First time using ropegun, yay! You can connect 2 entities in 2 seconds");
                     _ropegunFirstUse = false;
                 }
 
@@ -196,7 +196,7 @@ namespace PocceMod.Client
                 if ((API.IsEntityAPed(entity1) && API.IsPedAPlayer(entity1) && entity1 != player) ||
                     (API.IsEntityAPed(entity2) && API.IsPedAPlayer(entity2) && entity2 != player))
                 {
-                    Hud.Notification("You are not allowed to attach rope to another player");
+                    Common.Notification("You are not allowed to attach rope to another player");
                     return;
                 }
             }

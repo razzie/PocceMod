@@ -71,14 +71,14 @@ namespace PocceMod.Client
 
             if (!API.IsModelValid(hash))
             {
-                Hud.Notification(string.Format("Invalid model hash: 0x{0:X8} ({1})", hash, model));
+                Common.Notification(string.Format("Invalid model hash: 0x{0:X8} ({1})", hash, model));
                 return Task.FromResult(-1);
             }
 
             if (_firstSpawn)
             {
-                Hud.Notification("First time spawning prop, yay! Try /prop [search] command for filtered props");
-                Hud.Notification("Use the arrow keys to correct the position of the prop");
+                Common.Notification("First time spawning prop, yay! Try /prop [search] command for filtered props");
+                Common.Notification("Use the arrow keys to correct the position of the prop");
                 _firstSpawn = false;
             }
 
@@ -98,7 +98,7 @@ namespace PocceMod.Client
             var hash = (uint)API.GetHashKey(model);
             if (!API.IsModelValid(hash))
             {
-                Hud.Notification(string.Format("Invalid model hash: 0x{0:X8} ({1})", hash, model));
+                Common.Notification(string.Format("Invalid model hash: 0x{0:X8} ({1})", hash, model));
                 return -1;
             }
 
