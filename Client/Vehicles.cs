@@ -307,6 +307,42 @@ namespace PocceMod.Client
             API.DecorSetInt(vehicle, StateFlagsDecor, (int)state);
         }
 
+        private static bool IsHazardLightApplicable(uint model)
+        {
+            return API.IsThisModelACar(model) || API.IsThisModelABike(model) || API.IsThisModelAnAmphibiousCar(model) || API.IsThisModelAQuadbike(model);
+        }
+
+        public static void UpdateAutoHazardLights(int vehicle)
+        {
+            var speed = API.GetEntitySpeed(vehicle);
+            var model = (uint)API.GetEntityModel(vehicle);
+
+            if (!IsHazardLightApplicable(model))
+                return;
+
+            if (!GetLastState(vehicle, StateFlag.HazardLight))
+            {
+                if (API.IsEntityUpsidedown(vehicle) ||
+                    API.IsEntityInAir(vehicle) ||
+                    API.IsEntityInWater(vehicle) ||
+                    API.IsEntityOnFire(vehicle) ||
+                    (speed < 3f && GetLastState(vehicle, StateFlag.Cruising)) ||
+                    (!AreTiresIntact(vehicle) && GetLastState(vehicle, StateFlag.TiresIntact)) ||
+                    (API.GetVehicleEngineHealth(vehicle) < 100f && GetLastState(vehicle, StateFlag.EngineIntact)))
+                {
+                    SetState(vehicle, StateFlag.HazardLight, true);
+                    TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(vehicle), 3);
+                }
+            }
+            else if (speed > 5f)
+            {
+                SetState(vehicle, StateFlag.HazardLight, false);
+                TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(vehicle), 0);
+            }
+
+            UpdateState(vehicle);
+        }
+
         private static Task Update()
         {
             var player = API.GetPlayerPed(-1);
@@ -336,27 +372,7 @@ namespace PocceMod.Client
                 }
             }
 
-            if (!GetLastState(vehicle, StateFlag.HazardLight))
-            {
-                if (API.IsEntityUpsidedown(vehicle) ||
-                    (API.IsEntityInAir(vehicle) && !API.IsPedInFlyingVehicle(player)) ||
-                    (API.IsEntityInWater(vehicle) && !API.IsPedInAnyBoat(player)) ||
-                    API.IsEntityOnFire(vehicle) ||
-                    (speed < 3f && GetLastState(vehicle, StateFlag.Cruising)) ||
-                    (!AreTiresIntact(vehicle) && GetLastState(vehicle, StateFlag.TiresIntact)) ||
-                    (API.GetVehicleEngineHealth(vehicle) < 100f && GetLastState(vehicle, StateFlag.EngineIntact)))
-                {
-                    SetState(vehicle, StateFlag.HazardLight, true);
-                    TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(vehicle), 3);
-                }
-            }
-            else if (speed > 5f)
-            {
-                SetState(vehicle, StateFlag.HazardLight, false);
-                TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(vehicle), 0);
-            }
-
-            UpdateState(vehicle);
+            UpdateAutoHazardLights(vehicle);
 
             if (!Hud.IsMenuOpen() && API.DecorExistOn(vehicle, LightMultiplierDecor))
             {

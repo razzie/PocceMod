@@ -168,6 +168,8 @@ namespace PocceMod.Client
             if (!IsOwnedAutopilot(driver))
                 return Delay(1000);
 
+            Vehicles.UpdateAutoHazardLights(vehicle);
+
             if (Common.GetWaypoint(out Vector3 wp, false))
             {
                 // waypoint hasn't changed
