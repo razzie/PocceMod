@@ -91,13 +91,13 @@ namespace PocceMod.Client
 
         public Ropes()
         {
-            EventHandlers["PocceMod:AddRope"] += new Func<int, int, int, int, Task>(AddRope);
+            EventHandlers["PocceMod:AddRope"] += new Func<int, int, int, Vector3, Vector3, int, Task>(AddRope);
             EventHandlers["PocceMod:ClearRopes"] += new Action<int>(ClearRopes);
             EventHandlers["PocceMod:ClearLastRope"] += new Action<int>(ClearLastRope);
 
             API.AddTextEntryByHash(0x6FCC4E8A, "Pocce Ropegun"); // WT_POCCE_ROPEGUN
 
-            Tick += Update;
+            Tick += UpdateRopegun;
             Tick += RopeWindUpdate;
         }
 
@@ -132,7 +132,14 @@ namespace PocceMod.Client
             return pos;
         }
 
-        private static async Task AddRope(int player, int entity1, int entity2, int mode)
+        private static Vector3 TransformOffset(int entity, Vector3 offset)
+        {
+            var matrix = new Prop(entity).Matrix;
+            Vector3.Transform(ref offset, ref matrix, out Vector3 result);
+            return result;
+        }
+
+        private static async Task AddRope(int player, int entity1, int entity2, Vector3 offset1, Vector3 offset2, int mode)
         {
             if (entity1 == entity2)
                 return;
@@ -141,8 +148,8 @@ namespace PocceMod.Client
             entity2 = await Common.WaitForNetEntity(entity2);
 
             bool tow = ((Mode)mode & Mode.Tow) == Mode.Tow;
-            var pos1 = tow ? GetAdjustedPosition(entity1, -0.75f) : API.GetEntityCoords(entity1, API.IsEntityAPed(entity1));
-            var pos2 = tow ? GetAdjustedPosition(entity2, 0.75f) : API.GetEntityCoords(entity2, API.IsEntityAPed(entity2));
+            var pos1 = tow ? GetAdjustedPosition(entity1, -0.75f) : API.GetEntityCoords(entity1, API.IsEntityAPed(entity1)) + TransformOffset(entity1, offset1);
+            var pos2 = tow ? GetAdjustedPosition(entity2, 0.75f) : API.GetEntityCoords(entity2, API.IsEntityAPed(entity2)) + TransformOffset(entity2, offset2);
             var length = (float)Math.Sqrt(pos1.DistanceToSquared(pos2));
 
             int unkPtr = 0;
@@ -224,7 +231,7 @@ namespace PocceMod.Client
             if (entity1 == entity2)
                 return;
 
-            TriggerServerEvent("PocceMod:AddRope", API.ObjToNet(entity1), API.ObjToNet(entity2), (int)mode);
+            TriggerServerEvent("PocceMod:AddRope", API.ObjToNet(entity1), API.ObjToNet(entity2), Vector3.Zero, Vector3.Zero, (int)mode);
         }
 
         public static void ClearAll()
@@ -244,7 +251,7 @@ namespace PocceMod.Client
             API.SetCurrentPedVehicleWeapon(player, Ropegun);
         }
 
-        private static async Task Update()
+        private static async Task UpdateRopegun()
         {
             var playerID = API.PlayerId();
             var player = API.GetPlayerPed(-1);

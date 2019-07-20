@@ -12,7 +12,7 @@ namespace PocceMod.Server
             EventHandlers["PocceMod:Burn"] += new Action<Player, int>(Burn);
             EventHandlers["PocceMod:EMP"] += new Action<Player, int>(EMP);
             EventHandlers["PocceMod:SetIndicator"] += new Action<Player, int, int>(SetIndicator);
-            EventHandlers["PocceMod:AddRope"] += new Action<Player, int, int, int>(AddRope);
+            EventHandlers["PocceMod:AddRope"] += new Action<Player, int, int, Vector3, Vector3, int>(AddRope);
             EventHandlers["PocceMod:ClearRopes"] += new Action<Player>(ClearRopes);
             EventHandlers["PocceMod:ClearLastRope"] += new Action<Player>(ClearLastRope);
         }
@@ -39,10 +39,10 @@ namespace PocceMod.Server
             TriggerClientEvent("PocceMod:SetIndicator", vehicle, state);
         }
 
-        private void AddRope([FromSource] Player source, int entity1, int entity2, int mode)
+        private void AddRope([FromSource] Player source, int entity1, int entity2, Vector3 offset1, Vector3 offset2, int mode)
         {
             if (Permission.CanDo(source, Ability.Rope) || Permission.CanDo(source, Ability.RopeGun))
-                TriggerClientEvent("PocceMod:AddRope", source.Handle, entity1, entity2, mode);
+                TriggerClientEvent("PocceMod:AddRope", source.Handle, entity1, entity2, offset1, offset2, mode);
         }
 
         private void ClearRopes([FromSource] Player source)
