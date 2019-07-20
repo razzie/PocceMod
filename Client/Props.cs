@@ -66,15 +66,6 @@ namespace PocceMod.Client
 
         public static Task<int> Spawn(string model)
         {
-            var player = API.GetPlayerPed(-1);
-            var hash = (uint)API.GetHashKey(model);
-
-            if (!API.IsModelValid(hash))
-            {
-                Common.Notification(string.Format("Invalid model hash: 0x{0:X8} ({1})", hash, model));
-                return Task.FromResult(-1);
-            }
-
             if (_firstSpawn)
             {
                 Common.Notification("First time spawning prop, yay! Try /prop [search] command for filtered props");
@@ -82,14 +73,15 @@ namespace PocceMod.Client
                 _firstSpawn = false;
             }
 
+            var player = API.GetPlayerPed(-1);
             if (API.IsPedInAnyVehicle(player, false))
             {
                 var vehicle = API.GetVehiclePedIsIn(player, false);
-                return SpawnOnEntity(vehicle, hash);
+                return SpawnOnEntity(vehicle, model);
             }
             else
             {
-                 return SpawnInFrontOfPed(player, hash);
+                 return SpawnInFrontOfPed(player, model);
             }
         }
 
@@ -108,34 +100,28 @@ namespace PocceMod.Client
 
             API.SetEntityRotation(prop, rotation.X, rotation.Y, rotation.Z, 0, true);
             API.DecorSetBool(prop, PropDecor, true);
+            await Common.RequestCollision(hash);
+
+            if (!API.DoesEntityHavePhysics(prop))
+                API.FreezeEntityPosition(prop, true);
+
             return prop;
         }
 
-        private static async Task<int> SpawnInFrontOfPed(int ped, uint model)
+        private static Task<int> SpawnInFrontOfPed(int ped, string model)
         {
             var pedModel = (uint)API.GetEntityModel(ped);
             var pos = API.GetEntityCoords(ped, true);
             var heading = API.GetEntityHeading(ped);
-            var headingRad = (Math.PI / 180) * heading;
+            var headingRad = MathUtil.DegreesToRadians(heading);
 
-            await Common.RequestModel(model);
-            var prop = API.CreateObject((int)model, pos.X - (float)Math.Sin(headingRad), pos.Y + (float)Math.Cos(headingRad), pos.Z - 1f, true, false, true);
-            _props.Add(prop);
-
-            API.SetEntityHeading(prop, -heading);
-            API.SetEntityCollision(prop, true, true);
-            API.ActivatePhysics(prop);
-            API.DecorSetBool(prop, PropDecor, true);
-            return prop;
+            return SpawnAtCoords(model, new Vector3(pos.X - (float)Math.Sin(headingRad), pos.Y + (float)Math.Cos(headingRad), pos.Z - 1f), new Vector3(0f, 0f, heading));
         }
 
-        private static async Task<int> SpawnOnEntity(int entity, uint model)
+        private static async Task<int> SpawnOnEntity(int entity, string model)
         {
-            var subentity = API.GetEntityAttachedTo(entity);
-            if (subentity > 0)
-                return await SpawnOnEntity(subentity, model);
-
             var pos = API.GetEntityCoords(entity, API.IsEntityAPed(entity));
+            var heading = API.GetEntityHeading(entity);
             var entityModel = (uint)API.GetEntityModel(entity);
             Vector3 entityMin = Vector3.Zero;
             Vector3 entityMax = Vector3.Zero;
@@ -143,19 +129,14 @@ namespace PocceMod.Client
 
             Vector3 propMin = Vector3.Zero;
             Vector3 propMax = Vector3.Zero;
-            API.GetModelDimensions(model, ref propMin, ref propMax);
+            API.GetModelDimensions((uint)API.GetHashKey(model), ref propMin, ref propMax);
 
-            await Common.RequestModel(model);
-            var prop = API.CreateObject((int)model, pos.X, pos.Y, pos.Z + entityMax.Z - propMin.Z, true, false, true);
-            _props.Add(prop);
-
+            var prop = await SpawnAtCoords(model, new Vector3(pos.X, pos.Y, pos.Z + entityMax.Z - propMin.Z), new Vector3(0f, 0f, heading));
             if (!API.DoesEntityHavePhysics(prop) || propMax.Z - propMin.Z > 3f) // large objects glitch too much
                 API.AttachEntityToEntity(prop, entity, 0, 0f, 0f, -propMin.Z, 0f, 0f, 0f, false, false, false, false, 0, true);
             else
                 API.AttachEntityToEntityPhysically(prop, entity, 0, 0, 0f, 0f, entityMax.Z, 0f, 0f, propMin.Z, 0f, 0f, 0f, 100f, true, false, true, true, 2);
 
-            API.ActivatePhysics(prop);
-            API.DecorSetBool(prop, PropDecor, true);
             return prop;
         }
 

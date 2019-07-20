@@ -57,6 +57,15 @@ namespace PocceMod.Client
             }
         }
 
+        public static async Task RequestCollision(uint model)
+        {
+            while (!API.HasCollisionForModelLoaded(model))
+            {
+                API.RequestCollisionForModel(model);
+                await BaseScript.Delay(10);
+            }
+        }
+
         public static async Task<int> WaitForNetEntity(int netEntity)
         {
             var timeout = DateTime.Now + TimeSpan.FromSeconds(2);
