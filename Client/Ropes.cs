@@ -239,7 +239,9 @@ namespace PocceMod.Client
 
         public static void EquipRopeGun()
         {
-            Peds.GiveWeapon(API.GetPlayerPed(-1), Ropegun);
+            var player = API.GetPlayerPed(-1);
+            Peds.GiveWeapon(player, Ropegun);
+            API.SetCurrentPedVehicleWeapon(player, Ropegun);
         }
 
         private static async Task Update()
