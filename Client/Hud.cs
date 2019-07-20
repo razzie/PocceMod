@@ -49,6 +49,11 @@ namespace PocceMod.Client
             MenuController.MenuToggleKey = (Control)key;
         }
 
+        public static bool IsMenuOpen()
+        {
+            return MenuController.IsAnyMenuOpen();
+        }
+
         public static void AddMenuItem(string item, Func<Task> onSelect)
         {
             MenuController.DontOpenAnyMenu = false;

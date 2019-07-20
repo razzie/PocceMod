@@ -282,7 +282,7 @@ namespace PocceMod.Client
                 TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(vehicle), 0);
             }
 
-            if (API.DecorExistOn(vehicle, LightMultiplierDecor))
+            if (!Hud.IsMenuOpen() && API.DecorExistOn(vehicle, LightMultiplierDecor))
             {
                 if (API.IsControlPressed(0, 172)) // up
                 {

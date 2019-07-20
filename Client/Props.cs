@@ -163,7 +163,7 @@ namespace PocceMod.Client
 
         private static Task Update()
         {
-            if (_props.Count == 0)
+            if (Hud.IsMenuOpen() || _props.Count == 0)
                 return Delay(1000);
 
             var player = API.GetPlayerPed(-1);
