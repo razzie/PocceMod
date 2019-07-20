@@ -14,8 +14,9 @@ namespace PocceMod.Client
             None = 0,
             Animals = 1,
             Players = 2,
-            Dead = 4,
-            CurrentVehiclePassengers = 8
+            NonPlayers = 4,
+            Dead = 8,
+            CurrentVehiclePassengers = 16
         }
 
         public const Filter DefaultFilters = Filter.Dead;
@@ -47,8 +48,16 @@ namespace PocceMod.Client
                 if (HasFilter(Filter.Animals) && !API.IsPedHuman(ped))
                     continue;
 
-                if (HasFilter(Filter.Players) && API.IsPedAPlayer(ped))
-                    continue;
+                if (API.IsPedAPlayer(ped))
+                {
+                    if (HasFilter(Filter.Players))
+                        continue;
+                }
+                else
+                {
+                    if (HasFilter(Filter.NonPlayers))
+                        continue;
+                }
 
                 if (HasFilter(Filter.Dead) && API.IsPedDeadOrDying(ped, true))
                     continue;

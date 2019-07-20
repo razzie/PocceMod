@@ -8,6 +8,7 @@ namespace PocceMod.Client
     public class Autopilot : BaseScript
     {
         private const uint Model = 0xA8683715; // monkey
+        private const uint PoliceHeli = 0x1517D4D9; // polmav
         private const int DrivingStyle = 537133886;
         private const string FlagDecor = "POCCE_AUTOPILOT_FLAG";
         private const string PlayerDecor = "POCCE_AUTOPILOT_PLAYER";
@@ -150,6 +151,16 @@ namespace PocceMod.Client
 
             if (!IsOwnedAutopilot(driver))
                 return Delay(1000);
+
+            if ((uint)API.GetEntityModel(vehicle) == PoliceHeli)
+            {
+                var players = Peds.Get(Peds.Filter.NonPlayers);
+                if (Common.GetClosestEntity(players, out int target))
+                {
+                    API.SetVehicleSearchlight(vehicle, true, true);
+                    API.SetMountedWeaponTarget(driver, target, 0, 0f, 0f, 0f);
+                }
+            }
 
             if (API.AnyPassengersRappeling(vehicle))
             {
