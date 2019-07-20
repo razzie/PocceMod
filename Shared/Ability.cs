@@ -3,6 +3,7 @@
     public enum Ability
     {
         SpawnVehicle,
+        SpawnVehicleByName,
         SpawnProp,
         SpawnPocceCompanion,
         SpawnPetCompanion,
