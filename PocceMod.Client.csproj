@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="Client\Autopilot.cs" />
     <Compile Include="Client\Common.cs" />
+    <Compile Include="Client\Skin.cs" />
     <Compile Include="Shared\Ability.cs" />
     <Compile Include="Shared\Config.cs" />
     <Compile Include="Client\DataSource.cs" />
