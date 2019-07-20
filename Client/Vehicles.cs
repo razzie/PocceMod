@@ -21,7 +21,8 @@ namespace PocceMod.Client
         {
             HazardLight = 1,
             TiresIntact = 2,
-            Cruising = 4
+            EngineIntact = 4,
+            Cruising = 8
         }
 
         public const Filter DefaultFilters = Filter.PlayerVehicle;
@@ -293,6 +294,11 @@ namespace PocceMod.Client
             else
                 state &= ~StateFlag.TiresIntact;
 
+            if (API.GetVehicleEngineHealth(vehicle) >= 100f)
+                state |= StateFlag.EngineIntact;
+            else
+                state &= StateFlag.EngineIntact;
+
             if (API.GetEntitySpeed(vehicle) > 10f)
                 state |= StateFlag.Cruising;
             else
@@ -330,20 +336,21 @@ namespace PocceMod.Client
                 }
             }
 
-            if (API.IsEntityUpsidedown(vehicle) ||
-                (API.IsEntityInAir(vehicle) && !API.IsPedInFlyingVehicle(player)) ||
-                (API.IsEntityInWater(vehicle) && !API.IsPedInAnyBoat(player)) ||
-                API.IsEntityOnFire(vehicle) ||
-                (speed < 1f && GetLastState(vehicle, StateFlag.Cruising)) ||
-                (!AreTiresIntact(vehicle) && GetLastState(vehicle, StateFlag.TiresIntact)))
+            if (!GetLastState(vehicle, StateFlag.HazardLight))
             {
-                if (!GetLastState(vehicle, StateFlag.HazardLight))
+                if (API.IsEntityUpsidedown(vehicle) ||
+                    (API.IsEntityInAir(vehicle) && !API.IsPedInFlyingVehicle(player)) ||
+                    (API.IsEntityInWater(vehicle) && !API.IsPedInAnyBoat(player)) ||
+                    API.IsEntityOnFire(vehicle) ||
+                    (speed < 3f && GetLastState(vehicle, StateFlag.Cruising)) ||
+                    (!AreTiresIntact(vehicle) && GetLastState(vehicle, StateFlag.TiresIntact)) ||
+                    (API.GetVehicleEngineHealth(vehicle) < 100f && GetLastState(vehicle, StateFlag.EngineIntact)))
                 {
                     SetState(vehicle, StateFlag.HazardLight, true);
                     TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(vehicle), 3);
                 }
             }
-            else if (speed > 5f && GetLastState(vehicle, StateFlag.HazardLight))
+            else if (speed > 5f)
             {
                 SetState(vehicle, StateFlag.HazardLight, false);
                 TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(vehicle), 0);
