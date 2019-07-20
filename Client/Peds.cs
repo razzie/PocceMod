@@ -15,11 +15,12 @@ namespace PocceMod.Client
             Animals = 1,
             Players = 2,
             NonPlayers = 4,
-            Dead = 8,
-            CurrentVehiclePassengers = 16
+            LocalPlayer = 8,
+            Dead = 16,
+            CurrentVehiclePassengers = 32
         }
 
-        public const Filter DefaultFilters = Filter.Dead;
+        public const Filter DefaultFilters = Filter.LocalPlayer | Filter.Dead;
 
         public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 1600f)
         {
@@ -48,6 +49,9 @@ namespace PocceMod.Client
                 if (HasFilter(Filter.Animals) && !API.IsPedHuman(ped))
                     continue;
 
+                if (HasFilter(Filter.LocalPlayer) && ped == player)
+                    continue;
+
                 if (API.IsPedAPlayer(ped))
                 {
                     if (HasFilter(Filter.Players))
@@ -65,7 +69,7 @@ namespace PocceMod.Client
                 if (HasFilter(Filter.CurrentVehiclePassengers) && API.GetVehiclePedIsIn(ped, false) == vehicle)
                     continue;
 
-                if (coords.DistanceToSquared(pos) > rangeSquared || ped == player)
+                if (coords.DistanceToSquared(pos) > rangeSquared)
                     continue;
 
                 peds.Add(ped);

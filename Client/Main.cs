@@ -44,7 +44,7 @@ namespace PocceMod.Client
 
             if (Permission.CanDo(Ability.Rope))
             {
-                Hud.AddMenuListItem("Rope", "Closest ped", () => RopeClosest(Peds.Get(Peds.Filter.Dead | Peds.Filter.CurrentVehiclePassengers)));
+                Hud.AddMenuListItem("Rope", "Closest ped", () => RopeClosest(Peds.Get(Peds.Filter.LocalPlayer | Peds.Filter.Dead | Peds.Filter.CurrentVehiclePassengers)));
                 Hud.AddMenuListItem("Rope", "Closest vehicle", () => RopeClosest(Vehicles.Get()));
                 Hud.AddMenuListItem("Rope", "Closest vehicle tow", () => RopeClosest(Vehicles.Get(), true));
                 Hud.AddMenuListItem("Rope", "Closest prop", () => RopeClosest(Props.Get()));

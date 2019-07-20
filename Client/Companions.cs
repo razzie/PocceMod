@@ -193,7 +193,7 @@ namespace PocceMod.Client
         private static Task Update()
         {
             var player = API.GetPlayerPed(-1);
-            var peds = Peds.Get(Peds.Filter.None);
+            var peds = Peds.Get(Peds.Filter.LocalPlayer);
             var companions = Get(peds);
 
             if (companions.Count == 0 || CheckAndHandlePlayerCombat(peds, companions))
