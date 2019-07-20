@@ -148,6 +148,7 @@ namespace PocceMod.Client
 
             if (((Mode)mode & Mode.Grapple) == Mode.Grapple)
             {
+                await Delay(10);
                 API.StartRopeWinding(rope);
                 _windingRopes.Add(rope);
             }
