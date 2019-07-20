@@ -22,13 +22,13 @@ namespace PocceMod.Client
 
         public const Filter DefaultFilters = Filter.LocalPlayer | Filter.Dead;
 
-        public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 1600f)
+        public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 1600f, int originEntity = -1)
         {
             var peds = new List<int>();
             int ped = 0;
             int handle = API.FindFirstPed(ref ped);
             var player = API.GetPlayerPed(-1);
-            var coords = API.GetEntityCoords(player, true);
+            var coords = API.GetEntityCoords((originEntity != -1) ? originEntity : player, false);
             var vehicle = API.GetVehiclePedIsIn(player, false);
 
             if (!API.IsPedInAnyVehicle(player, false))

@@ -80,12 +80,12 @@ namespace PocceMod.Client
             return entity;
         }
 
-        public static bool GetClosestEntity(IEnumerable<int> entities, out int closest)
+        public static bool GetClosestEntity(IEnumerable<int> entities, out int closest, int originEntity = -1)
         {
             closest = -1;
             bool found = false;
             float minDist = float.MaxValue;
-            var coords = API.GetEntityCoords(API.GetPlayerPed(-1), true);
+            var coords = API.GetEntityCoords((originEntity != -1) ? originEntity : API.GetPlayerPed(-1), false);
 
             foreach (var entity in entities)
             {

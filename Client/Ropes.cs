@@ -148,8 +148,8 @@ namespace PocceMod.Client
             entity2 = await Common.WaitForNetEntity(entity2);
 
             bool tow = ((Mode)mode & Mode.Tow) == Mode.Tow;
-            var pos1 = tow ? GetAdjustedPosition(entity1, -0.75f) : API.GetEntityCoords(entity1, API.IsEntityAPed(entity1)) + TransformOffset(entity1, offset1);
-            var pos2 = tow ? GetAdjustedPosition(entity2, 0.75f) : API.GetEntityCoords(entity2, API.IsEntityAPed(entity2)) + TransformOffset(entity2, offset2);
+            var pos1 = tow ? GetAdjustedPosition(entity1, -0.75f) : API.GetEntityCoords(entity1, API.IsEntityAPed(entity1));// + TransformOffset(entity1, offset1);
+            var pos2 = tow ? GetAdjustedPosition(entity2, 0.75f) : API.GetEntityCoords(entity2, API.IsEntityAPed(entity2));// + TransformOffset(entity2, offset2);
             var length = (float)Math.Sqrt(pos1.DistanceToSquared(pos2));
 
             int unkPtr = 0;

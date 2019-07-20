@@ -135,27 +135,22 @@ namespace PocceMod.Client
             var vehicle = API.GetVehiclePedIsIn(player, !inVehicle);
             var driver = API.GetPedInVehicleSeat(vehicle, -1);
 
-            if (!inVehicle)
-            {
-                if (IsAutopilot(driver) && API.IsEntityAMissionEntity(driver) &&
-                    !API.AnyPassengersRappeling(vehicle) && Vehicles.GetPlayers(vehicle).Count == 0)
-                {
-                    var tmp_driver = driver;
-                    API.SetEntityAsMissionEntity(tmp_driver, false, false);
-                    API.SetPedAsNoLongerNeeded(ref tmp_driver);
-
-                    API.DecorSetInt(driver, WaypointHashDecor, 0);
-                    Wander(driver, vehicle);
-                }
-            }
-
-            if (!IsOwnedAutopilot(driver))
+            if (!IsAutopilot(driver))
                 return Delay(1000);
+
+            if (!inVehicle && API.IsEntityAMissionEntity(driver) &&
+                !API.AnyPassengersRappeling(vehicle) && Vehicles.GetPlayers(vehicle).Count == 0)
+            {
+                API.RemovePedFromGroup(driver);
+                API.SetEntityAsMissionEntity(driver, false, false);
+                var tmp_driver = driver;
+                API.SetPedAsNoLongerNeeded(ref tmp_driver);
+            }
 
             if ((uint)API.GetEntityModel(vehicle) == PoliceHeli)
             {
-                var players = Peds.Get(Peds.Filter.NonPlayers);
-                if (Common.GetClosestEntity(players, out int target))
+                var players = Peds.Get(Peds.Filter.NonPlayers, 1600f, driver);
+                if (Common.GetClosestEntity(players, out int target, driver))
                 {
                     API.SetVehicleSearchlight(vehicle, true, true);
                     API.SetMountedWeaponTarget(driver, target, 0, 0f, 0f, 0f);
@@ -169,6 +164,9 @@ namespace PocceMod.Client
                 API.DecorSetInt(driver, WaypointHashDecor, 0);
                 return Delay(1000);
             }
+
+            if (!IsOwnedAutopilot(driver))
+                return Delay(1000);
 
             if (Common.GetWaypoint(out Vector3 wp, false))
             {
