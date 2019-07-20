@@ -1,5 +1,6 @@
 ﻿using CitizenFX.Core.Native;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PocceMod.Client
 {
@@ -50,6 +51,20 @@ namespace PocceMod.Client
             {
                 API.SetPedComponentVariation(ped, i, _drawables[i], _textures[i], _palettes[i]);
             }
+        }
+
+        public override bool Equals(object value)
+        {
+            var skin = value as Skin;
+            return skin != null && Name == skin.Name &&
+                Enumerable.SequenceEqual(_drawables, skin._drawables) &&
+                Enumerable.SequenceEqual(_textures, skin._textures) &&
+                Enumerable.SequenceEqual(_palettes, skin._palettes);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
 
         private static readonly string[] Models = new string[]
