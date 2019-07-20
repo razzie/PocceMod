@@ -18,6 +18,36 @@ namespace PocceMod.Client
             API.DrawNotification(blink, saveToBrief);
         }
 
+        // I'm really sorry for stealing this
+        // source: https://github.com/TomGrobbe/vMenu/blob/master/vMenu/CommonFunctions.cs
+        public static async Task<string> GetUserInput(string windowTitle, string defaultText, int maxInputLength)
+        {
+            // Create the window title string.
+            var spacer = "\t";
+            API.AddTextEntry($"{API.GetCurrentResourceName().ToUpper()}_WINDOW_TITLE", $"{windowTitle ?? "Enter"}:{spacer}(MAX {maxInputLength.ToString()} Characters)");
+
+            // Display the input box.
+            API.DisplayOnscreenKeyboard(1, $"{API.GetCurrentResourceName().ToUpper()}_WINDOW_TITLE", "", defaultText ?? "", "", "", "", maxInputLength);
+            await BaseScript.Delay(0);
+            // Wait for a result.
+            while (true)
+            {
+                int keyboardStatus = API.UpdateOnscreenKeyboard();
+
+                switch (keyboardStatus)
+                {
+                    case 3: // not displaying input field anymore somehow
+                    case 2: // cancelled
+                        return null;
+                    case 1: // finished editing
+                        return API.GetOnscreenKeyboardResult();
+                    default:
+                        await BaseScript.Delay(0);
+                        break;
+                }
+            }
+        }
+
         public static async Task RequestModel(uint model)
         {
             while (!API.HasModelLoaded(model))
