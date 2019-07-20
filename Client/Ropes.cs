@@ -20,18 +20,20 @@ namespace PocceMod.Client
 
         private class RopegunState
         {
-            private bool _ropegunFirstUse;
-            private int _lastRopegunEntity1;
-            private int _lastRopegunEntity2;
-            private DateTime _lastRopegunFire;
+            private bool _firstUse;
+            private int _lastEntity1;
+            private int _lastEntity2;
+            private Vector3 _lastOffset1;
+            private Vector3 _lastOffset2;
+            private DateTime _lastFire;
 
             public RopegunState()
             {
-                _ropegunFirstUse = true;
+                _firstUse = true;
                 Clear();
             }
 
-            public void Update(ref int entity1, ref int entity2, out bool clearLast)
+            public void Update(ref int entity1, ref int entity2, ref Vector3 offset1, ref Vector3 offset2, out bool clearLast)
             {
                 clearLast = false;
 
@@ -39,40 +41,50 @@ namespace PocceMod.Client
                 if (entity1 != player && entity2 != player)
                     return;
 
-                if (_ropegunFirstUse)
+                if (_firstUse)
                 {
                     Common.Notification("First time using ropegun, yay! You can connect 2 entities in 2 seconds");
-                    _ropegunFirstUse = false;
+                    _firstUse = false;
                 }
 
                 var timestamp = DateTime.Now;
-                if (_lastRopegunEntity1 != -1 && _lastRopegunEntity2 != -1 && (timestamp - _lastRopegunFire) < TimeSpan.FromSeconds(2f))
+                if (_lastEntity1 != -1 && _lastEntity2 != -1 && (timestamp - _lastFire) < TimeSpan.FromSeconds(2f))
                 {
-                    clearLast = (_lastRopegunEntity1 == player || _lastRopegunEntity2 == player);
+                    clearLast = (_lastEntity1 == player || _lastEntity2 == player);
 
                     if (entity1 == player)
-                        entity1 = _lastRopegunEntity2;
+                    {
+                        entity1 = _lastEntity2;
+                        offset1 = _lastOffset2;
+                    }
                     else
-                        entity2 = _lastRopegunEntity2;
+                    {
+                        entity2 = _lastEntity2;
+                        offset2 = _lastOffset2;
+                    }
                 }
 
-                _lastRopegunEntity1 = entity1;
-                _lastRopegunEntity2 = entity2;
-                _lastRopegunFire = timestamp;
+                _lastEntity1 = entity1;
+                _lastEntity2 = entity2;
+                _lastOffset1 = offset1;
+                _lastOffset2 = offset2;
+                _lastFire = timestamp;
             }
 
             public void Undo(out bool clearLast)
             {
                 var player = GetPlayerEntity();
-                clearLast = (_lastRopegunEntity1 == player || _lastRopegunEntity2 == player);
+                clearLast = (_lastEntity1 == player || _lastEntity2 == player);
                 Clear();
             }
 
             public void Clear()
             {
-                _lastRopegunEntity1 = -1;
-                _lastRopegunEntity2 = -1;
-                _lastRopegunFire = DateTime.MinValue;
+                _lastEntity1 = -1;
+                _lastEntity2 = -1;
+                _lastOffset1 = Vector3.Zero;
+                _lastOffset2 = Vector3.Zero;
+                _lastFire = DateTime.MinValue;
             }
         }
 
@@ -132,13 +144,6 @@ namespace PocceMod.Client
             return pos;
         }
 
-        private static Vector3 TransformOffset(int entity, Vector3 offset)
-        {
-            var matrix = new Prop(entity).Matrix;
-            Vector3.Transform(ref offset, ref matrix, out Vector3 result);
-            return result;
-        }
-
         private static async Task AddRope(int player, int entity1, int entity2, Vector3 offset1, Vector3 offset2, int mode)
         {
             if (entity1 == entity2)
@@ -148,8 +153,8 @@ namespace PocceMod.Client
             entity2 = await Common.WaitForNetEntity(entity2);
 
             bool tow = ((Mode)mode & Mode.Tow) == Mode.Tow;
-            var pos1 = tow ? GetAdjustedPosition(entity1, -0.75f) : API.GetEntityCoords(entity1, API.IsEntityAPed(entity1));// + TransformOffset(entity1, offset1);
-            var pos2 = tow ? GetAdjustedPosition(entity2, 0.75f) : API.GetEntityCoords(entity2, API.IsEntityAPed(entity2));// + TransformOffset(entity2, offset2);
+            var pos1 = tow ? GetAdjustedPosition(entity1, -0.75f) : API.GetOffsetFromEntityInWorldCoords(entity1, offset1.X, offset1.Y, offset1.Z);
+            var pos2 = tow ? GetAdjustedPosition(entity2, 0.75f) : API.GetOffsetFromEntityInWorldCoords(entity2, offset2.X, offset2.Y, offset2.Z);
             var length = (float)Math.Sqrt(pos1.DistanceToSquared(pos2));
 
             int unkPtr = 0;
@@ -199,12 +204,12 @@ namespace PocceMod.Client
             }
         }
 
-        public static void PlayerAttach(int entity, Mode mode = Mode.Normal)
+        public static void PlayerAttach(int entity, Vector3 offset, Mode mode = Mode.Normal)
         {
-            Attach(GetPlayerEntity(), entity, mode);
+            Attach(GetPlayerEntity(), entity, Vector3.Zero, offset, mode);
         }
 
-        public static void Attach(int entity1, int entity2, Mode mode = Mode.Normal)
+        public static void Attach(int entity1, int entity2, Vector3 offset1, Vector3 offset2, Mode mode = Mode.Normal)
         {
             if (!Permission.CanDo(Ability.RopeOtherPlayer))
             {
@@ -219,7 +224,7 @@ namespace PocceMod.Client
 
             if ((mode & Mode.Ropegun) == Mode.Ropegun)
             {
-                _ropegunState.Update(ref entity1, ref entity2, out bool clearLast);
+                _ropegunState.Update(ref entity1, ref entity2, ref offset1, ref offset2, out bool clearLast);
                 if (clearLast)
                     ClearLast();
             }
@@ -231,7 +236,7 @@ namespace PocceMod.Client
             if (entity1 == entity2)
                 return;
 
-            TriggerServerEvent("PocceMod:AddRope", API.ObjToNet(entity1), API.ObjToNet(entity2), Vector3.Zero, Vector3.Zero, (int)mode);
+            TriggerServerEvent("PocceMod:AddRope", API.ObjToNet(entity1), API.ObjToNet(entity2), offset1, offset2, (int)mode);
         }
 
         public static void ClearAll()
@@ -249,6 +254,51 @@ namespace PocceMod.Client
             var player = API.GetPlayerPed(-1);
             Peds.GiveWeapon(player, Ropegun);
             API.SetCurrentPedVehicleWeapon(player, Ropegun);
+        }
+
+        private static bool TryShootRopegun(float distance, out Task<int> target, out Vector3 offset)
+        {
+            var player = GetPlayerEntity();
+            Common.GetAimCoords(out Vector3 rayBegin, out Vector3 rayEnd, distance);
+            var ray = API.CastRayPointToPoint(rayBegin.X, rayBegin.Y, rayBegin.Z, rayEnd.X, rayEnd.Y, rayEnd.Z, 1 | 2 | 4 | 8 | 16 | 32, player, 0);
+
+            target = Task.FromResult(-1);
+            offset = Vector3.Zero;
+
+            bool hit = false;
+            var coords = Vector3.Zero;
+            var normal = Vector3.Zero;
+            var entity = -1;
+            API.GetRaycastResult(ray, ref hit, ref coords, ref normal, ref entity);
+
+            if (hit)
+            {
+                switch (API.GetEntityType(entity))
+                {
+                    case 1:
+                    case 2:
+                        target = Task.FromResult(entity);
+                        offset = API.GetOffsetFromEntityGivenWorldCoords(entity, coords.X, coords.Y, coords.Z);
+                        return true;
+
+                    case 3:
+                        if (Props.IsPocceProp(entity))
+                        {
+                            target = Task.FromResult(entity);
+                            offset = API.GetOffsetFromEntityGivenWorldCoords(entity, coords.X, coords.Y, coords.Z);
+                            return true;
+                        }
+                        break;
+                }
+
+                if (Permission.CanDo(Ability.RopeGunStaticObjects))
+                {
+                    target = Props.SpawnAtCoords("prop_devin_rope_01", coords, normal, true);
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static async Task UpdateRopegun()
@@ -271,39 +321,13 @@ namespace PocceMod.Client
                 return;
 
             var attackControl = API.IsPedInAnyVehicle(player, false) ? 69 : 24;  // INPUT_VEH_ATTACK; INPUT_ATTACK
-            if (API.IsControlJustPressed(0, attackControl))
+            var grapple = (RopegunWindKey > 0 && API.IsControlPressed(0, RopegunWindKey));
+
+            if (API.IsControlJustPressed(0, attackControl) && TryShootRopegun(48f, out Task<int> target, out Vector3 offset))
             {
-                Mode mode = (RopegunWindKey > 0 && API.IsControlPressed(0, RopegunWindKey)) ? Mode.Ropegun | Mode.Grapple : Mode.Ropegun;
-
-                int target = 0;
-                if (API.GetEntityPlayerIsFreeAimingAt(playerID, ref target) &&
-                    (API.IsEntityAPed(target) || API.IsEntityAVehicle(target) || API.DoesEntityBelongToThisScript(target, true)))
-                {
-                    if (API.IsEntityAPed(target) && API.IsPedInAnyVehicle(target, false))
-                        target = API.GetVehiclePedIsIn(target, false);
-
-                    PlayerAttach(target, mode);
-                }
-                else if (Permission.CanDo(Ability.RopeGunStaticObjects))
-                {
-                    player = GetPlayerEntity();
-                    Common.GetAimCoords(out Vector3 rayBegin, out Vector3 rayEnd, 30f);
-                    var ray = API.CastRayPointToPoint(rayBegin.X, rayBegin.Y, rayBegin.Z, rayEnd.X, rayEnd.Y, rayEnd.Z, -1, player, 0);
-
-                    bool hit = false;
-                    var endCoords = Vector3.Zero;
-                    var surfaceNormal = Vector3.Zero;
-                    int entityHit = -1;
-                    API.GetRaycastResult(ray, ref hit, ref endCoords, ref surfaceNormal, ref entityHit);
-
-                    if (hit)
-                    {
-                        var prop = await Props.SpawnAtCoords("prop_devin_rope_01", endCoords, surfaceNormal);
-                        API.FreezeEntityPosition(prop, true);
-                        PlayerAttach(prop, mode);
-                        API.SetEntityAsNoLongerNeeded(ref prop);
-                    }
-                }
+                var entity = await target;
+                PlayerAttach(entity, offset, grapple ? Mode.Ropegun | Mode.Grapple : Mode.Ropegun);
+                API.SetEntityAsNoLongerNeeded(ref entity);
             }
         }
 

@@ -311,7 +311,7 @@ namespace PocceMod.Client
         public static void RopeClosest(IEnumerable<int> entities, bool tow = false)
         {
             if (Common.GetClosestEntity(entities, out int closest))
-                Ropes.PlayerAttach(closest, tow ? Ropes.Mode.Tow : Ropes.Mode.Normal);
+                Ropes.PlayerAttach(closest, Vector3.Zero, tow ? Ropes.Mode.Tow : Ropes.Mode.Normal);
             else
                 Common.Notification("Nothing in range");
         }

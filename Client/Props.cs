@@ -64,6 +64,11 @@ namespace PocceMod.Client
             return props;
         }
 
+        public static bool IsPocceProp(int prop)
+        {
+            return API.DecorGetBool(prop, PropDecor);
+        }
+
         public static Task<int> Spawn(string model)
         {
             if (_firstSpawn)
@@ -85,7 +90,7 @@ namespace PocceMod.Client
             }
         }
 
-        public static async Task<int> SpawnAtCoords(string model, Vector3 coords, Vector3 rotation)
+        public static async Task<int> SpawnAtCoords(string model, Vector3 coords, Vector3 rotation, bool freeze = false)
         {
             var hash = (uint)API.GetHashKey(model);
             if (!API.IsModelValid(hash))
@@ -102,7 +107,7 @@ namespace PocceMod.Client
             API.DecorSetBool(prop, PropDecor, true);
             await Common.RequestCollision(hash);
 
-            if (!API.DoesEntityHavePhysics(prop))
+            if (!API.DoesEntityHavePhysics(prop) || freeze)
                 API.FreezeEntityPosition(prop, true);
 
             return prop;
