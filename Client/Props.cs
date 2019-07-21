@@ -1,5 +1,6 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using PocceMod.Shared;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ namespace PocceMod.Client
     public class Props : BaseScript
     {
         private const string PropDecor = "POCCE_PROP";
+        private static readonly int PropUndoKey;
         private static readonly List<int> _props = new List<int>();
         private static bool _firstSpawn = true;
 
@@ -20,6 +22,11 @@ namespace PocceMod.Client
         }
 
         public const Filter DefaultFilters = Filter.Stock;
+
+        static Props()
+        {
+            PropUndoKey = Config.GetConfigInt("PropUndoKey");
+        }
 
         public Props()
         {
@@ -189,6 +196,9 @@ namespace PocceMod.Client
                     API.SetEntityRotation(prop, rotation.X, rotation.Y, rotation.Z + 1f, 0, true);
                 else if (API.IsControlPressed(0, 175)) // right
                     API.SetEntityRotation(prop, rotation.X, rotation.Y, rotation.Z - 1f, 0, true);
+
+                if (PropUndoKey > 0 && API.IsControlJustPressed(0, PropUndoKey))
+                    ClearLast();
 
                 return Delay(0);
             }
