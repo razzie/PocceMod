@@ -1,4 +1,6 @@
-﻿using CitizenFX.Core.Native;
+﻿using CitizenFX.Core;
+using CitizenFX.Core.Native;
+using PocceMod.Shared;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -35,10 +37,7 @@ namespace PocceMod.Client
             }
 
             Model = (uint)API.GetEntityModel(ped);
-            if (_lookupTable.TryGetValue(Model, out string name))
-                Name = name;
-            else
-                Name = string.Format("{0:X8}", Model);
+            Name = ModelToName(Model);
         }
 
         public string Name
@@ -75,6 +74,14 @@ namespace PocceMod.Client
             return base.GetHashCode();
         }
 
+        public static string ModelToName(uint model)
+        {
+            if (_lookupTable.TryGetValue(model, out string name))
+                return name;
+            else
+                return string.Format("{0:X8}", model);
+        }
+
         private static readonly string[] Models = new string[]
         {
             "a_c_boar",
@@ -96,6 +103,7 @@ namespace PocceMod.Client
             "a_c_mtlion",
             "a_c_pig",
             "a_c_pigeon",
+            "a_c_pug",
             "a_c_poodle",
             "a_c_rabbit_01",
             "a_c_rat",
@@ -789,6 +797,11 @@ namespace PocceMod.Client
         public IEnumerable<KeyValuePair<string, List<Skin>>> Elements
         {
             get { return _skins; }
+        }
+
+        public int Count
+        {
+            get { return _skins.Count; }
         }
 
         public void Add(Skin skin)

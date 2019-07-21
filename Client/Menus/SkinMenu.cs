@@ -82,6 +82,9 @@ namespace PocceMod.Client.Menus
                 _allSkins.Add(skin);
                 Common.Notification("ped: " + skin.Name);
             }
+
+            if (_lastSkins.Count > 0)
+                ShowLastSkins();
         }
 
         private async Task ChangeSkin(MenuListItem item, int index)
