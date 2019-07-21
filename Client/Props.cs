@@ -1,5 +1,6 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using PocceMod.Client.Menus;
 using PocceMod.Shared;
 using System;
 using System.Collections.Generic;
@@ -175,7 +176,7 @@ namespace PocceMod.Client
 
         private static Task Update()
         {
-            if (Hud.IsMenuOpen() || _props.Count == 0)
+            if (MainMenu.IsOpen || _props.Count == 0)
                 return Delay(1000);
 
             var player = API.GetPlayerPed(-1);

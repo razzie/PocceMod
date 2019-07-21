@@ -1,5 +1,6 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using PocceMod.Client.Menus;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -375,7 +376,7 @@ namespace PocceMod.Client
                 }
             }
 
-            if (!Hud.IsMenuOpen() && API.DecorExistOn(vehicle, LightMultiplierDecor))
+            if (!MainMenu.IsOpen && API.DecorExistOn(vehicle, LightMultiplierDecor))
             {
                 if (API.IsControlPressed(0, 172)) // up
                 {

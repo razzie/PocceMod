@@ -1,5 +1,6 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using PocceMod.Client.Menus;
 using PocceMod.Shared;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,9 @@ namespace PocceMod.Client
 {
     public class Main : BaseScript
     {
+        private static MainMenu _menu;
+        private static bool _crazyOceanWaves = false;
+
         public Main()
         {
             Permission.Granted += (player, group) => SetupMenu();
@@ -21,110 +25,127 @@ namespace PocceMod.Client
 
         private static void SetupMenu()
         {
+            _menu = new MainMenu();
+
+            #region Vehicle
             if (Permission.CanDo(Ability.SpawnVehicle))
-                Hud.AddSubmenu("Spawn vehicle", async (vehicle) => await Vehicles.Spawn(vehicle), Config.VehicleList);
+                _menu.AddMenuListItem("Vehicle", "Spawn from list ☰", _menu.VehicleMenu.OpenMenu);
 
-            if (Permission.CanDo(Ability.SpawnProp))
-            {
-                Hud.AddSubmenu("Spawn prop", async (prop) => await Props.Spawn(prop), Config.PropList, 10);
-                API.RegisterCommand("prop", new Action<int, List<object>, string>(PropCmd), false);
-            }
+            if (Permission.CanDo(Ability.SpawnVehicleByName))
+                _menu.AddMenuListItemAsync("Vehicle", "Spawn by name", VehicleMenu.SpawnByName);
 
-            if (Permission.CanDo(Ability.SpawnPocceCompanion))
-                Hud.AddMenuListItem("Spawn ped", "Pocce companion", PocceCompanion);
-
-            if (Permission.CanDo(Ability.SpawnPetCompanion))
-                Hud.AddMenuListItem("Spawn ped", "Pet companion", PetCompanion);
-
-            if (Permission.CanDo(Ability.SpawnPoccePassengers))
-                Hud.AddMenuListItem("Spawn ped", "Pocce passengers", PoccePassengers);
-
-            if (Permission.CanDo(Ability.SpawnTrashPed))
-                Hud.AddMenuListItem("Spawn ped", "Trash ped", SpawnTrashPed);
-
-            if (Permission.CanDo(Ability.Rope))
-            {
-                Hud.AddMenuListItem("Rope", "Closest ped", () => RopeClosest(Peds.Get(Peds.Filter.LocalPlayer | Peds.Filter.Dead | Peds.Filter.CurrentVehiclePassengers)));
-                Hud.AddMenuListItem("Rope", "Closest vehicle", () => RopeClosest(Vehicles.Get()));
-                Hud.AddMenuListItem("Rope", "Closest vehicle tow", () => RopeClosest(Vehicles.Get(), true));
-                Hud.AddMenuListItem("Rope", "Closest prop", () => RopeClosest(Props.Get()));
-            }
-
-            if (Permission.CanDo(Ability.RopeGun))
-                Hud.AddMenuListItem("Rope", "Equip rope gun", () => Ropes.EquipRopeGun());
-
-            if (Permission.CanDo(Ability.RappelFromHeli))
-                Hud.AddMenuListItem("Rope", "Rappel from heli", RappelFromHeli);
-
-            if (Permission.CanDo(Ability.Rope) || Permission.CanDo(Ability.RopeGun))
-            {
-                Hud.AddMenuListItem("Clear", "Ropes", () => Ropes.ClearAll());
-                Hud.AddMenuListItem("Clear", "Last rope", () => Ropes.ClearLast());
-            }
-
-            if (Permission.CanDo(Ability.SpawnProp))
-            {
-                Hud.AddMenuListItem("Clear", "Props", () => Props.ClearAll());
-                Hud.AddMenuListItem("Clear", "Last prop", () => Props.ClearLast());
-            }
+            if (Permission.CanDo(Ability.Autopilot))
+                _menu.AddMenuListItemAsync("Vehicle", "Autopilot (toggle)", Autopilot.Toggle);
 
             if (Permission.CanDo(Ability.TeleportToClosestVehicle))
             {
-                Hud.AddMenuListItem("Teleport", "Closest vehicle", () => TeleportToClosestVehicle());
-                Hud.AddMenuListItem("Teleport", "Closest vehicle as passenger", () => TeleportToClosestVehicle(true));
+                _menu.AddMenuListItem("Vehicle", "TP into closest", () => VehicleMenu.TeleportToClosestVehicle());
+                _menu.AddMenuListItem("Vehicle", "TP into closest as passenger", () => VehicleMenu.TeleportToClosestVehicle(true));
             }
+            #endregion
 
-            if (Permission.CanDo(Ability.OceanWaves))
+            #region Prop
+            if (Permission.CanDo(Ability.SpawnProp))
             {
-                Hud.AddMenuListItem("Ocean waves", "High", () => API.SetWavesIntensity(8f));
-                Hud.AddMenuListItem("Ocean waves", "Mid", () => API.SetWavesIntensity(2f));
-                Hud.AddMenuListItem("Ocean waves", "Low", () => API.SetWavesIntensity(0f));
-                Hud.AddMenuListItem("Ocean waves", "Reset", () => API.ResetWavesIntensity());
+                _menu.AddMenuListItem("Prop", "Spawn from list ☰", _menu.PropMenu.OpenMenu);
+                _menu.AddMenuListItem("Prop", "Spawn from list (search)", async () =>
+                {
+                    var prop = await Common.GetUserInput("Filter props", "", 30);
+                    _menu.PropMenu.Filter(prop);
+                });
+                _menu.AddMenuListItem("Prop", "Clear last", Props.ClearLast);
+                _menu.AddMenuListItem("Prop", "Clear all", Props.ClearAll);
+            }
+            #endregion
+
+            #region Rope
+            if (Permission.CanDo(Ability.RopeGun))
+                _menu.AddMenuListItem("Rope", "Equip rope gun", Ropes.EquipRopeGun);
+
+            if (Permission.CanDo(Ability.Rope))
+            {
+                _menu.AddMenuListItem("Rope", "Closest ped", () => RopeClosest(Peds.Get(Peds.Filter.LocalPlayer | Peds.Filter.Dead | Peds.Filter.CurrentVehiclePassengers)));
+                _menu.AddMenuListItem("Rope", "Closest vehicle", () => RopeClosest(Vehicles.Get()));
+                _menu.AddMenuListItem("Rope", "Closest vehicle tow", () => RopeClosest(Vehicles.Get(), true));
+                _menu.AddMenuListItem("Rope", "Closest prop", () => RopeClosest(Props.Get()));
             }
 
+            if (Permission.CanDo(Ability.Rope) || Permission.CanDo(Ability.RopeGun))
+            {
+                _menu.AddMenuListItem("Rope", "Clear last", Ropes.ClearLast);
+                _menu.AddMenuListItem("Rope", "Clear all", Ropes.ClearAll);
+            }
+            #endregion
+
+            #region Companion
+            if (Permission.CanDo(Ability.SpawnPocceCompanion))
+                _menu.AddMenuListItemAsync("Companion", "Spawn pocce", PocceCompanion);
+
+            if (Permission.CanDo(Ability.SpawnPetCompanion))
+                _menu.AddMenuListItemAsync("Companion", "Spawn pet", PetCompanion);
+
+            if (Permission.CanDo(Ability.SpawnPoccePassengers))
+                _menu.AddMenuListItemAsync("Companion", "Pocce passengers", PoccePassengers);
+            #endregion
+
+            #region Riot
             if (Permission.CanDo(Ability.PocceRiot))
-                Hud.AddMenuListItem("Riot", "Pocce riot", async () => await PocceRiot(false));
+                _menu.AddMenuListItem("Riot", "Pocce riot", async () => await PocceRiot(false));
 
             if (Permission.CanDo(Ability.PocceRiotArmed))
-                Hud.AddMenuListItem("Riot", "Armed pocce riot", async () => await PocceRiot(true));
+                _menu.AddMenuListItem("Riot", "Pocce riot (armed)", async () => await PocceRiot(true));
 
             if (Permission.CanDo(Ability.PedRiot))
-                Hud.AddMenuListItem("Riot", "Ped riot", async () => await PedRiot(false));
+                _menu.AddMenuListItem("Riot", "Ped riot", async () => await PedRiot(false));
 
             if (Permission.CanDo(Ability.PedRiotArmed))
-                Hud.AddMenuListItem("Riot", "Armed ped riot", async () => await PedRiot(true));
+                _menu.AddMenuListItem("Riot", "Ped riot (armed)", async () => await PedRiot(true));
+            #endregion
 
-            if (Permission.CanDo(Ability.Autopilot))
-                Hud.AddMenuListItem("Vehicle", "Autopilot", Autopilot.Toggle);
-
-            if (Permission.CanDo(Ability.EMP))
-                Hud.AddMenuListItem("Vehicle", "EMP", () => Vehicles.EMP());
-
-            if (Permission.CanDo(Ability.CargobobMagnet))
-                Hud.AddMenuListItem("Vehicle", "Cargobob magnet", () => CargobobMagnet());
-
-            if (Permission.CanDo(Ability.UltrabrightHeadlight))
-                Hud.AddMenuListItem("Vehicle", "Ultrabright headlight", () => UltrabrightHeadlight());
-
+            #region Skin
             if (Permission.CanDo(Ability.IdentifySkins))
             {
                 if (Permission.CanDo(Ability.ChangeSkin))
                 {
-                    var skins = new DataSource<string>();
-                    Hud.AddMenuItem("Indentify skins", () => skins.Push(IdentifyPedModels()));
-                    Hud.AddSubmenu("Change skin", async (skin) => await ChangeSkin(skin), skins);
+                    _menu.AddMenuListItem("Skin", "Detect nearby skins", () => _menu.SkinMenu.DataSource.Push(SkinMenu.DetectSkins()));
+                    //_menu.AddMenuListItem("Skin", "Choose from last detect ☰", ???);
+                    _menu.AddMenuListItem("Skin", "Choose from all ☰", _menu.SkinMenu.OpenMenu);
                 }
                 else
                 {
-                    Hud.AddMenuItem("Indentify skins", () => IdentifyPedModels());
+                    _menu.AddMenuListItem("Skin", "Detect nearby skins", () => SkinMenu.DetectSkins());
                 }
             }
+            #endregion
 
-            var menukey = Config.GetConfigInt("MenuKey");
-            if (menukey > 0)
+            #region Extra
+            if (Permission.CanDo(Ability.OceanWaves))
             {
-                Hud.SetMenuKey(menukey);
+                _menu.AddMenuListItem("Extra", "Crazy ocean waves (toggle)", () =>
+                {
+                    _crazyOceanWaves = !_crazyOceanWaves;
+                    if (_crazyOceanWaves)
+                        API.SetWavesIntensity(8f);
+                    else
+                        API.ResetWavesIntensity();
+                });
             }
+
+            if (Permission.CanDo(Ability.RappelFromHeli))
+                _menu.AddMenuListItemAsync("Extra", "Rappel from heli", RappelFromHeli);
+
+            if (Permission.CanDo(Ability.UltrabrightHeadlight))
+                _menu.AddMenuListItem("Extra", "Ultrabright headlight", UltrabrightHeadlight);
+
+            if (Permission.CanDo(Ability.EMP))
+                _menu.AddMenuListItem("Extra", "EMP", () => Vehicles.EMP());
+
+            if (Permission.CanDo(Ability.CargobobMagnet))
+                _menu.AddMenuListItem("Extra", "Cargobob magnet", CargobobMagnet);
+
+            if (Permission.CanDo(Ability.SpawnTrashPed))
+                _menu.AddMenuListItemAsync("Extra", "Trash ped", SpawnTrashPed);
+            #endregion
         }
 
         public static async Task SpawnTrashPed()
@@ -282,32 +303,6 @@ namespace PocceMod.Client
             API.SetEntityAsNoLongerNeeded(ref ped);
         }
 
-        public static List<string> IdentifyPedModels()
-        {
-            var coords = API.GetEntityCoords(API.GetPlayerPed(-1), true);
-            var peds = Peds.Get();
-            var models = new List<string>();
-
-            foreach (var ped in peds)
-            {
-                var pos = API.GetEntityCoords(ped, true);
-                if (coords.DistanceToSquared(pos) < 4f)
-                {
-                    var model = string.Format("0x{0:X8}", API.GetEntityModel(ped));
-                    models.Add(model);
-                    Common.Notification("ped:" + model);
-                }
-            }
-
-            return models;
-        }
-
-        public static async Task ChangeSkin(string hexModel)
-        {
-            var model = uint.Parse(hexModel.Substring(2), System.Globalization.NumberStyles.HexNumber);
-            await Game.Player.ChangeModel(new Model((PedHash)model));
-        }
-
         public static void RopeClosest(IEnumerable<int> entities, bool tow = false)
         {
             if (Common.GetClosestEntity(entities, out int closest))
@@ -385,43 +380,6 @@ namespace PocceMod.Client
             {
                 Common.Notification("Player is not in a heli");
             }
-        }
-
-        public static void TeleportToClosestVehicle(bool forcePassenger = false)
-        {
-            var vehicles = Vehicles.Get();
-            if (Common.GetClosestEntity(vehicles, out int vehicle))
-            {
-                if (Vehicles.GetFreeSeat(vehicle, out int seat, forcePassenger))
-                {
-                    var player = API.GetPlayerPed(-1);
-                    API.SetPedIntoVehicle(player, vehicle, seat);
-                }
-                else
-                {
-                    Common.Notification("Closest vehicle doesn't have a free seat");
-                }
-            }
-            else
-            {
-                Common.Notification("No vehicles in range");
-            }
-        }
-
-        private static void PropCmd(int source, List<object> args, string raw)
-        {
-            if (args.Count == 0)
-                return;
-
-            Prop(args[0].ToString());
-        }
-
-        public static void Prop(string prop)
-        {
-            if (!Permission.CanDo(Ability.SpawnProp))
-                return;
-
-            Hud.FilterSubmenu("Spawn prop", prop);
         }
     }
 }

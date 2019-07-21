@@ -32,6 +32,11 @@ namespace PocceMod.Client.Menus
             PropMenu = new PropMenu();
             SkinMenu = new SkinMenu();
 
+            MenuController.AddMenu(this);
+            MenuController.AddSubmenu(this, VehicleMenu);
+            MenuController.AddSubmenu(this, PropMenu);
+            MenuController.AddSubmenu(this, SkinMenu);
+
             OnItemSelect += async (_menu, _item, _index) =>
             {
                 if (_menuItemActions.TryGetValue(_index, out Func<Task> action))
