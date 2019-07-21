@@ -118,7 +118,10 @@ namespace PocceMod.Client
 
             submenu.OnMenuClose += (_menu) =>
             {
+                var item = submenu.GetCurrentMenuItem();
                 submenu.ResetFilter();
+                var index = item.Index;
+                submenu.RefreshIndex(index, index > submenu.MaxItemsOnScreen ? index - submenu.MaxItemsOnScreen + 1 : 0);
             };
 
             if (groupByLetters > 0)
@@ -213,7 +216,10 @@ namespace PocceMod.Client
 
             submenu.OnMenuClose += (_menu) =>
             {
+                var item = submenu.GetCurrentMenuItem();
                 submenu.ResetFilter();
+                var index = item.Index;
+                submenu.RefreshIndex(index, index > submenu.MaxItemsOnScreen ? index - submenu.MaxItemsOnScreen + 1 : 0);
             };
         }
 
@@ -269,7 +275,7 @@ namespace PocceMod.Client
                                 {
                                     menuListItem.ListIndex = i;
                                     var index = menuItem.Index;
-                                    menu.RefreshIndex(index, index > menu.MaxItemsOnScreen ? index - menu.MaxItemsOnScreen - 1 : 0);
+                                    menu.RefreshIndex(index, index > menu.MaxItemsOnScreen ? index - menu.MaxItemsOnScreen + 1 : 0);
                                     menu.OpenMenu();
                                     return true;
                                 }
@@ -280,7 +286,7 @@ namespace PocceMod.Client
                             if (menuItem.Text == item)
                             {
                                 var index = menuItem.Index;
-                                menu.RefreshIndex(index, index > menu.MaxItemsOnScreen ? index - menu.MaxItemsOnScreen -1 : 0);
+                                menu.RefreshIndex(index, index > menu.MaxItemsOnScreen ? index - menu.MaxItemsOnScreen + 1 : 0);
                                 menu.OpenMenu();
                                 return true;
                             }
