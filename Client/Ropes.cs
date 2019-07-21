@@ -209,6 +209,14 @@ namespace PocceMod.Client
             Attach(GetPlayerEntity(), entity, Vector3.Zero, offset, mode);
         }
 
+        public static void AttachToClosest(IEnumerable<int> entities, bool tow = false)
+        {
+            if (Common.GetClosestEntity(entities, out int closest))
+                PlayerAttach(closest, Vector3.Zero, tow ? Mode.Tow : Mode.Normal);
+            else
+                Common.Notification("Nothing in range");
+        }
+
         public static void Attach(int entity1, int entity2, Vector3 offset1, Vector3 offset2, Mode mode = Mode.Normal)
         {
             if (!Permission.CanDo(Ability.RopeOtherPlayer))
