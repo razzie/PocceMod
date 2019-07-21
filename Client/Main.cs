@@ -102,17 +102,12 @@ namespace PocceMod.Client
 
             #region Skin
             if (Permission.CanDo(Ability.IdentifySkins))
+                _menu.AddMenuListItem("Skin", "Detect nearby skins", _menu.SkinMenu.DetectSkins);
+
+            if (Permission.CanDo(Ability.ChangeSkin))
             {
-                if (Permission.CanDo(Ability.ChangeSkin))
-                {
-                    _menu.AddMenuListItem("Skin", "Detect nearby skins", () => _menu.SkinMenu.DataSource.Push(SkinMenu.DetectSkins()));
-                    //_menu.AddMenuListItem("Skin", "Choose from last detect ↕", ???);
-                    _menu.AddMenuListItem("Skin", "Choose from all ↕", _menu.SkinMenu.OpenMenu);
-                }
-                else
-                {
-                    _menu.AddMenuListItem("Skin", "Detect nearby skins", () => SkinMenu.DetectSkins());
-                }
+                _menu.AddMenuListItem("Skin", "Choose from last detect ↕", _menu.SkinMenu.ShowLastSkins);
+                _menu.AddMenuListItem("Skin", "Choose from all ↕", _menu.SkinMenu.ShowAllSkins);
             }
             #endregion
 

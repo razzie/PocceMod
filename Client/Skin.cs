@@ -1,6 +1,7 @@
 ﻿using CitizenFX.Core.Native;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace PocceMod.Client
 {
@@ -33,11 +34,11 @@ namespace PocceMod.Client
                 _palettes[i] = API.GetPedPaletteVariation(ped, i);
             }
 
-            var hash = (uint)API.GetEntityModel(ped);
-            if (_lookupTable.TryGetValue(hash, out string name))
+            Model = (uint)API.GetEntityModel(ped);
+            if (_lookupTable.TryGetValue(Model, out string name))
                 Name = name;
             else
-                Name = string.Format("{0:X8}", hash);
+                Name = string.Format("{0:X8}", Model);
         }
 
         public string Name
@@ -45,8 +46,15 @@ namespace PocceMod.Client
             get; private set;
         }
 
-        public void Restore(int ped)
+        public uint Model
         {
+            get; private set;
+        }
+
+        public async Task Restore(int ped)
+        {
+            await Common.RequestModel(Model);
+
             for (int i = 0; i < ComponentCount; ++i)
             {
                 API.SetPedComponentVariation(ped, i, _drawables[i], _textures[i], _palettes[i]);
@@ -772,5 +780,46 @@ namespace PocceMod.Client
             "u_m_y_tattoo_01",
             "u_m_y_zombie_01"
         };
+    }
+
+    public class SkinSet
+    {
+        private readonly Dictionary<string, List<Skin>> _skins = new Dictionary<string, List<Skin>>();
+
+        public IEnumerable<KeyValuePair<string, List<Skin>>> Elements
+        {
+            get { return _skins; }
+        }
+
+        public void Add(Skin skin)
+        {
+            if (_skins.TryGetValue(skin.Name, out List<Skin> list))
+            {
+                foreach (var item in list)
+                {
+                    if (item.Equals(skin))
+                        return;
+                }
+
+                list.Add(skin);
+            }
+            else
+            {
+                _skins.Add(skin.Name, new List<Skin> { skin });
+            }
+        }
+
+        public void Add(IEnumerable<Skin> skins)
+        {
+            foreach (var skin in skins)
+            {
+                Add(skin);
+            }
+        }
+
+        public void Clear()
+        {
+            _skins.Clear();
+        }
     }
 }

@@ -8,76 +8,91 @@ namespace PocceMod.Client.Menus
 {
     public class SkinMenu : Menu
     {
+        private bool _firstUse = true;
+        private readonly SkinSet _allSkins = new SkinSet();
+        private readonly SkinSet _lastSkins = new SkinSet();
+
+        public enum SkinSelection
+        {
+            AllSkins,
+            LastSkins
+        }
+
         public SkinMenu() : base("PocceMod", "select skin")
         {
-            DataSource = new DataSource<string>();
-
-            OnItemSelect += async (_menu, _item, _index) =>
-            {
-                var item = _item.Text;
-                await ChangeSkin(item);
-                CloseMenu();
-            };
-
             OnListItemSelect += async (_menu, _listItem, _listIndex, _itemIndex) =>
             {
-                var item = _listItem.ListItems[_listIndex];
-                await ChangeSkin(item);
-                CloseMenu();
+                await ChangeSkin(_listItem, _listIndex);
+                //CloseMenu();
             };
 
             OnMenuOpen += (_menu) =>
             {
-                var items = DataSource.Pull();
-                foreach (var item in items)
+                if (_firstUse)
                 {
-                    bool isNewItem = true;
-                    foreach (var menuItem in GetMenuItems())
+                    Common.Notification("Weapon loadout is lost when chenging skin!");
+                    _firstUse = false;
+                }
+
+                var skinset = Selection == SkinSelection.AllSkins ? _allSkins : _lastSkins;
+
+                foreach (var items in skinset.Elements)
+                {
+                    var list = new List<string>();
+                    for (int i = 0; i < items.Value.Count; ++i)
                     {
-                        if (menuItem.Text == item)
-                        {
-                            isNewItem = false;
-                            break;
-                        }
+                        list.Add("#" + i);
                     }
 
-                    if (isNewItem)
-                    {
-                        AddMenuItem(new MenuItem(item));
-                    }
+                    var menuItem = new MenuListItem(items.Key, list, 0);
+                    menuItem.ItemData = items.Value;
+                    AddMenuItem(menuItem);
                 }
+            };
+
+            OnMenuClose += (_menu) =>
+            {
+                ClearMenuItems();
             };
         }
 
-        public DataSource<string> DataSource
+        public SkinSelection Selection { get; set; } = SkinSelection.AllSkins;
+
+        public void ShowAllSkins()
         {
-            get; private set;
+            Selection = SkinSelection.AllSkins;
+            OpenMenu();
         }
 
-        public static List<string> DetectSkins()
+        public void ShowLastSkins()
         {
-            var coords = API.GetEntityCoords(API.GetPlayerPed(-1), true);
-            var peds = Peds.Get();
-            var models = new List<string>();
+            Selection = SkinSelection.LastSkins;
+            OpenMenu();
+        }
+
+        public void DetectSkins()
+        {
+            _lastSkins.Clear();
+            var peds = Peds.Get(Peds.DefaultFilters, 4f);
 
             foreach (var ped in peds)
             {
-                var pos = API.GetEntityCoords(ped, true);
-                if (coords.DistanceToSquared(pos) < 4f)
-                {
-                    var model = string.Format("0x{0:X8}", API.GetEntityModel(ped));
-                    models.Add(model);
-                    Common.Notification("ped:" + model);
-                }
+                var skin = new Skin(ped);
+                _lastSkins.Add(skin);
+                _allSkins.Add(skin);
+                Common.Notification("ped: " + skin.Name);
             }
-
-            return models;
         }
 
-        public static async Task ChangeSkin(string hexModel)
+        private async Task ChangeSkin(MenuListItem item, int index)
         {
-            var model = uint.Parse(hexModel.Substring(2), System.Globalization.NumberStyles.HexNumber);
-            await Game.Player.ChangeModel(new Model((PedHash)model));
+            var skins = item.ItemData as List<Skin>;
+            if (skins != null && skins.Count > index)
+            {
+                var skin = skins[index];
+                await Game.Player.ChangeModel(new Model((PedHash)skin.Model));
+                await skin.Restore(API.GetPlayerPed(-1));
+            }
         }
     }
 }

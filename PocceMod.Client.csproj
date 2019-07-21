@@ -61,7 +61,6 @@
     <Compile Include="Client\Skin.cs" />
     <Compile Include="Shared\Ability.cs" />
     <Compile Include="Shared\Config.cs" />
-    <Compile Include="Client\DataSource.cs" />
     <Compile Include="Client\Main.cs" />
     <Compile Include="Client\Companions.cs" />
     <Compile Include="Client\Peds.cs" />
