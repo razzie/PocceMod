@@ -110,6 +110,7 @@ namespace PocceMod.Client
             await Common.RequestModel(hash);
             var prop = API.CreateObject((int)hash, coords.X, coords.Y, coords.Z, true, false, false);
             _props.Add(prop);
+            API.SetModelAsNoLongerNeeded(hash);
 
             API.SetEntityRotation(prop, rotation.X, rotation.Y, rotation.Z, 0, true);
             API.DecorSetBool(prop, PropDecor, true);

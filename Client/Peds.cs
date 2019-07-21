@@ -97,7 +97,9 @@ namespace PocceMod.Client
             }
 
             await Common.RequestModel(model);
-            return API.CreatePed(pedType, model, pos.X, pos.Y, pos.Z, 0f, true, false);
+            var ped = API.CreatePed(pedType, model, pos.X, pos.Y, pos.Z, 0f, true, false);
+            API.SetModelAsNoLongerNeeded(model);
+            return ped;
         }
 
         public static void GiveWeapon(int ped, uint weapon)

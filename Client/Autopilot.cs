@@ -115,6 +115,7 @@ namespace PocceMod.Client
             await Common.RequestModel(Model);
             var playerID = API.PlayerId();
             var ped = API.CreatePedInsideVehicle(vehicle, 26, Model, -1, true, false);
+            API.SetModelAsNoLongerNeeded(Model);
             API.DecorSetBool(ped, FlagDecor, true);
             API.DecorSetInt(ped, PlayerDecor, playerID);
             API.SetDriverAbility(ped, 1f);

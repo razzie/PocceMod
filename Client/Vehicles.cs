@@ -177,6 +177,7 @@ namespace PocceMod.Client
             if (API.IsThisModelAHeli(hash) && API.GetEntityHeightAboveGround(vehicle) > 10f)
                 API.SetHeliBladesFullSpeed(vehicle);
 
+            API.SetModelAsNoLongerNeeded(hash);
             return vehicle;
         }
 

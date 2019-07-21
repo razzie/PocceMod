@@ -18,6 +18,7 @@ namespace PocceMod.Client.Menus
                     var pocce = Config.PocceList[API.GetRandomIntInRange(0, Config.PocceList.Length)];
                     await Common.RequestModel(pocce);
                     ped = API.CreatePedInsideVehicle(vehicle, 26, pocce, seat, true, false);
+                    API.SetModelAsNoLongerNeeded(pocce);
                 }
                 else if (API.GetEntitySpeed(vehicle) > 0.1f)
                 {
@@ -78,6 +79,7 @@ namespace PocceMod.Client.Menus
                 var pocce = Config.PocceList[API.GetRandomIntInRange(0, Config.PocceList.Length)];
                 await Common.RequestModel(pocce);
                 var ped = API.CreatePedInsideVehicle(vehicle, 26, pocce, seat, true, false);
+                API.SetModelAsNoLongerNeeded(pocce);
                 API.SetEntityAsNoLongerNeeded(ref ped);
             }
         }
