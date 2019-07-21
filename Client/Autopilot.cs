@@ -40,7 +40,7 @@ namespace PocceMod.Client
 
             if (API.GetPedInVehicleSeat(vehicle, -1) != player)
             {
-                Common.Notification("You are not the driver of this vehicle");
+                Common.Notification("Player is not the driver of this vehicle");
                 return;
             }
 

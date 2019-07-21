@@ -64,6 +64,12 @@ namespace PocceMod.Client.Menus
             }
 
             var vehicle = API.GetVehiclePedIsIn(player, false);
+            if (API.GetPedInVehicleSeat(vehicle, -1) != player)
+            {
+                Common.Notification("Player is not the driver of this vehicle");
+                return;
+            }
+
             Vehicles.EnableUltrabrightHeadlight(vehicle);
             Common.Notification("Use arrow up/down keys to change brightness");
         }
@@ -74,6 +80,12 @@ namespace PocceMod.Client.Menus
             if (API.IsPedInAnyHeli(player))
             {
                 var heli = API.GetVehiclePedIsIn(player, false);
+                if (API.GetPedInVehicleSeat(heli, -1) != player)
+                {
+                    Common.Notification("Player is not the pilot of this heli");
+                    return;
+                }
+
                 if (API.IsCargobobMagnetActive(heli))
                 {
                     API.SetCargobobPickupMagnetActive(heli, false);
@@ -84,6 +96,10 @@ namespace PocceMod.Client.Menus
                     API.EnableCargobobHook(heli, 1);
                     API.SetCargobobPickupMagnetActive(heli, true);
                 }
+            }
+            else
+            {
+                Common.Notification("Player is not in a heli");
             }
         }
     }
