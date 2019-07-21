@@ -50,6 +50,11 @@
   <ItemGroup>
     <Compile Include="Client\Autopilot.cs" />
     <Compile Include="Client\Common.cs" />
+    <Compile Include="Client\Menus\MainMenu.cs" />
+    <Compile Include="Client\Menus\PropMenu.cs" />
+    <Compile Include="Client\Menus\SkinMenu.cs" />
+    <Compile Include="Client\Menus\Submenu.cs" />
+    <Compile Include="Client\Menus\VehicleMenu.cs" />
     <Compile Include="Client\Skin.cs" />
     <Compile Include="Shared\Ability.cs" />
     <Compile Include="Shared\Config.cs" />
@@ -103,5 +108,6 @@
   <ItemGroup>
     <Content Include="MenuAPI.dll" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
