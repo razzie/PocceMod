@@ -27,7 +27,7 @@ namespace PocceMod.Client
 
             #region Vehicle
             if (Permission.CanDo(Ability.SpawnVehicle))
-                _menu.AddMenuListItem("Vehicle", "Spawn from list ☰", _menu.VehicleMenu.OpenMenu);
+                _menu.AddMenuListItem("Vehicle", "Spawn from list ↕", _menu.VehicleMenu.OpenMenu);
 
             if (Permission.CanDo(Ability.SpawnVehicleByName))
                 _menu.AddMenuListItemAsync("Vehicle", "Spawn by name", VehicleMenu.SpawnByName);
@@ -45,7 +45,7 @@ namespace PocceMod.Client
             #region Prop
             if (Permission.CanDo(Ability.SpawnProp))
             {
-                _menu.AddMenuListItem("Prop", "Spawn from list ☰", _menu.PropMenu.OpenMenu);
+                _menu.AddMenuListItem("Prop", "Spawn from list ↕", _menu.PropMenu.OpenMenu);
                 _menu.AddMenuListItem("Prop", "Spawn from list (search)", async () =>
                 {
                     var prop = await Common.GetUserInput("Filter props", "", 30);
@@ -106,8 +106,8 @@ namespace PocceMod.Client
                 if (Permission.CanDo(Ability.ChangeSkin))
                 {
                     _menu.AddMenuListItem("Skin", "Detect nearby skins", () => _menu.SkinMenu.DataSource.Push(SkinMenu.DetectSkins()));
-                    //_menu.AddMenuListItem("Skin", "Choose from last detect ☰", ???);
-                    _menu.AddMenuListItem("Skin", "Choose from all ☰", _menu.SkinMenu.OpenMenu);
+                    //_menu.AddMenuListItem("Skin", "Choose from last detect ↕", ???);
+                    _menu.AddMenuListItem("Skin", "Choose from all ↕", _menu.SkinMenu.OpenMenu);
                 }
                 else
                 {
