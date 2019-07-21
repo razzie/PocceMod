@@ -349,6 +349,8 @@ namespace PocceMod.Client
             var vehicle = API.GetVehiclePedIsIn(player, !API.IsPedInAnyVehicle(player, false));
             var speed = API.GetEntitySpeed(vehicle);
 
+            UpdateAutoHazardLights(vehicle);
+
             if (API.IsVehicleSeatFree(vehicle, -1))
             {
                 if (speed > 1f && !GetLastState(vehicle, StateFlag.HazardLight))
@@ -356,6 +358,7 @@ namespace PocceMod.Client
                     SetState(vehicle, StateFlag.HazardLight, true);
                     TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(vehicle), 3);
                 }
+                return Delay(1000);
             }
             else if (API.GetPedInVehicleSeat(vehicle, -1) != player)
             {
@@ -371,8 +374,6 @@ namespace PocceMod.Client
                     API.SetMountedWeaponTarget(player, target, 0, 0f, 0f, 0f);
                 }
             }
-
-            UpdateAutoHazardLights(vehicle);
 
             if (!Hud.IsMenuOpen() && API.DecorExistOn(vehicle, LightMultiplierDecor))
             {
