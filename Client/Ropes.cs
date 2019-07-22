@@ -107,6 +107,8 @@ namespace PocceMod.Client
             EventHandlers["PocceMod:ClearRopes"] += new Action<int>(ClearRopes);
             EventHandlers["PocceMod:ClearLastRope"] += new Action<int>(ClearLastRope);
 
+            TriggerServerEvent("PocceMod:RequestRopes");
+
             API.AddTextEntryByHash(0x6FCC4E8A, "Pocce Ropegun"); // WT_POCCE_ROPEGUN
 
             Tick += UpdateRopegun;
