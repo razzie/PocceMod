@@ -10,16 +10,26 @@ namespace PocceMod.Client.Menus
     public class SkinMenu : Menu
     {
         private bool _firstUse = true;
+        private readonly SkinSet _pocceSkins = new SkinSet();
         private readonly SkinSet _allSkins = new SkinSet();
         private readonly SkinSet _lastSkins = new SkinSet();
         private SkinSet _source = null;
 
         public SkinMenu() : base("PocceMod", "select skin")
         {
+            foreach (var pocce in Config.PocceList)
+            {
+                _pocceSkins.Add(Skin.ModelToName(pocce));
+            }
+
+            OnItemSelect += async (_menu, _item, _index) =>
+            {
+                await ChangeSkin(_item.Text);
+            };
+
             OnListItemSelect += async (_menu, _listItem, _listIndex, _itemIndex) =>
             {
                 await ChangeSkin(_listItem, _listIndex);
-                //CloseMenu();
             };
 
             OnMenuOpen += (_menu) =>
@@ -35,15 +45,23 @@ namespace PocceMod.Client.Menus
 
                 foreach (var items in _source.Elements)
                 {
-                    var list = new List<string>();
-                    for (int i = 0; i < items.Value.Count; ++i)
+                    if (items.Value.Count > 0)
                     {
-                        list.Add("#" + i);
-                    }
+                        var list = new List<string>();
+                        for (int i = 0; i < items.Value.Count; ++i)
+                        {
+                            list.Add("#" + i);
+                        }
 
-                    var menuItem = new MenuListItem(items.Key, list, 0);
-                    menuItem.ItemData = items.Value;
-                    AddMenuItem(menuItem);
+                        var menuItem = new MenuListItem(items.Key, list, 0);
+                        menuItem.ItemData = items.Value;
+                        AddMenuItem(menuItem);
+                    }
+                    else
+                    {
+                        var menuItem = new MenuItem(items.Key);
+                        AddMenuItem(menuItem);
+                    }
                 }
             };
 
@@ -73,6 +91,11 @@ namespace PocceMod.Client.Menus
             OpenMenu(_lastSkins);
         }
 
+        public void ShowPocceSkins()
+        {
+            OpenMenu(_pocceSkins);
+        }
+
         public void DetectSkins()
         {
             _lastSkins.Clear();
@@ -90,7 +113,7 @@ namespace PocceMod.Client.Menus
                 ShowLastSkins();
         }
 
-        private async Task ChangeSkin(MenuListItem item, int index)
+        private static async Task ChangeSkin(MenuListItem item, int index)
         {
             var skins = item.ItemData as List<Skin>;
             if (skins != null && skins.Count > index)
@@ -99,6 +122,18 @@ namespace PocceMod.Client.Menus
                 await Game.Player.ChangeModel(new Model((PedHash)skin.Model));
                 await skin.Restore(API.GetPlayerPed(-1));
             }
+        }
+
+        private static async Task ChangeSkin(string model)
+        {
+            uint hash;
+            if (model.StartsWith("0x"))
+                hash = uint.Parse(model.Substring(2), System.Globalization.NumberStyles.HexNumber);
+            else
+                hash = (uint)API.GetHashKey(model);
+
+            await Game.Player.ChangeModel(new Model((PedHash)hash));
+            Skin.Randomize(API.GetPlayerPed(-1));
         }
     }
 }

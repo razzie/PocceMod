@@ -1,6 +1,4 @@
-﻿using CitizenFX.Core;
-using CitizenFX.Core.Native;
-using PocceMod.Shared;
+﻿using CitizenFX.Core.Native;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -80,6 +78,22 @@ namespace PocceMod.Client
                 return name;
             else
                 return string.Format("{0:X8}", model);
+        }
+
+        public static void Randomize(int ped)
+        {
+            for (int i = 0; i < ComponentCount; ++i)
+            {
+                var palette = API.GetPedPaletteVariation(ped, i);
+
+                var drawables = API.GetNumberOfPedDrawableVariations(ped, i);
+                var drawable = API.GetRandomIntInRange(0, drawables);
+
+                var textures = API.GetNumberOfPedTextureVariations(ped, i, drawable);
+                var texture = API.GetRandomIntInRange(0, textures);
+
+                API.SetPedComponentVariation(ped, i, drawable, texture, palette);
+            }
         }
 
         private static readonly string[] Models = new string[]
@@ -828,6 +842,12 @@ namespace PocceMod.Client
             {
                 Add(skin);
             }
+        }
+
+        public void Add(string model)
+        {
+            if (!_skins.ContainsKey(model))
+                _skins.Add(model, new List<Skin>());
         }
 
         public void Clear()
