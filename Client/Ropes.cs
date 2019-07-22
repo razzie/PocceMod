@@ -18,81 +18,11 @@ namespace PocceMod.Client
             Grapple = 4
         }
 
-        private class RopegunState
-        {
-            private bool _firstUse;
-            private int _lastEntity1;
-            private int _lastEntity2;
-            private Vector3 _lastOffset1;
-            private Vector3 _lastOffset2;
-            private DateTime _lastFire;
-
-            public RopegunState()
-            {
-                _firstUse = true;
-                Clear();
-            }
-
-            public void Update(ref int entity1, ref int entity2, ref Vector3 offset1, ref Vector3 offset2, out bool clearLast)
-            {
-                clearLast = false;
-
-                var player = GetPlayerEntity();
-                if (entity1 != player && entity2 != player)
-                    return;
-
-                if (_firstUse)
-                {
-                    Common.Notification("First time using ropegun, yay! You can connect 2 entities in 2 seconds");
-                    _firstUse = false;
-                }
-
-                var timestamp = DateTime.Now;
-                if (_lastEntity1 != -1 && _lastEntity2 != -1 && (timestamp - _lastFire) < TimeSpan.FromSeconds(2f))
-                {
-                    clearLast = (_lastEntity1 == player || _lastEntity2 == player);
-
-                    if (entity1 == player)
-                    {
-                        entity1 = _lastEntity2;
-                        offset1 = _lastOffset2;
-                    }
-                    else
-                    {
-                        entity2 = _lastEntity2;
-                        offset2 = _lastOffset2;
-                    }
-                }
-
-                _lastEntity1 = entity1;
-                _lastEntity2 = entity2;
-                _lastOffset1 = offset1;
-                _lastOffset2 = offset2;
-                _lastFire = timestamp;
-            }
-
-            public void Undo(out bool clearLast)
-            {
-                var player = GetPlayerEntity();
-                clearLast = (_lastEntity1 == player || _lastEntity2 == player);
-                Clear();
-            }
-
-            public void Clear()
-            {
-                _lastEntity1 = -1;
-                _lastEntity2 = -1;
-                _lastOffset1 = Vector3.Zero;
-                _lastOffset2 = Vector3.Zero;
-                _lastFire = DateTime.MinValue;
-            }
-        }
-
         private const uint Ropegun = 0x44AE7910; // WEAPON_POCCE_ROPEGUN
         private static readonly int RopegunWindKey;
         private static readonly int RopegunUndoKey;
         private static readonly Dictionary<int, List<int>> _ropes = new Dictionary<int, List<int>>();
-        private static readonly List<int> _windingRopes = new List<int>();
+        private static readonly List<RopeWindState> _windingRopes = new List<RopeWindState>();
         private static readonly RopegunState _ropegunState = new RopegunState();
 
         static Ropes()
@@ -113,12 +43,6 @@ namespace PocceMod.Client
 
             Tick += UpdateRopegun;
             Tick += RopeWindUpdate;
-        }
-
-        private static int GetPlayerEntity()
-        {
-            var player = API.GetPlayerPed(-1);
-            return API.IsPedInAnyVehicle(player, false) ? API.GetVehiclePedIsIn(player, false) : player;
         }
 
         private static Vector3 GetAdjustedPosition(int entity, float front)
@@ -169,11 +93,7 @@ namespace PocceMod.Client
                 _ropes.Add(player, new List<int> { rope });
 
             if (((Mode)mode & Mode.Grapple) == Mode.Grapple)
-            {
-                await Delay(10);
-                API.StartRopeWinding(rope);
-                _windingRopes.Add(rope);
-            }
+                _windingRopes.Add(new RopeWindState(rope, length));
 
             if (!API.RopeAreTexturesLoaded())
                 API.RopeLoadTextures();
@@ -208,7 +128,7 @@ namespace PocceMod.Client
 
         public static void PlayerAttach(int entity, Vector3 offset, Mode mode = Mode.Normal)
         {
-            Attach(GetPlayerEntity(), entity, Vector3.Zero, offset, mode);
+            Attach(Common.GetPlayerPedOrVehicle(), entity, Vector3.Zero, offset, mode);
         }
 
         public static void AttachToClosest(IEnumerable<int> entities, bool tow = false)
@@ -268,7 +188,7 @@ namespace PocceMod.Client
 
         private static bool TryShootRopegun(float distance, out Task<int> target, out Vector3 offset)
         {
-            var player = GetPlayerEntity();
+            var player = Common.GetPlayerPedOrVehicle();
             Common.GetAimCoords(out Vector3 rayBegin, out Vector3 rayEnd, distance);
             var ray = API.CastRayPointToPoint(rayBegin.X, rayBegin.Y, rayBegin.Z, rayEnd.X, rayEnd.Y, rayEnd.Z, 1 | 2 | 4 | 8 | 16 | 32, player, 0);
 
@@ -350,17 +270,112 @@ namespace PocceMod.Client
 
             foreach (var rope in _windingRopes.ToArray())
             {
-                int tmp_rope = rope;
-                if (!API.DoesRopeExist(ref tmp_rope))
+                if (!rope.Valid)
                 {
                     _windingRopes.Remove(rope);
                     continue;
                 }
 
-                var length = API.GetRopeLength(rope);
-                if (length > 1f)
-                    API.RopeForceLength(rope, length - 0.2f);
+                rope.Update();
             }
+        }
+    }
+
+    internal class RopegunState
+    {
+        private bool _firstUse;
+        private int _lastEntity1;
+        private int _lastEntity2;
+        private Vector3 _lastOffset1;
+        private Vector3 _lastOffset2;
+        private DateTime _lastFire;
+
+        public RopegunState()
+        {
+            _firstUse = true;
+            Clear();
+        }
+
+        public void Update(ref int entity1, ref int entity2, ref Vector3 offset1, ref Vector3 offset2, out bool clearLast)
+        {
+            clearLast = false;
+
+            var player = Common.GetPlayerPedOrVehicle();
+            if (entity1 != player && entity2 != player)
+                return;
+
+            if (_firstUse)
+            {
+                Common.Notification("First time using ropegun, yay! You can connect 2 entities in 2 seconds");
+                _firstUse = false;
+            }
+
+            var timestamp = DateTime.Now;
+            if (_lastEntity1 != -1 && _lastEntity2 != -1 && (timestamp - _lastFire) < TimeSpan.FromSeconds(2f))
+            {
+                clearLast = (_lastEntity1 == player || _lastEntity2 == player);
+
+                if (entity1 == player)
+                {
+                    entity1 = _lastEntity2;
+                    offset1 = _lastOffset2;
+                }
+                else
+                {
+                    entity2 = _lastEntity2;
+                    offset2 = _lastOffset2;
+                }
+            }
+
+            _lastEntity1 = entity1;
+            _lastEntity2 = entity2;
+            _lastOffset1 = offset1;
+            _lastOffset2 = offset2;
+            _lastFire = timestamp;
+        }
+
+        public void Undo(out bool clearLast)
+        {
+            var player = Common.GetPlayerPedOrVehicle();
+            clearLast = (_lastEntity1 == player || _lastEntity2 == player);
+            Clear();
+        }
+
+        public void Clear()
+        {
+            _lastEntity1 = -1;
+            _lastEntity2 = -1;
+            _lastOffset1 = Vector3.Zero;
+            _lastOffset2 = Vector3.Zero;
+            _lastFire = DateTime.MinValue;
+        }
+    }
+
+    internal class RopeWindState
+    {
+        private readonly int _rope;
+        private float _length;
+
+        public RopeWindState(int rope, float length)
+        {
+            API.StartRopeWinding(rope);
+            _rope = rope;
+            _length = length;
+        }
+
+        public bool Valid
+        {
+            get
+            {
+                int rope = _rope;
+                return API.DoesRopeExist(ref rope) && _length > 1f;
+            }
+        }
+
+        public void Update()
+        {
+            _length -= 0.2f;
+            API.RopeForceLength(_rope, _length);
         }
     }
 }

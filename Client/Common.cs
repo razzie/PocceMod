@@ -89,6 +89,12 @@ namespace PocceMod.Client
             return entity;
         }
 
+        public static int GetPlayerPedOrVehicle()
+        {
+            var player = API.GetPlayerPed(-1);
+            return API.IsPedInAnyVehicle(player, false) ? API.GetVehiclePedIsIn(player, false) : player;
+        }
+
         public static bool GetClosestEntity(IEnumerable<int> entities, out int closest, int originEntity = -1)
         {
             closest = -1;
