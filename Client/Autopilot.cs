@@ -20,7 +20,8 @@ namespace PocceMod.Client
             API.DecorRegister(PlayerDecor, 3);
             API.DecorRegister(WaypointHashDecor, 3);
 
-            Tick += Update;
+            Tick += UpdateCurrent;
+            Tick += UpdateNearby;
         }
 
         public static async Task Activate()
@@ -129,69 +130,6 @@ namespace PocceMod.Client
             Wander(ped, vehicle);
         }
 
-        private static Task Update()
-        {
-            var player = API.GetPlayerPed(-1);
-            var inVehicle = API.IsPedInAnyVehicle(player, false);
-            var vehicle = API.GetVehiclePedIsIn(player, !inVehicle);
-            var driver = API.GetPedInVehicleSeat(vehicle, -1);
-
-            if (!IsAutopilot(driver))
-                return Delay(1000);
-
-            if (!inVehicle && API.IsEntityAMissionEntity(driver) &&
-                !API.AnyPassengersRappeling(vehicle) && Vehicles.GetPlayers(vehicle).Count == 0)
-            {
-                API.RemovePedFromGroup(driver);
-                API.SetEntityAsMissionEntity(driver, false, false);
-                var tmp_driver = driver;
-                API.SetPedAsNoLongerNeeded(ref tmp_driver);
-            }
-
-            if ((uint)API.GetEntityModel(vehicle) == PoliceHeli)
-            {
-                var players = Peds.Get(Peds.Filter.NonPlayers, 1600f, driver);
-                if (Common.GetClosestEntity(players, out int target, driver))
-                {
-                    API.SetVehicleSearchlight(vehicle, true, true);
-                    API.SetMountedWeaponTarget(driver, target, 0, 0f, 0f, 0f);
-                }
-            }
-
-            if (API.AnyPassengersRappeling(vehicle))
-            {
-                var coords = API.GetEntityCoords(vehicle, false);
-                API.TaskHeliMission(driver, vehicle, 0, 0, coords.X, coords.Y, coords.Z, 4, 0f, 5f, API.GetEntityHeading(vehicle), -1, -1, 0, 0);
-                API.DecorSetInt(driver, WaypointHashDecor, 0);
-                return Delay(1000);
-            }
-
-            if (!IsOwnedAutopilot(driver))
-                return Delay(1000);
-
-            Vehicles.UpdateAutoHazardLights(vehicle);
-
-            if (Common.GetWaypoint(out Vector3 wp, false))
-            {
-                // waypoint hasn't changed
-                if (API.DecorGetInt(driver, WaypointHashDecor) == wp.GetHashCode())
-                    return Delay(1000);
-
-                API.DecorSetInt(driver, WaypointHashDecor, wp.GetHashCode());
-                GotoWaypoint(driver, vehicle, wp);
-                return Delay(1000);
-            }
-
-            // waypoint was removed
-            if (API.DecorGetInt(driver, WaypointHashDecor) > 0)
-            {
-                API.DecorSetInt(driver, WaypointHashDecor, 0);
-                Wander(driver, vehicle);
-            }
-
-            return Delay(1000);
-        }
-
         private static float GetHeading(int vehicle, Vector3 wp)
         {
             var coords = API.GetEntityCoords(vehicle, false);
@@ -239,6 +177,89 @@ namespace PocceMod.Client
                 var speed = API.GetVehicleModelMaxSpeed(vehicleModel);
                 API.TaskVehicleDriveWander(driver, vehicle, speed, DrivingStyle);
             }
+        }
+
+        private static Task UpdateCurrent()
+        {
+            var player = API.GetPlayerPed(-1);
+            var inVehicle = API.IsPedInAnyVehicle(player, false);
+            var vehicle = API.GetVehiclePedIsIn(player, !inVehicle);
+            var driver = API.GetPedInVehicleSeat(vehicle, -1);
+
+            if (!IsOwnedAutopilot(driver))
+                return Delay(1000);
+
+            if (!API.AnyPassengersRappeling(vehicle) && Common.GetWaypoint(out Vector3 wp, false))
+            {
+                // waypoint hasn't changed
+                if (API.DecorGetInt(driver, WaypointHashDecor) == wp.GetHashCode())
+                    return Delay(1000);
+
+                API.DecorSetInt(driver, WaypointHashDecor, wp.GetHashCode());
+                GotoWaypoint(driver, vehicle, wp);
+                return Delay(1000);
+            }
+
+            // waypoint was removed
+            if (API.DecorGetInt(driver, WaypointHashDecor) > 0)
+            {
+                API.DecorSetInt(driver, WaypointHashDecor, 0);
+                Wander(driver, vehicle);
+            }
+
+            return Delay(1000);
+        }
+
+        private static Task UpdateNearby()
+        {
+            var peds = Peds.Get(Peds.Filter.Dead | Peds.Filter.Players);
+            foreach (var ped in peds)
+            {
+                if (!IsAutopilot(ped))
+                    continue;
+
+                var vehicle = API.GetVehiclePedIsIn(ped, false);
+                if (API.GetPedInVehicleSeat(vehicle, -1) != ped)
+                    continue;
+
+                Vehicles.UpdateAutoHazardLights(vehicle);
+
+                if (API.IsEntityAMissionEntity(ped) && Vehicles.GetPlayers(vehicle).Count == 0)
+                {
+                    API.RemovePedFromGroup(ped);
+                    API.SetEntityAsMissionEntity(ped, false, false);
+                    var tmp_ped = ped;
+                    API.SetPedAsNoLongerNeeded(ref tmp_ped);
+                }
+
+                var vehicleModel = (uint)API.GetEntityModel(vehicle);
+                if (API.IsThisModelAHeli(vehicleModel))
+                {
+                    if (API.AnyPassengersRappeling(vehicle) && API.DecorGetInt(ped, WaypointHashDecor) > 0)
+                    {
+                        var coords = API.GetEntityCoords(vehicle, false);
+                        API.TaskHeliMission(ped, vehicle, 0, 0, coords.X, coords.Y, coords.Z, 4, 0f, 5f, API.GetEntityHeading(vehicle), -1, -1, 0, 0);
+                        API.DecorSetInt(ped, WaypointHashDecor, 0);
+                    }
+
+                    if (vehicleModel == PoliceHeli)
+                    {
+                        if (!API.IsVehicleSearchlightOn(vehicle))
+                            API.SetVehicleSearchlight(vehicle, true, true);
+
+                        if (!API.IsMountedWeaponTaskUnderneathDrivingTask(ped))
+                            API.ControlMountedWeapon(ped);
+
+                        var players = Peds.Get(Peds.Filter.NonPlayers | Peds.Filter.CurrentVehiclePassengers, 1600f, ped);
+                        if (Common.GetClosestEntity(players, out int target, ped))
+                        {
+                            API.SetMountedWeaponTarget(ped, target, 0, 0f, 0f, 0f);
+                        }
+                    }
+                }
+            }
+
+            return Delay(100);
         }
     }
 }
