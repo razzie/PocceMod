@@ -8,7 +8,6 @@ namespace PocceMod.Client
     public class Autopilot : BaseScript
     {
         private const uint Model = 0xA8683715; // monkey
-        private const uint PoliceHeli = 0x1517D4D9; // polmav
         private const int DrivingStyle = 537133886;
         private const string FlagDecor = "POCCE_AUTOPILOT_FLAG";
         private const string PlayerDecor = "POCCE_AUTOPILOT_PLAYER";
@@ -30,6 +29,7 @@ namespace PocceMod.Client
             if (!API.IsPedInAnyVehicle(player, false))
             {
                 Common.Notification("Player is not in a vehicle");
+                return;
             }
 
             var vehicle = API.GetVehiclePedIsIn(player, false);
@@ -64,6 +64,7 @@ namespace PocceMod.Client
             if (!API.IsPedInAnyVehicle(player, false))
             {
                 Common.Notification("Player is not in a vehicle");
+                return;
             }
 
             var vehicle = API.GetVehiclePedIsIn(player, false);
@@ -91,6 +92,7 @@ namespace PocceMod.Client
             if (!API.IsPedInAnyVehicle(player, false))
             {
                 Common.Notification("Player is not in a vehicle");
+                return;
             }
 
             var vehicle = API.GetVehiclePedIsIn(player, false);
@@ -242,20 +244,10 @@ namespace PocceMod.Client
                         API.DecorSetInt(ped, WaypointHashDecor, 0);
                     }
 
-                    if (vehicleModel == PoliceHeli)
-                    {
-                        if (!API.IsVehicleSearchlightOn(vehicle))
-                            API.SetVehicleSearchlight(vehicle, true, true);
-
-                        if (!API.IsMountedWeaponTaskUnderneathDrivingTask(ped))
-                            API.ControlMountedWeapon(ped);
-
-                        /*var players = Peds.Get(Peds.Filter.NonPlayers | Peds.Filter.CurrentVehiclePassengers, 1600f, ped);
-                        if (Common.GetClosestEntity(players, out int target, ped))
-                        {
-                            API.SetMountedWeaponTarget(ped, target, 0, 0f, 0f, 0f);
-                        }*/
-                    }
+                    if (!API.IsVehicleSearchlightOn(vehicle))
+                        API.SetVehicleSearchlight(vehicle, true, true);
+                    else if (!API.IsMountedWeaponTaskUnderneathDrivingTask(ped))
+                        API.ControlMountedWeapon(ped);
                 }
             }
 
