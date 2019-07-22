@@ -1,6 +1,7 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
 using MenuAPI;
+using PocceMod.Shared;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -11,12 +12,7 @@ namespace PocceMod.Client.Menus
         private bool _firstUse = true;
         private readonly SkinSet _allSkins = new SkinSet();
         private readonly SkinSet _lastSkins = new SkinSet();
-
-        public enum SkinSelection
-        {
-            AllSkins,
-            LastSkins
-        }
+        private SkinSet _source = null;
 
         public SkinMenu() : base("PocceMod", "select skin")
         {
@@ -28,15 +24,16 @@ namespace PocceMod.Client.Menus
 
             OnMenuOpen += (_menu) =>
             {
+                if (_source == null)
+                    return;
+
                 if (_firstUse)
                 {
                     Common.Notification("Weapon loadout is lost when chenging skin!");
                     _firstUse = false;
                 }
 
-                var skinset = Selection == SkinSelection.AllSkins ? _allSkins : _lastSkins;
-
-                foreach (var items in skinset.Elements)
+                foreach (var items in _source.Elements)
                 {
                     var list = new List<string>();
                     for (int i = 0; i < items.Value.Count; ++i)
@@ -53,21 +50,27 @@ namespace PocceMod.Client.Menus
             OnMenuClose += (_menu) =>
             {
                 ClearMenuItems();
+                _source = null;
             };
         }
 
-        public SkinSelection Selection { get; set; } = SkinSelection.AllSkins;
+        public void OpenMenu(SkinSet source)
+        {
+            if (Permission.CanDo(Ability.ChangeSkin))
+            {
+                _source = source;
+                OpenMenu();
+            }
+        }
 
         public void ShowAllSkins()
         {
-            Selection = SkinSelection.AllSkins;
-            OpenMenu();
+            OpenMenu(_allSkins);
         }
 
         public void ShowLastSkins()
         {
-            Selection = SkinSelection.LastSkins;
-            OpenMenu();
+            OpenMenu(_lastSkins);
         }
 
         public void DetectSkins()
