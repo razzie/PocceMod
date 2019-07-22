@@ -10,7 +10,6 @@ namespace PocceMod.Client.Menus
     public class SkinMenu : Menu
     {
         private bool _firstUse = true;
-        private readonly SkinSet _pocceSkins = new SkinSet();
         private readonly SkinSet _allSkins = new SkinSet();
         private readonly SkinSet _lastSkins = new SkinSet();
         private SkinSet _source = null;
@@ -19,7 +18,7 @@ namespace PocceMod.Client.Menus
         {
             foreach (var pocce in Config.PocceList)
             {
-                _pocceSkins.Add(Skin.ModelToName(pocce));
+                _allSkins.Add(Skin.ModelToName(pocce));
             }
 
             OnItemSelect += async (_menu, _item, _index) =>
@@ -91,11 +90,6 @@ namespace PocceMod.Client.Menus
             OpenMenu(_lastSkins);
         }
 
-        public void ShowPocceSkins()
-        {
-            OpenMenu(_pocceSkins);
-        }
-
         public void DetectSkins()
         {
             _lastSkins.Clear();
@@ -133,7 +127,7 @@ namespace PocceMod.Client.Menus
                 hash = (uint)API.GetHashKey(model);
 
             await Game.Player.ChangeModel(new Model((PedHash)hash));
-            Skin.Randomize(API.GetPlayerPed(-1));
+            //Skin.Randomize(API.GetPlayerPed(-1));
         }
     }
 }

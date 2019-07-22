@@ -108,7 +108,6 @@ namespace PocceMod.Client
             {
                 _menu.AddMenuListItem("Skin", "Choose from last detect ↕", _menu.SkinMenu.ShowLastSkins);
                 _menu.AddMenuListItem("Skin", "Choose from all ↕", _menu.SkinMenu.ShowAllSkins);
-                _menu.AddMenuListItem("Skin", "Choose pocce skin ↕", _menu.SkinMenu.ShowPocceSkins);
             }
             #endregion
 
