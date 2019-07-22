@@ -27,7 +27,6 @@ namespace PocceMod.Client
         }
 
         public const Filter DefaultFilters = Filter.PlayerVehicle;
-        private const uint PoliceHeli = 0x1517D4D9; // polmav
         private const string LightMultiplierDecor = "POCCE_VEHICLE_LIGHT_MULTIPLIER";
         private const string StateFlagsDecor = "POCCE_VEHICLE_STATE_FLAGS";
 
@@ -363,16 +362,6 @@ namespace PocceMod.Client
             else if (API.GetPedInVehicleSeat(vehicle, -1) != player)
             {
                 return Delay(1000);
-            }
-
-            if ((uint)API.GetEntityModel(vehicle) == PoliceHeli)
-            {
-                var players = Peds.Get(Peds.Filter.NonPlayers | Peds.Filter.LocalPlayer);
-                if (Common.GetClosestEntity(players, out int target))
-                {
-                    API.SetVehicleSearchlight(vehicle, true, true);
-                    API.SetMountedWeaponTarget(player, target, 0, 0f, 0f, 0f);
-                }
             }
 
             if (!MainMenu.IsOpen && API.DecorExistOn(vehicle, LightMultiplierDecor))

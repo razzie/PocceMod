@@ -250,11 +250,11 @@ namespace PocceMod.Client
                         if (!API.IsMountedWeaponTaskUnderneathDrivingTask(ped))
                             API.ControlMountedWeapon(ped);
 
-                        var players = Peds.Get(Peds.Filter.NonPlayers | Peds.Filter.CurrentVehiclePassengers, 1600f, ped);
+                        /*var players = Peds.Get(Peds.Filter.NonPlayers | Peds.Filter.CurrentVehiclePassengers, 1600f, ped);
                         if (Common.GetClosestEntity(players, out int target, ped))
                         {
                             API.SetMountedWeaponTarget(ped, target, 0, 0f, 0f, 0f);
-                        }
+                        }*/
                     }
                 }
             }
