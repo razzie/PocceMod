@@ -264,10 +264,11 @@ namespace PocceMod.Client
             return (state & flag) == flag;
         }
 
-        private static void SetState(int vehicle, StateFlag flag, bool enabled)
+        private static void SetState(int vehicle, StateFlag flag, bool value)
         {
             var state = (StateFlag)API.DecorGetInt(vehicle, StateFlagsDecor);
-            if (enabled)
+
+            if (value)
                 state |= flag;
             else
                 state &= ~flag;
@@ -291,20 +292,17 @@ namespace PocceMod.Client
         {
             var state = (StateFlag)API.DecorGetInt(vehicle, StateFlagsDecor);
 
-            if (AreTiresIntact(vehicle))
-                state |= StateFlag.TiresIntact;
-            else
-                state &= ~StateFlag.TiresIntact;
+            void set(StateFlag flag, bool value)
+            {
+                if (value)
+                    state |= flag;
+                else
+                    state &= ~flag;
+            }
 
-            if (API.GetVehicleEngineHealth(vehicle) >= 100f)
-                state |= StateFlag.EngineIntact;
-            else
-                state &= StateFlag.EngineIntact;
-
-            if (API.GetEntitySpeed(vehicle) > 10f)
-                state |= StateFlag.Cruising;
-            else
-                state &= ~StateFlag.Cruising;
+            set(StateFlag.TiresIntact, AreTiresIntact(vehicle));
+            set(StateFlag.EngineIntact, API.GetVehicleEngineHealth(vehicle) >= 100f);
+            set(StateFlag.Cruising, API.GetEntitySpeed(vehicle) > 10f);
 
             API.DecorSetInt(vehicle, StateFlagsDecor, (int)state);
         }
@@ -322,21 +320,21 @@ namespace PocceMod.Client
             if (!IsHazardLightApplicable(model))
                 return;
 
-            if (!GetLastState(vehicle, StateFlag.HazardLight))
+            if (API.IsEntityUpsidedown(vehicle) ||
+                API.IsEntityInAir(vehicle) ||
+                API.IsEntityInWater(vehicle) ||
+                API.IsEntityOnFire(vehicle) ||
+                (speed < 3f && GetLastState(vehicle, StateFlag.Cruising)) ||
+                (!AreTiresIntact(vehicle) && GetLastState(vehicle, StateFlag.TiresIntact)) ||
+                (API.GetVehicleEngineHealth(vehicle) < 100f && GetLastState(vehicle, StateFlag.EngineIntact)))
             {
-                if (API.IsEntityUpsidedown(vehicle) ||
-                    API.IsEntityInAir(vehicle) ||
-                    API.IsEntityInWater(vehicle) ||
-                    API.IsEntityOnFire(vehicle) ||
-                    (speed < 3f && GetLastState(vehicle, StateFlag.Cruising)) ||
-                    (!AreTiresIntact(vehicle) && GetLastState(vehicle, StateFlag.TiresIntact)) ||
-                    (API.GetVehicleEngineHealth(vehicle) < 100f && GetLastState(vehicle, StateFlag.EngineIntact)))
+                if (!GetLastState(vehicle, StateFlag.HazardLight))
                 {
                     SetState(vehicle, StateFlag.HazardLight, true);
                     TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(vehicle), 3);
                 }
             }
-            else if (speed > 5f)
+            else if (speed > 5f && GetLastState(vehicle, StateFlag.HazardLight))
             {
                 SetState(vehicle, StateFlag.HazardLight, false);
                 TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(vehicle), 0);
