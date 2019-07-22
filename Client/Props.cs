@@ -197,19 +197,22 @@ namespace PocceMod.Client
 
             if (Vector2.DistanceSquared(coords, (Vector2)pos) < 100f)
             {
-                var speed = Math.Max(0.01f * GetEntityHeight(prop), 0.01f);
+                Common.GetCamHorizontalForwardAndRightVectors(out Vector3 forward, out Vector3 right);
+                var speed = Math.Max(0.05f * GetEntityHeight(prop), 0.05f);
+                forward *= speed;
+                right *= speed;
 
                 if (API.IsControlPressed(0, 21)) // LEFT_SHIFT
                 {
                     if (API.IsControlPressed(0, 172)) // up
-                        API.SetEntityCoords(prop, pos.X + speed, pos.Y, pos.Z, true, false, false, false);
+                        API.SetEntityCoords(prop, pos.X + forward.X, pos.Y + forward.Y, pos.Z, true, false, false, false);
                     else if (API.IsControlPressed(0, 173)) // down
-                        API.SetEntityCoords(prop, pos.X - speed, pos.Y, pos.Z, true, false, false, false);
+                        API.SetEntityCoords(prop, pos.X - forward.X, pos.Y - forward.Y, pos.Z, true, false, false, false);
 
                     if (API.IsControlPressed(0, 174)) // left
-                        API.SetEntityCoords(prop, pos.X, pos.Y + speed, pos.Z, false, true, false, false);
+                        API.SetEntityCoords(prop, pos.X - right.X, pos.Y - right.Y, pos.Z, false, true, false, false);
                     else if (API.IsControlPressed(0, 175)) // right
-                        API.SetEntityCoords(prop, pos.X, pos.Y - speed, pos.Z, false, true, false, false);
+                        API.SetEntityCoords(prop, pos.X + right.X, pos.Y + right.Y, pos.Z, false, true, false, false);
                 }
                 else
                 {

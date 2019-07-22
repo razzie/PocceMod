@@ -157,6 +157,14 @@ namespace PocceMod.Client
             target = position + forward;
         }
 
+        public static void GetCamHorizontalForwardAndRightVectors(out Vector3 forward, out Vector3 right)
+        {
+            var heading = API.GetGameplayCamRot(2).Z;
+            var headingRad = MathUtil.DegreesToRadians(heading);
+            forward = new Vector3(-(float)Math.Sin(headingRad), (float)Math.Cos(headingRad), 0f);
+            right = new Vector3(forward.Y, -forward.X, 0f);
+        }
+
         public static Vector3 RotationToDirection(Vector3 rot)
         {
             float radiansZ = rot.Z * 0.0174532924f;
