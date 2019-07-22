@@ -175,6 +175,15 @@ namespace PocceMod.Client
             _props.RemoveAt(_props.Count - 1);
         }
 
+        private static float GetEntityHeight(int entity)
+        {
+            var model = (uint)API.GetEntityModel(entity);
+            var min = Vector3.Zero;
+            var max = Vector3.Zero;
+            API.GetModelDimensions(model, ref min, ref max);
+            return max.Z - min.Z;
+        }
+
         private static Task Update()
         {
             if (MainMenu.IsOpen || _props.Count == 0)
@@ -189,15 +198,32 @@ namespace PocceMod.Client
 
             if (Vector2.DistanceSquared(coords, (Vector2)pos) < 100f)
             {
-                if (API.IsControlPressed(0, 172)) // up
-                    API.SetEntityCoords(prop, pos.X, pos.Y, pos.Z + 0.01f, false, false, true, false);
-                else if (API.IsControlPressed(0, 173)) // down
-                    API.SetEntityCoords(prop, pos.X, pos.Y, pos.Z - 0.01f, false, false, true, false);
+                var speed = Math.Max(0.01f * GetEntityHeight(prop), 0.01f);
 
-                if (API.IsControlPressed(0, 174)) // left
-                    API.SetEntityRotation(prop, rotation.X, rotation.Y, rotation.Z + 1f, 0, true);
-                else if (API.IsControlPressed(0, 175)) // right
-                    API.SetEntityRotation(prop, rotation.X, rotation.Y, rotation.Z - 1f, 0, true);
+                if (API.IsControlPressed(0, 21)) // LEFT_SHIFT
+                {
+                    if (API.IsControlPressed(0, 172)) // up
+                        API.SetEntityCoords(prop, pos.X + speed, pos.Y, pos.Z, true, false, false, false);
+                    else if (API.IsControlPressed(0, 173)) // down
+                        API.SetEntityCoords(prop, pos.X - speed, pos.Y, pos.Z, true, false, false, false);
+
+                    if (API.IsControlPressed(0, 174)) // left
+                        API.SetEntityCoords(prop, pos.X, pos.Y + speed, pos.Z, false, true, false, false);
+                    else if (API.IsControlPressed(0, 175)) // right
+                        API.SetEntityCoords(prop, pos.X, pos.Y - speed, pos.Z, false, true, false, false);
+                }
+                else
+                {
+                    if (API.IsControlPressed(0, 172)) // up
+                        API.SetEntityCoords(prop, pos.X, pos.Y, pos.Z + speed, false, false, true, false);
+                    else if (API.IsControlPressed(0, 173)) // down
+                        API.SetEntityCoords(prop, pos.X, pos.Y, pos.Z - speed, false, false, true, false);
+
+                    if (API.IsControlPressed(0, 174)) // left
+                        API.SetEntityRotation(prop, rotation.X, rotation.Y, rotation.Z + 1f, 0, true);
+                    else if (API.IsControlPressed(0, 175)) // right
+                        API.SetEntityRotation(prop, rotation.X, rotation.Y, rotation.Z - 1f, 0, true);
+                }
 
                 if (PropUndoKey > 0 && API.IsControlJustPressed(0, PropUndoKey))
                     ClearLast();
