@@ -153,24 +153,34 @@ namespace PocceMod.Client
             return prop;
         }
 
-        public static void ClearAll()
+        public static async Task ClearAll()
         {
+            if (_props.Count == 0)
+                return;
+
+            await Delay(0);
+
             foreach (var prop in _props)
             {
+                await Common.NetworkRequestControl(prop);
+                API.SetEntityCoords(prop, 0f, 0f, 0f, true, true, true, false);
                 var tmp_prop = prop;
-                API.DeleteObject(ref tmp_prop);
+                API.DeleteEntity(ref tmp_prop);
             }
 
             _props.Clear();
         }
 
-        public static void ClearLast()
+        public static async Task ClearLast()
         {
             if (_props.Count == 0)
                 return;
 
             var prop = _props[_props.Count - 1];
-            API.DeleteObject(ref prop);
+            await Delay(0);
+            await Common.NetworkRequestControl(prop);
+            API.SetEntityCoords(prop, 0f, 0f, 0f, true, true, true, false);
+            API.DeleteEntity(ref prop);
             _props.RemoveAt(_props.Count - 1);
         }
 
@@ -228,7 +238,7 @@ namespace PocceMod.Client
                 }
 
                 if (PropUndoKey > 0 && API.IsControlJustPressed(0, PropUndoKey))
-                    ClearLast();
+                    return ClearLast();
 
                 return Delay(0);
             }

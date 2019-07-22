@@ -51,8 +51,8 @@ namespace PocceMod.Client
                     var prop = await Common.GetUserInput("Filter props", "", 30);
                     _menu.PropMenu.Filter(prop);
                 });
-                _menu.AddMenuListItem("Prop", "Clear last", Props.ClearLast);
-                _menu.AddMenuListItem("Prop", "Clear all", Props.ClearAll);
+                _menu.AddMenuListItemAsync("Prop", "Clear last", Props.ClearLast);
+                _menu.AddMenuListItemAsync("Prop", "Clear all", Props.ClearAll);
             }
             #endregion
 

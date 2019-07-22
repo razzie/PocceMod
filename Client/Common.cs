@@ -66,6 +66,15 @@ namespace PocceMod.Client
             }
         }
 
+        public static async Task NetworkRequestControl(int entity)
+        {
+            while (!API.NetworkHasControlOfEntity(entity))
+            {
+                API.NetworkRequestControlOfEntity(entity);
+                await BaseScript.Delay(10);
+            }
+        }
+
         public static async Task<int> WaitForNetEntity(int netEntity)
         {
             var timeout = DateTime.Now + TimeSpan.FromSeconds(10);
