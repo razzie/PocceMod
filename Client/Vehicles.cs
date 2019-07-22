@@ -185,7 +185,7 @@ namespace PocceMod.Client
         {
             API.StartScreenEffect("RaceTurbo", 500, false);
 
-            var vehicles = Get(Filter.None, rangeSquared);
+            var vehicles = Get(DefaultFilters, rangeSquared);
             foreach (var vehicle in vehicles)
             {
                 if (GetPlayers(vehicle).Count > 0)
