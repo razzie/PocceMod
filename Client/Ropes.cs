@@ -223,7 +223,7 @@ namespace PocceMod.Client
 
                 if (Permission.CanDo(Ability.RopeGunStaticObjects))
                 {
-                    target = Props.SpawnAtCoords("prop_devin_rope_01", coords, normal, true);
+                    target = Props.SpawnAtCoords("prop_devin_rope_01", coords, normal, true, false);
                     return true;
                 }
             }

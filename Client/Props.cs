@@ -97,7 +97,7 @@ namespace PocceMod.Client
             }
         }
 
-        public static async Task<int> SpawnAtCoords(string model, Vector3 coords, Vector3 rotation, bool freeze = false)
+        public static async Task<int> SpawnAtCoords(string model, Vector3 coords, Vector3 rotation, bool freeze = false, bool addToList = true)
         {
             var hash = (uint)API.GetHashKey(model);
             if (!API.IsModelValid(hash))
@@ -108,7 +108,9 @@ namespace PocceMod.Client
 
             await Common.RequestModel(hash);
             var prop = API.CreateObject((int)hash, coords.X, coords.Y, coords.Z, true, false, false);
-            _props.Add(prop);
+            if (addToList)
+                _props.Add(prop);
+
             API.SetModelAsNoLongerNeeded(hash);
 
             API.SetEntityRotation(prop, rotation.X, rotation.Y, rotation.Z, 0, true);
@@ -158,8 +160,6 @@ namespace PocceMod.Client
             if (_props.Count == 0)
                 return;
 
-            await Delay(0);
-
             foreach (var prop in _props)
             {
                 await Common.NetworkRequestControl(prop);
@@ -177,7 +177,6 @@ namespace PocceMod.Client
                 return;
 
             var prop = _props[_props.Count - 1];
-            await Delay(0);
             await Common.NetworkRequestControl(prop);
             API.SetEntityCoords(prop, 0f, 0f, 0f, true, true, true, false);
             API.DeleteEntity(ref prop);
