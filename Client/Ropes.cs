@@ -4,25 +4,16 @@ using PocceMod.Shared;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using static PocceMod.Shared.Rope;
 
 namespace PocceMod.Client
 {
     public class Ropes : BaseScript
     {
-        [Flags]
-        public enum Mode
-        {
-            Normal = 0,
-            Tow = 1,
-            Ropegun = 2,
-            Grapple = 4
-        }
-
         private const uint Ropegun = 0x44AE7910; // WEAPON_POCCE_ROPEGUN
         private static readonly int RopegunWindKey;
         private static readonly int RopegunUndoKey;
-        private static readonly Dictionary<int, List<int>> _ropes = new Dictionary<int, List<int>>();
-        private static readonly List<RopeWindState> _windingRopes = new List<RopeWindState>();
+        private static readonly RopeSet _ropes = new RopeSet();
         private static readonly RopegunState _ropegunState = new RopegunState();
 
         static Ropes()
@@ -42,10 +33,10 @@ namespace PocceMod.Client
             API.AddTextEntryByHash(0x6FCC4E8A, "Pocce Ropegun"); // WT_POCCE_ROPEGUN
 
             Tick += UpdateRopegun;
-            Tick += RopeWindUpdate;
+            Tick += UpdateRopes;
         }
 
-        private static Vector3 GetAdjustedPosition(int entity, float front)
+        private static void AdjustOffsetForTowing(int entity, ref Vector3 offset, float towOffset)
         {
             var right = Vector3.Zero;
             var forward = Vector3.Zero;
@@ -54,20 +45,19 @@ namespace PocceMod.Client
             API.GetEntityMatrix(entity, ref right, ref forward, ref up, ref pos);
 
             if (!API.IsEntityAVehicle(entity))
-                return pos;
+                return;
 
             var model = (uint)API.GetEntityModel(entity);
             var min = Vector3.Zero;
             var max = Vector3.Zero;
             API.GetModelDimensions(model, ref min, ref max);
 
-            if (front > 0)
-                right *= (max.X * front);
+            if (towOffset > 0)
+                right *= (max.X * towOffset);
             else
-                right *= (-min.X * front);
-
-            pos += right;
-            return pos;
+                right *= (-min.X * towOffset);
+            
+            offset = right;
         }
 
         private static async Task AddRope(int player, int entity1, int entity2, Vector3 offset1, Vector3 offset2, int mode)
@@ -78,22 +68,8 @@ namespace PocceMod.Client
             entity1 = await Common.WaitForNetEntity(entity1);
             entity2 = await Common.WaitForNetEntity(entity2);
 
-            bool tow = ((Mode)mode & Mode.Tow) == Mode.Tow;
-            var pos1 = tow ? GetAdjustedPosition(entity1, -0.75f) : API.GetOffsetFromEntityInWorldCoords(entity1, offset1.X, offset1.Y, offset1.Z);
-            var pos2 = tow ? GetAdjustedPosition(entity2, 0.75f) : API.GetOffsetFromEntityInWorldCoords(entity2, offset2.X, offset2.Y, offset2.Z);
-            var length = (float)Math.Sqrt(pos1.DistanceToSquared(pos2));
-
-            int unkPtr = 0;
-            var rope = API.AddRope(pos1.X, pos1.Y, pos1.Z, 0f, 0f, 0f, length, 1, length, 1f, 0f, false, false, false, 5f, true, ref unkPtr);
-            API.AttachEntitiesToRope(rope, entity1, entity2, pos1.X, pos1.Y, pos1.Z, pos2.X, pos2.Y, pos2.Z, length, false, false, null, null);
-
-            if (_ropes.TryGetValue(player, out List<int> playerRopes))
-                playerRopes.Add(rope);
-            else
-                _ropes.Add(player, new List<int> { rope });
-
-            if (((Mode)mode & Mode.Grapple) == Mode.Grapple)
-                _windingRopes.Add(new RopeWindState(rope, length));
+            var rope = new Shared.Rope(new Player(player), entity1, entity2, offset1, offset2, (ModeFlag)mode);
+            _ropes.AddRope(rope);
 
             if (!API.RopeAreTexturesLoaded())
                 API.RopeLoadTextures();
@@ -101,32 +77,15 @@ namespace PocceMod.Client
 
         private static void ClearRopes(int player)
         {
-            if (_ropes.TryGetValue(player, out List<int> playerRopes))
-            {
-                foreach (var rope in playerRopes)
-                {
-                    var tmp_rope = rope;
-                    API.DeleteRope(ref tmp_rope);
-                }
-
-                playerRopes.Clear();
-            }
+            _ropes.ClearRopes(new Player(player));
         }
 
         private static void ClearLastRope(int player)
         {
-            if (_ropes.TryGetValue(player, out List<int> playerRopes))
-            {
-                if (playerRopes.Count == 0)
-                    return;
-
-                var rope = playerRopes[playerRopes.Count - 1];
-                API.DeleteRope(ref rope);
-                playerRopes.RemoveAt(playerRopes.Count - 1);
-            }
+            _ropes.ClearLastRope(new Player(player));
         }
 
-        public static void PlayerAttach(int entity, Vector3 offset, Mode mode = Mode.Normal)
+        public static void PlayerAttach(int entity, Vector3 offset, ModeFlag mode = ModeFlag.Normal)
         {
             Attach(Common.GetPlayerPedOrVehicle(), entity, Vector3.Zero, offset, mode);
         }
@@ -134,12 +93,12 @@ namespace PocceMod.Client
         public static void AttachToClosest(IEnumerable<int> entities, bool tow = false)
         {
             if (Common.GetClosestEntity(entities, out int closest))
-                PlayerAttach(closest, Vector3.Zero, tow ? Mode.Tow : Mode.Normal);
+                PlayerAttach(closest, Vector3.Zero, tow ? ModeFlag.Tow : ModeFlag.Normal);
             else
                 Common.Notification("Nothing in range");
         }
 
-        public static void Attach(int entity1, int entity2, Vector3 offset1, Vector3 offset2, Mode mode = Mode.Normal)
+        public static void Attach(int entity1, int entity2, Vector3 offset1, Vector3 offset2, ModeFlag mode = ModeFlag.Normal)
         {
             if (!Permission.CanDo(Ability.RopeOtherPlayer))
             {
@@ -152,7 +111,13 @@ namespace PocceMod.Client
                 }
             }
 
-            if ((mode & Mode.Ropegun) == Mode.Ropegun)
+            if ((mode & ModeFlag.Tow) == ModeFlag.Tow)
+            {
+                AdjustOffsetForTowing(entity1, ref offset1, -0.75f);
+                AdjustOffsetForTowing(entity2, ref offset2, 0.75f);
+            }
+
+            if ((mode & ModeFlag.Ropegun) == ModeFlag.Ropegun)
             {
                 _ropegunState.Update(ref entity1, ref entity2, ref offset1, ref offset2, out bool clearLast);
                 if (clearLast)
@@ -256,26 +221,17 @@ namespace PocceMod.Client
             if (API.IsControlJustPressed(0, attackControl) && TryShootRopegun(48f, out Task<int> target, out Vector3 offset))
             {
                 var entity = await target;
-                PlayerAttach(entity, offset, grapple ? Mode.Ropegun | Mode.Grapple : Mode.Ropegun);
+                PlayerAttach(entity, offset, grapple ? ModeFlag.Ropegun | ModeFlag.Grapple : ModeFlag.Ropegun);
                 API.SetEntityAsNoLongerNeeded(ref entity);
             }
         }
 
-        private static async Task RopeWindUpdate()
+        private static async Task UpdateRopes()
         {
             await Delay(10);
 
-            if (_windingRopes.Count == 0)
-                return;
-
-            foreach (var rope in _windingRopes.ToArray())
+            foreach (var rope in _ropes.GetRopes())
             {
-                if (!rope.Valid)
-                {
-                    _windingRopes.Remove(rope);
-                    continue;
-                }
-
                 rope.Update();
             }
         }
@@ -348,34 +304,6 @@ namespace PocceMod.Client
             _lastOffset1 = Vector3.Zero;
             _lastOffset2 = Vector3.Zero;
             _lastFire = DateTime.MinValue;
-        }
-    }
-
-    internal class RopeWindState
-    {
-        private readonly int _rope;
-        private float _length;
-
-        public RopeWindState(int rope, float length)
-        {
-            API.StartRopeWinding(rope);
-            _rope = rope;
-            _length = length;
-        }
-
-        public bool Valid
-        {
-            get
-            {
-                int rope = _rope;
-                return API.DoesRopeExist(ref rope) && _length > 1f;
-            }
-        }
-
-        public void Update()
-        {
-            _length -= 0.2f;
-            API.RopeForceLength(_rope, _length);
         }
     }
 }

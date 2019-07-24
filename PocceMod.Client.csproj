@@ -69,6 +69,7 @@
     <Compile Include="Client\Vehicles.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Shared\Permission.cs" />
+    <Compile Include="Shared\Rope.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="config\config.ini">
