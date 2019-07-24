@@ -1,5 +1,4 @@
 ﻿using CitizenFX.Core;
-using CitizenFX.Core.Native;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,15 +24,6 @@ namespace PocceMod.Shared
             Offset1 = offset1;
             Offset2 = offset2;
             Mode = mode;
-
-#if CLIENT
-            GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
-            _length = (pos1 - pos2).Length();
-
-            int unkPtr = 0;
-            _handle = API.AddRope(pos1.X, pos1.Y, pos1.Z, 0f, 0f, 0f, _length, 1, _length, 1f, 0f, false, false, false, 5f, true, ref unkPtr);
-            API.AttachEntitiesToRope(_handle, Entity1, Entity2, pos1.X, pos1.Y, pos1.Z, pos2.X, pos2.Y, pos2.Z, _length, false, false, null, null);
-#endif
         }
 
         public Player Player { get; private set; }
@@ -42,47 +32,10 @@ namespace PocceMod.Shared
         public Vector3 Offset1 { get; private set; }
         public Vector3 Offset2 { get; private set; }
         public ModeFlag Mode { get; private set; }
-
-#if CLIENT
-        private int _handle;
-        private float _length;
-
-        private void GetWorldCoords(out Vector3 pos1, out Vector3 pos2)
-        {
-            pos1 = API.GetOffsetFromEntityInWorldCoords(Entity1, Offset1.X, Offset1.Y, Offset1.Z);
-            pos2 = API.GetOffsetFromEntityInWorldCoords(Entity2, Offset2.X, Offset2.Y, Offset2.Z);
-        }
-
-        public void Update()
-        {
-            // if a rope is shot, it ceases to exist
-            var rope = _handle;
-            if (!API.DoesRopeExist(ref rope))
-                return;
-
-            // if length is negative, rope is detached
-            if (API.GetRopeLength(_handle) < 0f)
-            {
-                GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
-                API.AttachEntitiesToRope(_handle, Entity1, Entity2, pos1.X, pos1.Y, pos1.Z, pos2.X, pos2.Y, pos2.Z, _length, false, false, null, null);
-            }
-
-            if ((Mode & ModeFlag.Grapple) == ModeFlag.Grapple && _length > 1f)
-            {
-                _length -= 0.2f;
-                API.RopeForceLength(_handle, _length);
-            }
-        }
-
-        public void Clear()
-        {
-            API.DeleteRope(ref _handle);
-        }
-#else
-        public void Clear()
+        
+        public virtual void Clear()
         {
         }
-#endif
     }
 
     public class RopeSet
