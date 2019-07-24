@@ -61,6 +61,23 @@ namespace PocceMod.Client
             offset = right;
         }
 
+        private static bool IsOtherPlayerEntity(int entity)
+        {
+            var playerID = API.PlayerId();
+
+            if (API.IsEntityAPed(entity))
+            {
+                return API.IsPedAPlayer(entity) && API.NetworkGetPlayerIndexFromPed(entity) != playerID;
+            }
+            else if (API.IsEntityAVehicle(entity))
+            {
+                var players = Vehicles.GetPlayers(entity);
+                return players.Any(player => player != playerID);
+            }
+
+            return false;
+        }
+
         private static async Task AddRope(int player, int entity1, int entity2, Vector3 offset1, Vector3 offset2, int mode)
         {
             if (entity1 == entity2)
@@ -101,15 +118,10 @@ namespace PocceMod.Client
 
         public static void Attach(int entity1, int entity2, Vector3 offset1, Vector3 offset2, ModeFlag mode = ModeFlag.Normal)
         {
-            if (!Permission.CanDo(Ability.RopeOtherPlayer))
+            if (!Permission.CanDo(Ability.RopeOtherPlayer) && (IsOtherPlayerEntity(entity1) || IsOtherPlayerEntity(entity2)))
             {
-                var player = API.GetPlayerPed(-1);
-                if ((API.IsEntityAPed(entity1) && API.IsPedAPlayer(entity1) && entity1 != player) ||
-                    (API.IsEntityAPed(entity2) && API.IsPedAPlayer(entity2) && entity2 != player))
-                {
-                    Common.Notification("You are not allowed to attach rope to another player");
-                    return;
-                }
+                Common.Notification("You are not allowed to attach rope to another player");
+                return;
             }
 
             if ((mode & ModeFlag.Tow) == ModeFlag.Tow)
