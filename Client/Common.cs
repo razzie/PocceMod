@@ -77,6 +77,9 @@ namespace PocceMod.Client
 
         public static async Task<int> WaitForNetEntity(int netEntity)
         {
+            if (netEntity == 0)
+                return 0;
+
             var timeout = DateTime.Now + TimeSpan.FromSeconds(10);
             var entity = API.NetToEnt(netEntity);
 

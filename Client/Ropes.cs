@@ -39,14 +39,14 @@ namespace PocceMod.Client
 
         private static void AdjustOffsetForTowing(int entity, ref Vector3 offset, float towOffset)
         {
+            if (!API.IsEntityAVehicle(entity))
+                return;
+
             var right = Vector3.Zero;
             var forward = Vector3.Zero;
             var up = Vector3.Zero;
             var pos = Vector3.Zero;
             API.GetEntityMatrix(entity, ref right, ref forward, ref up, ref pos);
-
-            if (!API.IsEntityAVehicle(entity))
-                return;
 
             var model = (uint)API.GetEntityModel(entity);
             var min = Vector3.Zero;
@@ -80,7 +80,7 @@ namespace PocceMod.Client
 
         private static async Task AddRope(int player, int entity1, int entity2, Vector3 offset1, Vector3 offset2, int mode)
         {
-            if (entity1 == entity2)
+            if (entity1 == entity2 && entity1 > 0)
                 return;
 
             entity1 = await Common.WaitForNetEntity(entity1);
@@ -141,10 +141,18 @@ namespace PocceMod.Client
                 _ropegunState.Clear();
             }
 
-            if (entity1 == entity2)
+            if (entity1 == entity2 && entity1 > 0)
                 return;
 
-            TriggerServerEvent("PocceMod:AddRope", API.ObjToNet(entity1), API.ObjToNet(entity2), offset1, offset2, (int)mode);
+            int ObjToNet(int entity)
+            {
+                if (entity == 0)
+                    return 0;
+
+                return API.ObjToNet(entity);
+            }
+
+            TriggerServerEvent("PocceMod:AddRope", ObjToNet(entity1), ObjToNet(entity2), offset1, offset2, (int)mode);
         }
 
         public static void ClearAll()
@@ -184,6 +192,9 @@ namespace PocceMod.Client
                 switch (API.GetEntityType(entity))
                 {
                     case 1:
+                        target = Task.FromResult(entity);
+                        break;
+
                     case 2:
                         target = Task.FromResult(entity);
                         offset = API.GetOffsetFromEntityGivenWorldCoords(entity, coords.X, coords.Y, coords.Z);
@@ -235,7 +246,7 @@ namespace PocceMod.Client
             {
                 var entity = await target;
                 PlayerAttach(entity, offset, grapple ? ModeFlag.Ropegun | ModeFlag.Grapple : ModeFlag.Ropegun);
-                API.SetEntityAsNoLongerNeeded(ref entity);
+                //API.SetEntityAsNoLongerNeeded(ref entity);
             }
         }
 
@@ -254,22 +265,80 @@ namespace PocceMod.Client
     {
         private int _handle;
         private float _length;
+        private Scenario _scenario;
+
+        private enum Scenario
+        {
+            EntityToEntity,
+            EntityToGround,
+            GroundToEntity,
+            GroundToGround
+        }
 
         public ClientRope(Player player, int entity1, int entity2, Vector3 offset1, Vector3 offset2, ModeFlag mode) : base(player, entity1, entity2, offset1, offset2, mode)
         {
+            _scenario = GetScenario(entity1, entity2);
+
             GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
             _length = (pos1 - pos2).Length();
-
+            
             int unkPtr = 0;
-            _handle = API.AddRope(pos1.X, pos1.Y, pos1.Z, 0f, 0f, 0f, _length, 1, _length, 1f, 0f, false, false, false, 5f, true, ref unkPtr);
-            API.AttachEntitiesToRope(_handle, Entity1, Entity2, pos1.X, pos1.Y, pos1.Z, pos2.X, pos2.Y, pos2.Z, _length, false, false, null, null);
-            API.StartRopeWinding(_handle);
+            var ropePos = (_scenario == Scenario.EntityToGround) ? pos2 : pos1;
+            _handle = API.AddRope(ropePos.X, ropePos.Y, ropePos.Z, 0f, 0f, 0f, _length, 1, _length, 1f, 0f, false, false, false, 5f, true, ref unkPtr);
+            Attach(pos1, pos2);
+
+            if ((Mode & ModeFlag.Grapple) == ModeFlag.Grapple)
+                API.StartRopeWinding(_handle);
+        }
+
+        private static Scenario GetScenario(int entity1, int entity2)
+        {
+            if (entity1 > 0 && entity2 > 0)
+                return Scenario.EntityToEntity;
+            else if (entity1 > 0)
+                return Scenario.EntityToGround;
+            else if (entity2 > 0)
+                return Scenario.GroundToEntity;
+            else
+                return Scenario.GroundToGround;
         }
 
         private void GetWorldCoords(out Vector3 pos1, out Vector3 pos2)
         {
-            pos1 = API.GetOffsetFromEntityInWorldCoords(Entity1, Offset1.X, Offset1.Y, Offset1.Z);
-            pos2 = API.GetOffsetFromEntityInWorldCoords(Entity2, Offset2.X, Offset2.Y, Offset2.Z);
+            if (_scenario == Scenario.EntityToEntity || _scenario == Scenario.EntityToGround)
+                pos1 = API.GetOffsetFromEntityInWorldCoords(Entity1, Offset1.X, Offset1.Y, Offset1.Z);
+            else
+                pos1 = Offset1;
+
+            if (_scenario == Scenario.EntityToEntity || _scenario == Scenario.GroundToEntity)
+                pos2 = API.GetOffsetFromEntityInWorldCoords(Entity2, Offset2.X, Offset2.Y, Offset2.Z);
+            else
+                pos2 = Offset2;
+        }
+
+        private void Attach(Vector3 pos1, Vector3 pos2)
+        {
+            switch (_scenario)
+            {
+                case Scenario.EntityToEntity:
+                    API.AttachEntitiesToRope(_handle, Entity1, Entity2, pos1.X, pos1.Y, pos1.Z, pos2.X, pos2.Y, pos2.Z, _length, false, false, null, null);
+                    break;
+
+                case Scenario.EntityToGround:
+                    API.AttachRopeToEntity(_handle, Entity1, pos1.X, pos1.Y, pos1.Z, true);
+                    API.PinRopeVertex(_handle, API.GetRopeVertexCount(_handle) - 1, pos2.X, pos2.Y, pos2.Z);
+                    break;
+
+                case Scenario.GroundToEntity:
+                    API.AttachRopeToEntity(_handle, Entity2, pos2.X, pos2.Y, pos2.Z, true);
+                    API.PinRopeVertex(_handle, 0, pos1.X, pos1.Y, pos1.Z);
+                    break;
+
+                case Scenario.GroundToGround:
+                    API.PinRopeVertex(_handle, 0, pos1.X, pos1.Y, pos1.Z);
+                    API.PinRopeVertex(_handle, API.GetRopeVertexCount(_handle) - 1, pos2.X, pos2.Y, pos2.Z);
+                    break;
+            }
         }
 
         public void Update()
@@ -279,18 +348,21 @@ namespace PocceMod.Client
             if (!API.DoesRopeExist(ref rope))
                 return;
 
-            // if length is negative, rope is detached
-            if (API.GetRopeLength(_handle) < 0f)
+            if (_scenario != Scenario.GroundToGround)
             {
-                GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
-                API.DetachRopeFromEntity(_handle, Entity1);
-                API.DetachRopeFromEntity(_handle, Entity2);
-                API.AttachEntitiesToRope(_handle, Entity1, Entity2, pos1.X, pos1.Y, pos1.Z, pos2.X, pos2.Y, pos2.Z, _length, false, false, null, null);
-            }
+                // if length is negative, rope is detached
+                if (API.GetRopeLength(_handle) < 0f)
+                {
+                    GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
+                    Attach(pos1, pos2);
+                }
 
-            if ((Mode & ModeFlag.Grapple) == ModeFlag.Grapple && _length > 1f)
-            {
-                _length -= 0.2f;
+                if ((Mode & ModeFlag.Grapple) == ModeFlag.Grapple && _length > 1f)
+                {
+                    _length -= 0.2f;
+                }
+
+                API.RopeSetUpdatePinverts(_handle);
                 API.RopeForceLength(_handle, _length);
             }
         }
