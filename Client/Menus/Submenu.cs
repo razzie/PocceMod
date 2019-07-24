@@ -86,7 +86,10 @@ namespace PocceMod.Client.Menus
                     for (int i = 0; i < subitems.Count; ++i)
                     {
                         if (subitems[i].Contains(item))
+                        {
+                            menuListItem.ListIndex = i;
                             return true;
+                        }
                     }
                 }
                 else
