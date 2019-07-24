@@ -155,6 +155,7 @@ namespace PocceMod.Client
         {
             var player = API.GetPlayerPed(-1);
             var pos = API.GetEntityCoords(player, true);
+            var heading = API.GetEntityHeading(player);
             var hash = (uint)API.GetHashKey(model);
 
             if (!API.IsModelValid(hash))
@@ -170,7 +171,7 @@ namespace PocceMod.Client
             }
 
             await Common.RequestModel(hash);
-            var vehicle = API.CreateVehicle(hash, pos.X, pos.Y, pos.Z + 1f, API.GetEntityHeading(player), true, false);
+            var vehicle = API.CreateVehicle(hash, pos.X, pos.Y, pos.Z + 1f, heading, true, false);
             API.SetPedIntoVehicle(player, vehicle, -1);
 
             if (API.GetEntityHeightAboveGround(vehicle) > 10f)
@@ -181,7 +182,9 @@ namespace PocceMod.Client
                 }
                 else if (API.IsThisModelAPlane(hash))
                 {
-                    API.SetEntityVelocity(vehicle, API.GetVehicleMaxSpeed(vehicle) * 0.5f, 0f, 0f);
+                    var speed = API.GetVehicleMaxSpeed(vehicle) * 0.5f;
+                    var headingRad = MathUtil.DegreesToRadians(heading);
+                    API.SetEntityVelocity(vehicle, -(float)Math.Sin(headingRad) * speed, (float)Math.Cos(headingRad) * speed, 0f);
                     API.SetVehicleEngineOn(vehicle, true, true, true);
                     API.SetVehicleJetEngineOn(vehicle, true);
                 }
