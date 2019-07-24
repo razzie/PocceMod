@@ -173,8 +173,19 @@ namespace PocceMod.Client
             var vehicle = API.CreateVehicle(hash, pos.X, pos.Y, pos.Z + 1f, API.GetEntityHeading(player), true, false);
             API.SetPedIntoVehicle(player, vehicle, -1);
 
-            if (API.IsThisModelAHeli(hash) && API.GetEntityHeightAboveGround(vehicle) > 10f)
-                API.SetHeliBladesFullSpeed(vehicle);
+            if (API.GetEntityHeightAboveGround(vehicle) > 10f)
+            {
+                if (API.IsThisModelAHeli(hash))
+                {
+                    API.SetHeliBladesFullSpeed(vehicle);
+                }
+                else if (API.IsThisModelAPlane(hash))
+                {
+                    API.SetEntityVelocity(vehicle, API.GetVehicleMaxSpeed(vehicle) * 0.5f, 0f, 0f);
+                    API.SetVehicleEngineOn(vehicle, true, true, true);
+                    API.SetVehicleJetEngineOn(vehicle, true);
+                }
+            }
 
             API.SetModelAsNoLongerNeeded(hash);
             return vehicle;
