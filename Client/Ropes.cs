@@ -42,23 +42,17 @@ namespace PocceMod.Client
             if (!API.IsEntityAVehicle(entity))
                 return;
 
-            var right = Vector3.Zero;
-            var forward = Vector3.Zero;
-            var up = Vector3.Zero;
-            var pos = Vector3.Zero;
-            API.GetEntityMatrix(entity, ref right, ref forward, ref up, ref pos);
-
             var model = (uint)API.GetEntityModel(entity);
             var min = Vector3.Zero;
             var max = Vector3.Zero;
             API.GetModelDimensions(model, ref min, ref max);
 
+            offset = new Vector3(0f, 1f, 0f);
+
             if (towOffset > 0)
-                right *= (max.X * towOffset);
+                offset *= (max.X * towOffset);
             else
-                right *= (-min.X * towOffset);
-            
-            offset = right;
+                offset *= (-min.X * towOffset);
         }
 
         private static bool IsOtherPlayerEntity(int entity)
