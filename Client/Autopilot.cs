@@ -25,14 +25,9 @@ namespace PocceMod.Client
 
         public static async Task Activate()
         {
-            var player = API.GetPlayerPed(-1);
-            if (!API.IsPedInAnyVehicle(player, false))
-            {
-                Common.Notification("Player is not in a vehicle");
+            if (!Common.EnsurePlayerIsInVehicle(out int player, out int vehicle))
                 return;
-            }
 
-            var vehicle = API.GetVehiclePedIsIn(player, false);
             if (API.IsVehicleSeatFree(vehicle, -1))
             {
                 await Spawn(vehicle);
@@ -60,14 +55,9 @@ namespace PocceMod.Client
 
         public static async Task Deactivate()
         {
-            var player = API.GetPlayerPed(-1);
-            if (!API.IsPedInAnyVehicle(player, false))
-            {
-                Common.Notification("Player is not in a vehicle");
+            if (!Common.EnsurePlayerIsInVehicle(out int player, out int vehicle))
                 return;
-            }
 
-            var vehicle = API.GetVehiclePedIsIn(player, false);
             var driver = API.GetPedInVehicleSeat(vehicle, -1);
             if (!IsAutopilot(driver))
             {
@@ -88,14 +78,9 @@ namespace PocceMod.Client
 
         public static async Task Toggle()
         {
-            var player = API.GetPlayerPed(-1);
-            if (!API.IsPedInAnyVehicle(player, false))
-            {
-                Common.Notification("Player is not in a vehicle");
+            if (!Common.EnsurePlayerIsInVehicle(out int player, out int vehicle))
                 return;
-            }
 
-            var vehicle = API.GetVehiclePedIsIn(player, false);
             var driver = API.GetPedInVehicleSeat(vehicle, -1);
             if (IsOwnedAutopilot(driver))
                 await Deactivate();

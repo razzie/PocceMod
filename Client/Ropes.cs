@@ -218,7 +218,7 @@ namespace PocceMod.Client
                         return true;
 
                     case 3:
-                        if (Props.IsPocceProp(target))
+                        if (API.NetworkDoesEntityExistWithNetworkId(target))
                         {
                             offset = API.GetOffsetFromEntityGivenWorldCoords(target, coords.X, coords.Y, coords.Z);
                             return true;

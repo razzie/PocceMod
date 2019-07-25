@@ -121,6 +121,34 @@ namespace PocceMod.Client
             return found;
         }
 
+        public static bool EnsurePlayerIsInVehicle(out int player, out int vehicle, bool notification = true)
+        {
+            vehicle = 0;
+            player = API.GetPlayerPed(-1);
+            if (!API.IsPedInAnyVehicle(player, true))
+            {
+                Notification("Player is not in a vehicle");
+                return false;
+            }
+
+            vehicle = API.GetVehiclePedIsIn(player, false);
+            return true;
+        }
+
+        public static bool EnsurePlayerIsVehicleDriver(out int player, out int vehicle, bool notification = true)
+        {
+            if (!EnsurePlayerIsInVehicle(out player, out vehicle, notification))
+                return false;
+
+            if (API.GetPedInVehicleSeat(vehicle, -1) != player)
+            {
+                Notification("Player is not the driver of this vehicle");
+                return false;
+            }
+
+            return true;
+        }
+
         public static bool IsEntityInRangeSquared(int entity, float rangeSquared)
         {
             var playerPos = API.GetEntityCoords(API.GetPlayerPed(-1), true);

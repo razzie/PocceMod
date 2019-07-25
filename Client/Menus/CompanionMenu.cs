@@ -66,14 +66,9 @@ namespace PocceMod.Client.Menus
 
         public static async Task PoccePassengers()
         {
-            int player = API.GetPlayerPed(-1);
-            if (!API.IsPedInAnyVehicle(player, true))
-            {
-                Common.Notification("Player is not in a vehicle");
+            if (!Common.EnsurePlayerIsInVehicle(out int player, out int vehicle))
                 return;
-            }
 
-            var vehicle = API.GetVehiclePedIsIn(player, false);
             while (Vehicles.GetFreeSeat(vehicle, out int seat))
             {
                 var pocce = Config.PocceList[API.GetRandomIntInRange(0, Config.PocceList.Length)];

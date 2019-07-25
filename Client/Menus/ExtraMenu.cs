@@ -56,19 +56,8 @@ namespace PocceMod.Client.Menus
 
         public static void UltrabrightHeadlight()
         {
-            var player = API.GetPlayerPed(-1);
-            if (!API.IsPedInAnyVehicle(player, true))
-            {
-                Common.Notification("Player is not in a vehicle");
+            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
                 return;
-            }
-
-            var vehicle = API.GetVehiclePedIsIn(player, false);
-            if (API.GetPedInVehicleSeat(vehicle, -1) != player)
-            {
-                Common.Notification("Player is not the driver of this vehicle");
-                return;
-            }
 
             Vehicles.EnableUltrabrightHeadlight(vehicle);
             Common.Notification("Use arrow up/down keys to change brightness");
