@@ -25,6 +25,8 @@
         EMPOtherPlayer,
         CargobobMagnet,
         UltrabrightHeadlight,
+        ZeroGravity,
+        Balloons,
         IdentifySkins,
         ChangeSkin
     }

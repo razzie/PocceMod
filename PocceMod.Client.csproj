@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client\AntiGravity.cs" />
     <Compile Include="Client\Autopilot.cs" />
     <Compile Include="Client\Common.cs" />
     <Compile Include="Client\Menus\CompanionMenu.cs" />

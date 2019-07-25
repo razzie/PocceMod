@@ -1,4 +1,5 @@
-﻿using CitizenFX.Core.Native;
+﻿using CitizenFX.Core;
+using CitizenFX.Core.Native;
 using System.Threading.Tasks;
 
 namespace PocceMod.Client.Menus
@@ -90,6 +91,44 @@ namespace PocceMod.Client.Menus
             {
                 Common.Notification("Player is not in a heli");
             }
+        }
+
+        public static void ToggleZeroGravity()
+        {
+            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
+                return;
+
+            if (AntiGravity.Contains(vehicle))
+                AntiGravity.Remove(vehicle);
+            else
+                AntiGravity.Add(vehicle, 2f);
+        }
+
+        public static async Task Balloons()
+        {
+            var balls = new string[] { "prop_beach_volball01", "prop_beach_volball02", "prop_beachball_02", "prop_bskball_01" };
+            var coords = API.GetEntityCoords(API.GetPlayerPed(-1), true);
+            coords.Z += 2f;
+
+            Vector3 randomVector()
+            {
+                return new Vector3(API.GetRandomFloatInRange(-0.5f, 0.5f), API.GetRandomFloatInRange(-0.5f, 0.5f), API.GetRandomFloatInRange(-0.5f, 0.5f));
+            }
+
+            var joint = await Props.SpawnAtCoords("prop_devin_rope_01", coords, Vector3.Zero);
+            Ropes.PlayerAttach(joint, Vector3.Zero);
+            AntiGravity.Add(joint, 2f);
+
+            for (int i = 0; i < 10; ++i)
+            {
+                var model = balls[API.GetRandomIntInRange(0, balls.Length)];
+                var ball = await Props.SpawnAtCoords(model, coords + randomVector(), Vector3.Zero);
+                Ropes.Attach(joint, ball, Vector3.Zero, Vector3.Zero);
+                AntiGravity.Add(ball, 2f);
+                API.SetEntityAsNoLongerNeeded(ref ball);
+            }
+
+            API.SetEntityAsNoLongerNeeded(ref joint);
         }
     }
 }
