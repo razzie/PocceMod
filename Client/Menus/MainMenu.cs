@@ -16,8 +16,17 @@ namespace PocceMod.Client.Menus
         {
             MenuController.MenuToggleKey = Control.SelectCharacterMichael;
             MenuController.EnableMenuToggleKeyOnController = false;
-            MenuController.MenuAlignment = MenuController.MenuAlignmentOption.Right;
             MenuController.DontOpenAnyMenu = true;
+
+            try
+            {
+                MenuController.MenuAlignment = Config.GetConfigBool("MenuRightAlign") ? MenuController.MenuAlignmentOption.Right : MenuController.MenuAlignmentOption.Left;
+            }
+            catch (AspectRatioException)
+            {
+                Common.Notification("Unsupported aspect ratio! PocceMod menu is force left aligned");
+                MenuController.MenuAlignment = MenuController.MenuAlignmentOption.Left;
+            }
 
             var menukey = Config.GetConfigInt("MenuKey");
             if (menukey > 0)

@@ -30,13 +30,18 @@ namespace PocceMod.Shared
 
         public static int GetConfigInt(string item)
         {
-            if (Configuration.TryGetValue(item, out string value))
-            {
-                int.TryParse(value, out int result);
+            if (Configuration.TryGetValue(item, out string value) && int.TryParse(value, out int result))
                 return result;
-            }
+            else
+                return 0;
+        }
 
-            return 0;
+        public static bool GetConfigBool(string item)
+        {
+            if (Configuration.TryGetValue(item, out string value) && bool.TryParse(value, out bool result))
+                return result;
+            else
+                return false;
         }
 
         private static uint[] _weaponList = null;
