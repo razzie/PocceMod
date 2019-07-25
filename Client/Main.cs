@@ -70,6 +70,7 @@ namespace PocceMod.Client
 
             if (Permission.CanDo(Ability.Rope) || Permission.CanDo(Ability.RopeGun))
             {
+                _menu.AddMenuListItem("Rope", "Free myself", Ropes.ClearPlayer);
                 _menu.AddMenuListItem("Rope", "Clear last", Ropes.ClearLast);
                 _menu.AddMenuListItem("Rope", "Clear all", Ropes.ClearAll);
             }

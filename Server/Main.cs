@@ -17,6 +17,7 @@ namespace PocceMod.Server
             EventHandlers["PocceMod:AddRope"] += new Action<Player, int, int, Vector3, Vector3, int>(AddRope);
             EventHandlers["PocceMod:ClearRopes"] += new Action<Player>(ClearRopes);
             EventHandlers["PocceMod:ClearLastRope"] += new Action<Player>(ClearLastRope);
+            EventHandlers["PocceMod:ClearEntityRopes"] += new Action<Player, int>(ClearEntityRopes);
             EventHandlers["PocceMod:RequestRopes"] += new Action<Player>(RequestRopes);
         }
 
@@ -63,6 +64,12 @@ namespace PocceMod.Server
         {
             TriggerClientEvent("PocceMod:ClearLastRope", source.Handle);
             _ropes.ClearLastRope(source);
+        }
+
+        private void ClearEntityRopes([FromSource] Player source, int entity)
+        {
+            TriggerClientEvent("PocceMod:ClearEntityRopes", entity);
+            _ropes.ClearEntityRopes(entity);
         }
 
         private void RequestRopes([FromSource] Player source)

@@ -14,14 +14,14 @@ namespace PocceMod.Client
         internal static int RootObject { get; private set; }
         private const uint Ropegun = 0x44AE7910; // WEAPON_POCCE_ROPEGUN
         private static readonly int RopegunWindKey;
-        private static readonly int RopegunUndoKey;
+        private static readonly int RopeClearKey;
         private static readonly RopeSet _ropes = new RopeSet();
         private static readonly RopegunState _ropegunState = new RopegunState();
 
         static Ropes()
         {
             RopegunWindKey = Config.GetConfigInt("RopegunWindKey");
-            RopegunUndoKey = Config.GetConfigInt("RopegunUndoKey");
+            RopeClearKey = Config.GetConfigInt("RopeClearKey");
         }
 
         public Ropes()
@@ -29,6 +29,7 @@ namespace PocceMod.Client
             EventHandlers["PocceMod:AddRope"] += new Func<int, int, int, Vector3, Vector3, int, Task>(AddRope);
             EventHandlers["PocceMod:ClearRopes"] += new Action<int>(ClearRopes);
             EventHandlers["PocceMod:ClearLastRope"] += new Action<int>(ClearLastRope);
+            EventHandlers["PocceMod:ClearEntityRopes"] += new Action<int>(ClearEntityRopes);
 
             TriggerServerEvent("PocceMod:RequestRopes");
 
@@ -95,7 +96,7 @@ namespace PocceMod.Client
             if (entity2 == 0)
                 entity2 = RootObject;
 
-            var rope = new ClientRope(new Player(player), entity1, entity2, offset1, offset2, (ModeFlag)mode);
+            var rope = new RopeWrapper(new Player(player), entity1, entity2, offset1, offset2, (ModeFlag)mode);
             _ropes.AddRope(rope);
 
             if (!API.RopeAreTexturesLoaded())
@@ -110,6 +111,11 @@ namespace PocceMod.Client
         private static void ClearLastRope(int player)
         {
             _ropes.ClearLastRope(new Player(player));
+        }
+
+        private static void ClearEntityRopes(int entity)
+        {
+            _ropes.ClearEntityRopes(entity);
         }
 
         public static void PlayerAttach(int entity, Vector3 offset, ModeFlag mode = ModeFlag.Normal)
@@ -174,6 +180,11 @@ namespace PocceMod.Client
             TriggerServerEvent("PocceMod:ClearLastRope");
         }
 
+        public static void ClearPlayer()
+        {
+            TriggerServerEvent("PocceMod:ClearEntityRopes", Common.GetPlayerPedOrVehicle());
+        }
+
         public static void EquipRopeGun()
         {
             var player = API.GetPlayerPed(-1);
@@ -226,24 +237,15 @@ namespace PocceMod.Client
             return false;
         }
 
-        private static async Task UpdateRopegun()
+        private static Task UpdateRopegun()
         {
             var playerID = API.PlayerId();
             var player = API.GetPlayerPed(-1);
             if (API.GetSelectedPedWeapon(player) != (int)Ropegun)
-            {
-                await Delay(100);
-                return;
-            }
-
-            if (RopegunUndoKey > 0 && API.IsControlJustPressed(0, RopegunUndoKey))
-            {
-                _ropegunState.Undo(out bool clearLast);
-                if (clearLast) ClearLast();
-            }
+                return Delay(100);
 
             if (!API.IsPlayerFreeAiming(playerID))
-                return;
+                return Delay(0);
 
             var attackControl = API.IsPedInAnyVehicle(player, false) ? 69 : 24;  // INPUT_VEH_ATTACK; INPUT_ATTACK
             var grapple = (RopegunWindKey > 0 && API.IsControlPressed(0, RopegunWindKey));
@@ -252,20 +254,27 @@ namespace PocceMod.Client
             {
                 PlayerAttach(target, offset, grapple ? ModeFlag.Ropegun | ModeFlag.Grapple : ModeFlag.Ropegun);
             }
+
+            return Delay(0);
         }
 
         private static async Task UpdateRopes()
         {
             await Delay(10);
 
-            foreach (var rope in _ropes.GetRopes().Cast<ClientRope>())
+            if (RopeClearKey > 0 && API.IsControlJustPressed(0, RopeClearKey))
+            {
+                ClearPlayer();
+            }
+
+            foreach (var rope in _ropes.GetRopes().Cast<RopeWrapper>())
             {
                 rope.Update();
             }
         }
     }
 
-    internal class ClientRope : Shared.Rope
+    internal class RopeWrapper : Shared.Rope
     {
         private int _handle;
         private float _length;
@@ -279,7 +288,7 @@ namespace PocceMod.Client
             GroundToGround
         }
 
-        public ClientRope(Player player, int entity1, int entity2, Vector3 offset1, Vector3 offset2, ModeFlag mode) : base(player, entity1, entity2, offset1, offset2, mode)
+        public RopeWrapper(Player player, int entity1, int entity2, Vector3 offset1, Vector3 offset2, ModeFlag mode) : base(player, entity1, entity2, offset1, offset2, mode)
         {
             _scenario = GetScenario(entity1, entity2);
 

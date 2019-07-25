@@ -81,5 +81,20 @@ namespace PocceMod.Shared
                 playerRopes.RemoveAt(playerRopes.Count - 1);
             }
         }
+
+        public void ClearEntityRopes(int entity)
+        {
+            foreach (var playerRopes in _ropes.Values)
+            {
+                foreach (var rope in playerRopes.ToArray())
+                {
+                    if (rope.Entity1 == entity || rope.Entity2 == entity)
+                    {
+                        rope.Clear();
+                        playerRopes.Remove(rope);
+                    }
+                }
+            }
+        }
     }
 }
