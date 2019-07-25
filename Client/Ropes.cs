@@ -11,6 +11,7 @@ namespace PocceMod.Client
 {
     public class Ropes : BaseScript
     {
+        internal static int RootObject { get; private set; }
         private const uint Ropegun = 0x44AE7910; // WEAPON_POCCE_ROPEGUN
         private static readonly int RopegunWindKey;
         private static readonly int RopegunUndoKey;
@@ -77,8 +78,22 @@ namespace PocceMod.Client
             if (entity1 == entity2 && entity1 > 0)
                 return;
 
+            if (RootObject == 0)
+            {
+                var model = (uint)API.GetHashKey("prop_devin_rope_01");
+                await Common.RequestModel(model);
+                RootObject = API.CreateObject((int)model, 0f, 0f, 0f, false, false, false);
+                API.FreezeEntityPosition(RootObject, true);
+            }
+
             entity1 = await Common.WaitForNetEntity(entity1);
             entity2 = await Common.WaitForNetEntity(entity2);
+
+            if (entity1 == 0)
+                entity1 = RootObject;
+
+            if (entity2 == 0)
+                entity2 = RootObject;
 
             var rope = new ClientRope(new Player(player), entity1, entity2, offset1, offset2, (ModeFlag)mode);
             _ropes.AddRope(rope);
@@ -166,39 +181,35 @@ namespace PocceMod.Client
             API.SetCurrentPedVehicleWeapon(player, Ropegun);
         }
 
-        private static bool TryShootRopegun(float distance, out Task<int> target, out Vector3 offset)
+        private static bool TryShootRopegun(float distance, out int target, out Vector3 offset)
         {
             var player = Common.GetPlayerPedOrVehicle();
             Common.GetAimCoords(out Vector3 rayBegin, out Vector3 rayEnd, distance);
             var ray = API.CastRayPointToPoint(rayBegin.X, rayBegin.Y, rayBegin.Z, rayEnd.X, rayEnd.Y, rayEnd.Z, 1 | 2 | 4 | 8 | 16 | 32, player, 0);
 
-            target = Task.FromResult(-1);
+            target = 0;
             offset = Vector3.Zero;
 
             bool hit = false;
             var coords = Vector3.Zero;
             var normal = Vector3.Zero;
-            var entity = -1;
-            API.GetRaycastResult(ray, ref hit, ref coords, ref normal, ref entity);
+            API.GetRaycastResult(ray, ref hit, ref coords, ref normal, ref target);
 
             if (hit)
             {
-                switch (API.GetEntityType(entity))
+                switch (API.GetEntityType(target))
                 {
                     case 1:
-                        target = Task.FromResult(entity);
-                        break;
+                        return true;
 
                     case 2:
-                        target = Task.FromResult(entity);
-                        offset = API.GetOffsetFromEntityGivenWorldCoords(entity, coords.X, coords.Y, coords.Z);
+                        offset = API.GetOffsetFromEntityGivenWorldCoords(target, coords.X, coords.Y, coords.Z);
                         return true;
 
                     case 3:
-                        if (Props.IsPocceProp(entity))
+                        if (Props.IsPocceProp(target))
                         {
-                            target = Task.FromResult(entity);
-                            offset = API.GetOffsetFromEntityGivenWorldCoords(entity, coords.X, coords.Y, coords.Z);
+                            offset = API.GetOffsetFromEntityGivenWorldCoords(target, coords.X, coords.Y, coords.Z);
                             return true;
                         }
                         break;
@@ -206,7 +217,8 @@ namespace PocceMod.Client
 
                 if (Permission.CanDo(Ability.RopeGunStaticObjects))
                 {
-                    target = Props.SpawnAtCoords("prop_devin_rope_01", coords, normal, true, false);
+                    target = 0;
+                    offset = coords;
                     return true;
                 }
             }
@@ -236,11 +248,9 @@ namespace PocceMod.Client
             var attackControl = API.IsPedInAnyVehicle(player, false) ? 69 : 24;  // INPUT_VEH_ATTACK; INPUT_ATTACK
             var grapple = (RopegunWindKey > 0 && API.IsControlPressed(0, RopegunWindKey));
 
-            if (API.IsControlJustPressed(0, attackControl) && TryShootRopegun(48f, out Task<int> target, out Vector3 offset))
+            if (API.IsControlJustPressed(0, attackControl) && TryShootRopegun(48f, out int target, out Vector3 offset))
             {
-                var entity = await target;
-                PlayerAttach(entity, offset, grapple ? ModeFlag.Ropegun | ModeFlag.Grapple : ModeFlag.Ropegun);
-                //API.SetEntityAsNoLongerNeeded(ref entity);
+                PlayerAttach(target, offset, grapple ? ModeFlag.Ropegun | ModeFlag.Grapple : ModeFlag.Ropegun);
             }
         }
 
@@ -259,7 +269,7 @@ namespace PocceMod.Client
     {
         private int _handle;
         private float _length;
-        private Scenario _scenario;
+        private readonly Scenario _scenario;
 
         private enum Scenario
         {
@@ -325,7 +335,7 @@ namespace PocceMod.Client
 
                 case Scenario.GroundToEntity:
                     API.AttachRopeToEntity(_handle, Entity2, pos2.X, pos2.Y, pos2.Z, true);
-                    API.PinRopeVertex(_handle, 0, pos1.X, pos1.Y, pos1.Z);
+                    API.PinRopeVertex(_handle, API.GetRopeVertexCount(_handle) - 1, pos1.X, pos1.Y, pos1.Z);
                     break;
 
                 case Scenario.GroundToGround:
@@ -354,10 +364,8 @@ namespace PocceMod.Client
                 if ((Mode & ModeFlag.Grapple) == ModeFlag.Grapple && _length > 1f)
                 {
                     _length -= 0.2f;
+                    API.RopeForceLength(_handle, _length);
                 }
-
-                API.RopeSetUpdatePinverts(_handle);
-                API.RopeForceLength(_handle, _length);
             }
         }
 
