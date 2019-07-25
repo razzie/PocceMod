@@ -17,7 +17,7 @@ namespace PocceMod.Client
 
         public static void Add(int entity, float force)
         {
-            _entities.Add(entity, force);
+            _entities.Add(entity, force * 10f);
         }
 
         public static bool Contains(int entity)
@@ -30,8 +30,14 @@ namespace PocceMod.Client
             _entities.Remove(entity);
         }
 
-        private static Task Update()
+        private static async Task Update()
         {
+            if (_entities.Count == 0)
+            {
+                await Delay(100);
+                return;
+            }
+
             foreach (var pair in _entities.ToArray())
             {
                 var entity = pair.Key;
@@ -43,10 +49,8 @@ namespace PocceMod.Client
                     continue;
                 }
 
-                API.ApplyForceToEntityCenterOfMass(entity, 0, 0f, 0f, force, false, true, true, false);
+                API.ApplyForceToEntityCenterOfMass(entity, 0, 0f, 0f, force, false, false, true, false);
             }
-
-            return Delay(0);
         }
     }
 }
