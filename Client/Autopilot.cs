@@ -120,8 +120,7 @@ namespace PocceMod.Client
         private static float GetHeading(int vehicle, Vector3 wp)
         {
             var coords = API.GetEntityCoords(vehicle, false);
-            var heading = (float)Math.Atan2(wp.Y - coords.Y, wp.X - coords.X);
-            return MathUtil.RadiansToDegrees(heading);
+            return Common.GetHeading(coords, wp);
         }
 
         private static void GotoWaypoint(int driver, int vehicle, Vector3 wp)

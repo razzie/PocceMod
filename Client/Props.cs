@@ -123,17 +123,24 @@ namespace PocceMod.Client
             return prop;
         }
 
-        private static Task<int> SpawnInFrontOfPed(int ped, string model)
+        public static Task<int> SpawnInFrontOfPed(int ped, string model)
         {
             var pedModel = (uint)API.GetEntityModel(ped);
-            var pos = API.GetEntityCoords(ped, true);
             var heading = API.GetEntityHeading(ped);
             var headingRad = MathUtil.DegreesToRadians(heading);
+            var pos = API.GetEntityCoords(ped, true);
+            var offset = new Vector3((float)Math.Sin(headingRad), (float)Math.Cos(headingRad), -1f);
 
-            return SpawnAtCoords(model, new Vector3(pos.X - (float)Math.Sin(headingRad), pos.Y + (float)Math.Cos(headingRad), pos.Z - 1f), new Vector3(0f, 0f, heading));
+            return SpawnAtCoords(model, pos + offset, new Vector3(0f, 0f, heading));
         }
 
-        private static async Task<int> SpawnOnEntity(int entity, string model)
+        public static Task<int> SpawnInRange(Vector3 center, string model, float minRange, float maxRange)
+        {
+            var pos = Common.GetRandomSpawnCoordsInRange(center, minRange, maxRange, out float heading);
+            return SpawnAtCoords(model, pos, new Vector3(0f, 0f, heading));
+        }
+
+        public static async Task<int> SpawnOnEntity(int entity, string model)
         {
             var pos = API.GetEntityCoords(entity, API.IsEntityAPed(entity));
             var heading = API.GetEntityHeading(entity);

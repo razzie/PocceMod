@@ -227,5 +227,25 @@ namespace PocceMod.Client
                 Z = (float)Math.Sin(radiansX)
             };
         }
+
+        public static float GetHeading(Vector3 src, Vector3 dest)
+        {
+            var heading = (float)Math.Atan2(dest.Y - src.Y, dest.X - src.X);
+            return MathUtil.RadiansToDegrees(heading);
+        }
+
+        public static Vector3 GetRandomSpawnCoordsInRange(Vector3 center, float minRange, float maxRange, out float heading)
+        {
+            heading = API.GetRandomFloatInRange(0f, 360f);
+            var headingRad = MathUtil.DegreesToRadians(heading);
+            var distance = API.GetRandomFloatInRange(minRange, maxRange);
+            var offset = new Vector3((float)Math.Sin(headingRad), (float)Math.Cos(headingRad), 0) * distance;
+
+            float groundZ = 0f;
+            if (API.GetGroundZFor_3dCoord(center.X + offset.X, center.Y + offset.Y, center.Z, ref groundZ, false))
+                offset.Z = groundZ - center.Z;
+
+            return center + offset;
+        }
     }
 }

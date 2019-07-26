@@ -17,7 +17,8 @@ namespace PocceMod.Client
             NonPlayers = 4,
             LocalPlayer = 8,
             Dead = 16,
-            CurrentVehiclePassengers = 32
+            VehiclePassengers= 32,
+            CurrentVehiclePassengers = 64
         }
 
         public const Filter DefaultFilters = Filter.LocalPlayer | Filter.Dead;
@@ -66,6 +67,9 @@ namespace PocceMod.Client
                 if (HasFilter(Filter.Dead) && API.IsPedDeadOrDying(ped, true))
                     continue;
 
+                if (HasFilter(Filter.VehiclePassengers) && API.IsPedInAnyVehicle(ped, true))
+                    continue;
+
                 if (HasFilter(Filter.CurrentVehiclePassengers) && API.GetVehiclePedIsIn(ped, false) == vehicle)
                     continue;
 
@@ -80,15 +84,9 @@ namespace PocceMod.Client
             return peds;
         }
 
-        public static async Task<int> Spawn(uint[] modelList, int pedType = 26)
+        public static Vector3 GetSafeCoords(Vector3 coords)
         {
-            if (modelList.Length == 0)
-                return -1;
-
-            var model = modelList[API.GetRandomIntInRange(0, modelList.Length)];
-            var coords = API.GetEntityCoords(API.GetPlayerPed(-1), true);
             var pos = new Vector3();
-
             if (!API.GetSafeCoordForPed(coords.X, coords.Y, coords.Z, true, ref pos, 16))
             {
                 pos.X = coords.X;
@@ -96,10 +94,36 @@ namespace PocceMod.Client
                 pos.Z = coords.Z + 1f;
             }
 
+            return pos;
+        }
+
+        public static async Task<int> Spawn(uint model, Vector3 coords, bool trySafeCoords = true, int pedType = 26)
+        {
             await Common.RequestModel(model);
+            var pos = trySafeCoords ? GetSafeCoords(coords) : coords;
             var ped = API.CreatePed(pedType, model, pos.X, pos.Y, pos.Z, 0f, true, false);
             API.SetModelAsNoLongerNeeded(model);
             return ped;
+        }
+
+        public static Task<int> Spawn(uint[] modelList, int pedType = 26)
+        {
+            if (modelList.Length == 0)
+                return Task.FromResult(-1);
+
+            var model = modelList[API.GetRandomIntInRange(0, modelList.Length)];
+            var coords = API.GetEntityCoords(API.GetPlayerPed(-1), true);
+            return Spawn(model, coords, true, pedType);
+        }
+
+        public static Task<int> SpawnInRange(uint[] modelList, Vector3 center, float minRange, float maxRange, int pedType = 26)
+        {
+            if (modelList.Length == 0)
+                return Task.FromResult(-1);
+
+            var model = modelList[API.GetRandomIntInRange(0, modelList.Length)];
+            var coords = Common.GetRandomSpawnCoordsInRange(center, minRange, maxRange, out float heading);
+            return Spawn(model, coords, false, pedType);
         }
 
         public static void GiveWeapon(int ped, uint weapon)
