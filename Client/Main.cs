@@ -131,8 +131,8 @@ namespace PocceMod.Client
             if (Permission.CanDo(Ability.SpawnTrashPed))
                 _menu.AddMenuListItemAsync("Extra", "Trash ped", SpawnTrashPed);
 
-            if (Permission.CanDo(Ability.ZeroGravity))
-                _menu.AddMenuListItem("Extra", "Zero gravity (toggle)", ExtraMenu.ToggleZeroGravity);
+            if (Permission.CanDo(Ability.AntiGravity))
+                _menu.AddMenuListItem("Extra", "Anti-gravity (toggle)", ExtraMenu.ToggleZeroGravity);
 
             if (Permission.CanDo(Ability.Balloons))
                 _menu.AddMenuListItemAsync("Extra", "Balloons", ExtraMenu.Balloons);
