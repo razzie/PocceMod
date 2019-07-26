@@ -22,11 +22,12 @@ namespace PocceMod.Client
         {
             var center = API.GetEntityCoords(API.GetPlayerPed(-1), true);
 
+            var station = API.GetPlayerRadioStationIndex();
             for (int i = 0; i < speakers; ++i)
             {
                 var model = "prop_speaker_0" + API.GetRandomIntInRange(1, 8);
                 var prop = await Props.SpawnInRange(center, model, 1f, radius);
-                API.DecorSetInt(prop, SpeakerRadioDecor, 1);
+                API.DecorSetInt(prop, SpeakerRadioDecor, station);
                 API.SetEntityAsNoLongerNeeded(ref prop);
             }
 
@@ -141,6 +142,12 @@ namespace PocceMod.Client
                     API.SetStaticEmitterEnabled("SE_Script_Placed_Prop_Emitter_Boombox", true);
                     _speakers.Add(prop);
                 }
+            }
+
+            foreach (var speaker in _speakers.ToArray())
+            {
+                if (!API.DoesEntityExist(speaker))
+                    _speakers.Remove(speaker);
             }
 
             return Delay(1000);
