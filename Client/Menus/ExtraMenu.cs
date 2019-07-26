@@ -1,6 +1,4 @@
-﻿using CitizenFX.Core;
-using CitizenFX.Core.Native;
-using System.Collections.Generic;
+﻿using CitizenFX.Core.Native;
 using System.Threading.Tasks;
 
 namespace PocceMod.Client.Menus
@@ -105,33 +103,9 @@ namespace PocceMod.Client.Menus
                 AntiGravity.Add(vehicle, 1.5f);
         }
 
-        public static async Task Balloons()
+        public static Task Balloons()
         {
-            var models = new string[] { "prop_beach_volball01", "prop_beach_volball02", "prop_beachball_02", "prop_bskball_01" };
-            var coords = API.GetEntityCoords(API.GetPlayerPed(-1), true);
-            coords.Z += 1f;
-
-            var root = await Props.SpawnAtCoords("prop_devin_rope_01", coords, Vector3.Zero);
-            Ropes.PlayerAttach(root, Vector3.Zero);
-
-            var balls = new List<int>();
-            for (int i = 0; i < API.GetRandomIntInRange(3, 6); ++i)
-            {
-                var model = models[API.GetRandomIntInRange(0, models.Length)];
-                var offset = new Vector3(API.GetRandomFloatInRange(-0.25f, 0.25f), API.GetRandomFloatInRange(-0.25f, 0.25f), API.GetRandomFloatInRange(0f, 0.5f));
-                var ball = await Props.SpawnAtCoords(model, coords + offset, Vector3.Zero);
-                Ropes.Attach(root, ball, Vector3.Zero, Vector3.Zero);
-                AntiGravity.Add(ball, 2f);
-                balls.Add(ball);
-            }
-
-            foreach (var ball in balls)
-            {
-                int tmp_ball = ball;
-                API.SetEntityAsNoLongerNeeded(ref tmp_ball);
-            }
-
-            API.SetEntityAsNoLongerNeeded(ref root);
+            return Props.SpawnBalloons(API.GetPlayerPed(-1));
         }
     }
 }

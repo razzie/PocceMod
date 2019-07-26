@@ -155,6 +155,35 @@ namespace PocceMod.Client
             return prop;
         }
 
+        public static async Task SpawnBalloons(int entity)
+        {
+            var models = new string[] { "prop_beach_volball01", "prop_beach_volball02", "prop_beachball_02", "prop_bskball_01" };
+            var coords = API.GetEntityCoords(entity, true);
+            coords.Z += GetEntityHeight(entity);
+
+            var root = await SpawnAtCoords("prop_devin_rope_01", coords, Vector3.Zero);
+            Ropes.PlayerAttach(root, Vector3.Zero);
+
+            var balls = new List<int>();
+            for (int i = 0; i < API.GetRandomIntInRange(3, 6); ++i)
+            {
+                var model = models[API.GetRandomIntInRange(0, models.Length)];
+                var offset = new Vector3(API.GetRandomFloatInRange(-0.25f, 0.25f), API.GetRandomFloatInRange(-0.25f, 0.25f), API.GetRandomFloatInRange(0f, 0.5f));
+                var ball = await SpawnAtCoords(model, coords + offset, Vector3.Zero);
+                Ropes.Attach(root, ball, Vector3.Zero, Vector3.Zero);
+                AntiGravity.Add(ball, 2f);
+                balls.Add(ball);
+            }
+
+            foreach (var ball in balls)
+            {
+                int tmp_ball = ball;
+                API.SetEntityAsNoLongerNeeded(ref tmp_ball);
+            }
+
+            API.SetEntityAsNoLongerNeeded(ref root);
+        }
+
         public static async Task ClearAll()
         {
             if (_props.Count == 0)
