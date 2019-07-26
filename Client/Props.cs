@@ -137,7 +137,7 @@ namespace PocceMod.Client
         public static Task<int> SpawnInRange(Vector3 center, string model, float minRange, float maxRange)
         {
             var pos = Common.GetRandomSpawnCoordsInRange(center, minRange, maxRange, out float heading);
-            return SpawnAtCoords(model, pos, new Vector3(0f, 0f, heading));
+            return SpawnAtCoords(model, pos, new Vector3(0f, 0f, -heading));
         }
 
         public static async Task<int> SpawnOnEntity(int entity, string model)

@@ -116,14 +116,16 @@ namespace PocceMod.Client
             return Spawn(model, coords, true, pedType);
         }
 
-        public static Task<int> SpawnInRange(uint[] modelList, Vector3 center, float minRange, float maxRange, int pedType = 26)
+        public static async Task<int> SpawnInRange(uint[] modelList, Vector3 center, float minRange, float maxRange, int pedType = 26)
         {
             if (modelList.Length == 0)
-                return Task.FromResult(-1);
+                return -1;
 
             var model = modelList[API.GetRandomIntInRange(0, modelList.Length)];
             var coords = Common.GetRandomSpawnCoordsInRange(center, minRange, maxRange, out float heading);
-            return Spawn(model, coords, false, pedType);
+            var ped = await Spawn(model, coords, false, pedType);
+            API.SetEntityHeading(ped, heading);
+            return ped;
         }
 
         public static void GiveWeapon(int ped, uint weapon)

@@ -22,10 +22,11 @@ namespace PocceMod.Client
         {
             var center = API.GetEntityCoords(API.GetPlayerPed(-1), true);
 
+            var speakerModels = new string[] { "prop_speaker_01", "prop_speaker_02", "prop_speaker_03", "prop_speaker_05", "prop_speaker_06", "prop_speaker_07", "prop_speaker_08" };
             var station = API.GetPlayerRadioStationIndex();
             for (int i = 0; i < speakers; ++i)
             {
-                var model = "prop_speaker_0" + API.GetRandomIntInRange(1, 8);
+                var model = speakerModels[API.GetRandomIntInRange(0, speakerModels.Length)];
                 var prop = await Props.SpawnInRange(center, model, 1f, radius);
                 API.DecorSetInt(prop, SpeakerRadioDecor, station);
                 API.SetEntityAsNoLongerNeeded(ref prop);
