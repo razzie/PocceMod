@@ -37,6 +37,11 @@ namespace PocceMod.Client
 
             Tick += UpdateRopegun;
             Tick += UpdateRopes;
+
+            if (RopeClearKey > 0)
+            {
+                Tick += UpdateRopeClear;
+            }
         }
 
         private static void AdjustOffsetForTowing(int entity, ref Vector3 offset, float towOffset)
@@ -237,15 +242,18 @@ namespace PocceMod.Client
             return false;
         }
 
-        private static Task UpdateRopegun()
+        private static async Task UpdateRopegun()
         {
             var playerID = API.PlayerId();
             var player = API.GetPlayerPed(-1);
             if (API.GetSelectedPedWeapon(player) != (int)Ropegun)
-                return Delay(100);
+            {
+                await Delay(100);
+                return;
+            }
 
             if (!API.IsPlayerFreeAiming(playerID))
-                return Delay(0);
+                return;
 
             var attackControl = API.IsPedInAnyVehicle(player, false) ? 69 : 24;  // INPUT_VEH_ATTACK; INPUT_ATTACK
             var grapple = (RopegunWindKey > 0 && API.IsControlPressed(0, RopegunWindKey));
@@ -254,23 +262,26 @@ namespace PocceMod.Client
             {
                 PlayerAttach(target, offset, grapple ? ModeFlag.Ropegun | ModeFlag.Grapple : ModeFlag.Ropegun);
             }
-
-            return Delay(0);
         }
 
         private static async Task UpdateRopes()
         {
             await Delay(10);
 
-            if (RopeClearKey > 0 && API.IsControlJustPressed(0, RopeClearKey))
-            {
-                ClearPlayer();
-            }
-
             foreach (var rope in _ropes.GetRopes().Cast<RopeWrapper>())
             {
                 rope.Update();
             }
+        }
+
+        private static Task UpdateRopeClear()
+        {
+            if (API.IsControlJustPressed(0, RopeClearKey))
+            {
+                ClearPlayer();
+            }
+
+            return Task.FromResult(0);
         }
     }
 
