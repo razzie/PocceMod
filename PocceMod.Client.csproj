@@ -51,11 +51,11 @@
     <Compile Include="Client\AntiGravity.cs" />
     <Compile Include="Client\Autopilot.cs" />
     <Compile Include="Client\Common.cs" />
+    <Compile Include="Client\Events.cs" />
     <Compile Include="Client\Menus\CompanionMenu.cs" />
     <Compile Include="Client\Menus\ExtraMenu.cs" />
     <Compile Include="Client\Menus\MainMenu.cs" />
     <Compile Include="Client\Menus\PropMenu.cs" />
-    <Compile Include="Client\Menus\RiotMenu.cs" />
     <Compile Include="Client\Menus\SkinMenu.cs" />
     <Compile Include="Client\Menus\Submenu.cs" />
     <Compile Include="Client\Menus\VehicleMenu.cs" />

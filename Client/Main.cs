@@ -87,18 +87,21 @@ namespace PocceMod.Client
                 _menu.AddMenuListItemAsync("Companion", "Pocce passengers", CompanionMenu.PoccePassengers);
             #endregion
 
-            #region Riot
+            #region Event
+            if (Permission.CanDo(Ability.PocceParty))
+                _menu.AddMenuListItemAsync("Event", "Pocce party", Events.PoccePartyRandom);
+
             if (Permission.CanDo(Ability.PocceRiot))
-                _menu.AddMenuListItem("Riot", "Pocce riot", async () => await RiotMenu.PocceRiot(false));
+                _menu.AddMenuListItem("Event", "Pocce riot", async () => await Events.PocceRiot(false));
 
             if (Permission.CanDo(Ability.PocceRiotArmed))
-                _menu.AddMenuListItem("Riot", "Pocce riot (armed)", async () => await RiotMenu.PocceRiot(true));
+                _menu.AddMenuListItem("Event", "Pocce riot (armed)", async () => await Events.PocceRiot(true));
 
             if (Permission.CanDo(Ability.PedRiot))
-                _menu.AddMenuListItem("Riot", "Ped riot", async () => await RiotMenu.PedRiot(false));
+                _menu.AddMenuListItem("Event", "Ped riot", async () => await Events.PedRiot(false));
 
             if (Permission.CanDo(Ability.PedRiotArmed))
-                _menu.AddMenuListItem("Riot", "Ped riot (armed)", async () => await RiotMenu.PedRiot(true));
+                _menu.AddMenuListItem("Event", "Ped riot (armed)", async () => await Events.PedRiot(true));
             #endregion
 
             #region Skin
