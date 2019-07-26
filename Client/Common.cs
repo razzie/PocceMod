@@ -127,7 +127,9 @@ namespace PocceMod.Client
             player = API.GetPlayerPed(-1);
             if (!API.IsPedInAnyVehicle(player, true))
             {
-                Notification("Player is not in a vehicle");
+                if (notification)
+                    Notification("Player is not in a vehicle");
+
                 return false;
             }
 
@@ -142,7 +144,9 @@ namespace PocceMod.Client
 
             if (API.GetPedInVehicleSeat(vehicle, -1) != player)
             {
-                Notification("Player is not the driver of this vehicle");
+                if (notification)
+                    Notification("Player is not the driver of this vehicle");
+
                 return false;
             }
 
