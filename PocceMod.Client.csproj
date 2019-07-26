@@ -55,6 +55,7 @@
     <Compile Include="Client\Menus\CompanionMenu.cs" />
     <Compile Include="Client\Menus\ExtraMenu.cs" />
     <Compile Include="Client\Menus\MainMenu.cs" />
+    <Compile Include="Client\Menus\MassScenarioMenu.cs" />
     <Compile Include="Client\Menus\PropMenu.cs" />
     <Compile Include="Client\Menus\SkinMenu.cs" />
     <Compile Include="Client\Menus\Submenu.cs" />

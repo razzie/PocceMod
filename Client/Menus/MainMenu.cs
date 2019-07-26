@@ -40,11 +40,13 @@ namespace PocceMod.Client.Menus
             VehicleMenu = new VehicleMenu();
             PropMenu = new PropMenu();
             SkinMenu = new SkinMenu();
+            MassScenarioMenu = new MassScenarioMenu();
 
             MenuController.AddMenu(this);
             MenuController.AddSubmenu(this, VehicleMenu);
             MenuController.AddSubmenu(this, PropMenu);
             MenuController.AddSubmenu(this, SkinMenu);
+            MenuController.AddSubmenu(this, MassScenarioMenu);
 
             OnItemSelect += async (_menu, _item, _index) =>
             {
@@ -77,6 +79,11 @@ namespace PocceMod.Client.Menus
         }
 
         public SkinMenu SkinMenu
+        {
+            get; private set;
+        }
+
+        public MassScenarioMenu MassScenarioMenu
         {
             get; private set;
         }

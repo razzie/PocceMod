@@ -91,6 +91,9 @@ namespace PocceMod.Client
             if (Permission.CanDo(Ability.PocceParty))
                 _menu.AddMenuListItemAsync("Event", "Pocce party", Events.PoccePartyRandom);
 
+            if (Permission.CanDo(Ability.MassScenario))
+                _menu.AddMenuListItem("Event", "Play mass scenario", _menu.MassScenarioMenu.OpenMenu);
+
             if (Permission.CanDo(Ability.PocceRiot))
                 _menu.AddMenuListItem("Event", "Pocce riot", async () => await Events.PocceRiot(false));
 
