@@ -19,6 +19,8 @@ namespace PocceMod.Server
             EventHandlers["PocceMod:ClearLastRope"] += new Action<Player>(ClearLastRope);
             EventHandlers["PocceMod:ClearEntityRopes"] += new Action<Player, int>(ClearEntityRopes);
             EventHandlers["PocceMod:RequestRopes"] += new Action<Player>(RequestRopes);
+            EventHandlers["PocceMod:AntiGravityAdd"] += new Action<Player, int, float>(AntiGravityAdd);
+            EventHandlers["PocceMod:AntiGravityRemove"] += new Action<Player, int>(AntiGravityRemove);
         }
 
         private void PlayerDropped([FromSource] Player source, string reason)
@@ -78,6 +80,18 @@ namespace PocceMod.Server
             {
                 rope.Player.TriggerEvent("PocceMod:AddRope", rope.Player.Handle, rope.Entity1, rope.Entity2, rope.Offset1, rope.Offset2, rope.Mode);
             }
+        }
+
+        private void AntiGravityAdd([FromSource] Player source, int entity, float force)
+        {
+            if (Permission.CanDo(source, Ability.AntiGravity) || Permission.CanDo(source, Ability.Balloons))
+                TriggerClientEvent("PocceMod:AntiGravityAdd", entity, force);
+        }
+
+        private void AntiGravityRemove([FromSource] Player source, int entity)
+        {
+            if (Permission.CanDo(source, Ability.AntiGravity) || Permission.CanDo(source, Ability.Balloons))
+                TriggerClientEvent("PocceMod:AntiGravityRemove", entity);
         }
     }
 }

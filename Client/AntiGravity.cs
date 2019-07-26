@@ -1,5 +1,6 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,12 +13,15 @@ namespace PocceMod.Client
 
         public AntiGravity()
         {
+            EventHandlers["PocceMod:AntiGravityAdd"] += new Action<int, float>((entity, force) => _entities.Add(API.NetToEnt(entity), force * 10f));
+            EventHandlers["PocceMod:AntiGravityRemove"] += new Action<int>(entity => _entities.Remove(API.NetToEnt(entity)));
+
             Tick += Update;
         }
 
         public static void Add(int entity, float force)
         {
-            _entities.Add(entity, force * 10f);
+            TriggerServerEvent("PocceMod:AntiGravityAdd", API.ObjToNet(entity), force);
         }
 
         public static bool Contains(int entity)
@@ -27,7 +31,7 @@ namespace PocceMod.Client
 
         public static void Remove(int entity)
         {
-            _entities.Remove(entity);
+            TriggerServerEvent("PocceMod:AntiGravityRemove", API.ObjToNet(entity));
         }
 
         private static async Task Update()
