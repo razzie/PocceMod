@@ -1,4 +1,5 @@
-﻿using CitizenFX.Core.Native;
+﻿using CitizenFX.Core;
+using CitizenFX.Core.Native;
 using System.Threading.Tasks;
 
 namespace PocceMod.Client.Menus
@@ -103,9 +104,15 @@ namespace PocceMod.Client.Menus
                 AntiGravity.Add(vehicle, 1.5f);
         }
 
-        public static Task Balloons()
+        public static async Task Balloons()
         {
-            return Props.SpawnBalloons(API.GetPlayerPed(-1));
+            var player = API.GetPlayerPed(-1);
+            var coords = API.GetEntityCoords(player, true);
+            coords.Z += 1f;
+
+            var balloon = await Props.SpawnBalloons(coords);
+            Ropes.PlayerAttach(balloon, Vector3.Zero);
+            API.SetEntityAsNoLongerNeeded(ref balloon);
         }
     }
 }

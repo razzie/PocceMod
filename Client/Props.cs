@@ -162,14 +162,10 @@ namespace PocceMod.Client
             return prop;
         }
 
-        public static async Task SpawnBalloons(int entity)
+        public static async Task<int> SpawnBalloons(Vector3 coords)
         {
             var models = new string[] { "prop_beach_volball01", "prop_beach_volball02", "prop_beachball_02", "prop_bskball_01" };
-            var coords = API.GetEntityCoords(entity, true);
-            coords.Z += GetEntityHeight(entity);
-
             var root = await SpawnAtCoords("prop_devin_rope_01", coords, Vector3.Zero);
-            Ropes.PlayerAttach(root, Vector3.Zero);
 
             var balls = new List<int>();
             for (int i = 0; i < API.GetRandomIntInRange(3, 6); ++i)
@@ -188,7 +184,7 @@ namespace PocceMod.Client
                 API.SetEntityAsNoLongerNeeded(ref tmp_ball);
             }
 
-            API.SetEntityAsNoLongerNeeded(ref root);
+            return root;
         }
 
         public static async Task ClearAll()
@@ -219,7 +215,7 @@ namespace PocceMod.Client
             _props.RemoveAt(_props.Count - 1);
         }
 
-        private static float GetEntityHeight(int entity)
+        public static float GetEntityHeight(int entity)
         {
             var model = (uint)API.GetEntityModel(entity);
             var min = Vector3.Zero;
