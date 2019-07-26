@@ -96,7 +96,7 @@ namespace PocceMod.Client.Menus
 
         public void AddMenuItem(string item, Action onSelect)
         {
-            AddMenuItemAsync(item, () => { onSelect(); return BaseScript.Delay(0); });
+            AddMenuItemAsync(item, () => { onSelect(); return Task.FromResult(0); });
         }
 
         public void AddMenuListItemAsync(string item, string subitem, Func<Task> onSelect)
@@ -121,7 +121,7 @@ namespace PocceMod.Client.Menus
 
         public void AddMenuListItem(string item, string subitem, Action onSelect)
         {
-            AddMenuListItemAsync(item, subitem, () => { onSelect(); return BaseScript.Delay(0); });
+            AddMenuListItemAsync(item, subitem, () => { onSelect(); return Task.FromResult(0); });
         }
 
     }

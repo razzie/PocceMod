@@ -383,12 +383,12 @@ namespace PocceMod.Client
                 if (API.IsControlPressed(0, 172)) // up
                 {
                     SetLightMultiplier(vehicle, GetLightMultiplier(vehicle) + 0.1f);
-                    return Delay(0);
+                    return Task.FromResult(0);
                 }
                 else if (API.IsControlPressed(0, 173)) // down
                 {
                     SetLightMultiplier(vehicle, GetLightMultiplier(vehicle) - 0.1f);
-                    return Delay(0);
+                    return Task.FromResult(0);
                 }
             }
 
