@@ -179,7 +179,7 @@ namespace PocceMod.Client
                 {
                     if (API.IsPedOnFoot(companion) && !API.IsPedActiveInScenario(companion))
                     {
-                        var scenario = Config.ScenarioList[API.GetRandomIntInRange(0, Config.ScenarioList.Length)];
+                        var scenario = (Config.ScenarioList.Length > 0) ? Config.ScenarioList[API.GetRandomIntInRange(0, Config.ScenarioList.Length)] : "WORLD_HUMAN_STAND_MOBILE";
                         API.TaskStartScenarioInPlace(companion, scenario, 0, true);
                     }
                 }
