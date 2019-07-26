@@ -304,6 +304,15 @@ namespace PocceMod.Client
                 API.StartRopeWinding(_handle);
         }
 
+        public bool Exists
+        {
+            get
+            {
+                int rope = _handle;
+                return API.DoesRopeExist(ref rope);
+            }
+        }
+
         private static Scenario GetScenario(int entity1, int entity2)
         {
             if (entity1 > 0 && entity2 > 0)
@@ -357,9 +366,15 @@ namespace PocceMod.Client
         public void Update()
         {
             // if a rope is shot, it ceases to exist
-            var rope = _handle;
-            if (!API.DoesRopeExist(ref rope))
+            if (_handle == -1 || !Exists)
                 return;
+
+            if ((Entity1 != 0 && !API.DoesEntityExist(Entity1)) ||
+                (Entity2 != 0 && !API.DoesEntityExist(Entity2)))
+            {
+                Clear();
+                return;
+            }
 
             if (_scenario != Scenario.GroundToGround)
             {
@@ -381,6 +396,7 @@ namespace PocceMod.Client
         public override void Clear()
         {
             API.DeleteRope(ref _handle);
+            _handle = -1;
         }
     }
 
