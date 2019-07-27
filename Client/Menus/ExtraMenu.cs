@@ -106,12 +106,13 @@ namespace PocceMod.Client.Menus
 
         public static async Task Balloons()
         {
-            var player = API.GetPlayerPed(-1);
-            var coords = API.GetEntityCoords(player, true);
-            coords.Z += 1f;
+            var player = Common.GetPlayerPedOrVehicle();
+            var coords = API.GetEntityCoords(player, false);
+
+            coords.Z += API.IsEntityAVehicle(player) ? Props.GetEntityHeight(player) : 1f;
 
             var balloon = await Props.SpawnBalloons(coords);
-            Ropes.PlayerAttach(balloon, Vector3.Zero);
+            Ropes.Attach(player, balloon, Vector3.Zero, Vector3.Zero);
             API.SetEntityAsNoLongerNeeded(ref balloon);
         }
     }
