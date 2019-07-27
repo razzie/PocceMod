@@ -66,21 +66,23 @@ namespace PocceMod.Client
             }
         }
 
-        public static async Task NetworkRequestControl(int entity)
+        public static async Task NetworkRequestControl(int entity, int timeoutSeconds = 2)
         {
-            while (!API.NetworkHasControlOfEntity(entity))
+            var timeout = DateTime.Now + TimeSpan.FromSeconds(timeoutSeconds);
+
+            while (!API.NetworkHasControlOfEntity(entity) && DateTime.Now < timeout)
             {
                 API.NetworkRequestControlOfEntity(entity);
-                await BaseScript.Delay(10);
+                await BaseScript.Delay(100);
             }
         }
 
-        public static async Task<int> WaitForNetEntity(int netEntity)
+        public static async Task<int> WaitForNetEntity(int netEntity, int timeoutSeconds = 10)
         {
             if (netEntity == 0)
                 return 0;
 
-            var timeout = DateTime.Now + TimeSpan.FromSeconds(10);
+            var timeout = DateTime.Now + TimeSpan.FromSeconds(timeoutSeconds);
             var entity = API.NetToEnt(netEntity);
 
             while (!API.DoesEntityExist(entity) && DateTime.Now < timeout)
