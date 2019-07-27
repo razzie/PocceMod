@@ -18,15 +18,14 @@ namespace PocceMod.Client
             Tick += Update;
         }
 
-        public static async Task PocceParty(float radius, int speakers, int peds, int balloons)
+        public static async Task PocceParty(float radius, int speakers, int peds, int balloons, int booze)
         {
             var center = API.GetEntityCoords(API.GetPlayerPed(-1), true);
-
-            var speakerModels = new string[] { "prop_speaker_01", "prop_speaker_02", "prop_speaker_03", "prop_speaker_05", "prop_speaker_06", "prop_speaker_07", "prop_speaker_08" };
             var station = API.GetPlayerRadioStationIndex();
+
             for (int i = 0; i < speakers; ++i)
             {
-                var model = speakerModels[API.GetRandomIntInRange(0, speakerModels.Length)];
+                var model = SpeakerList[API.GetRandomIntInRange(0, SpeakerList.Length)];
                 var prop = await Props.SpawnInRange(center, model, 1f, radius);
                 API.DecorSetInt(prop, SpeakerRadioDecor, station);
                 API.SetEntityAsNoLongerNeeded(ref prop);
@@ -46,6 +45,13 @@ namespace PocceMod.Client
                 API.FreezeEntityPosition(balloon, true);
                 API.SetEntityAsNoLongerNeeded(ref balloon);
             }
+
+            for (int i = 0; i < booze; ++i)
+            {
+                var model = BoozeList[API.GetRandomIntInRange(0, BoozeList.Length)];
+                var prop = await Props.SpawnInRange(center, model, 1f, radius);
+                API.SetEntityAsNoLongerNeeded(ref prop);
+            }
         }
 
         public static Task PoccePartyRandom()
@@ -53,8 +59,9 @@ namespace PocceMod.Client
             float radius = API.GetRandomFloatInRange(5f, 10f);
             int speakers = API.GetRandomIntInRange(2, 7);
             int peds = API.GetRandomIntInRange(10, 20);
-            int balloons = API.GetRandomIntInRange(0, 20);
-            return PocceParty(radius, speakers, peds, balloons);
+            int balloons = API.GetRandomIntInRange(1, 10);
+            int booze = API.GetRandomIntInRange(10, 20);
+            return PocceParty(radius, speakers, peds, balloons, booze);
         }
 
         public static async Task PocceRiot(bool useWeapons)
@@ -153,5 +160,40 @@ namespace PocceMod.Client
 
             return Delay(1000);
         }
+
+        private static readonly string[] SpeakerList = new string[]
+        {
+            "prop_speaker_01",
+            "prop_speaker_02",
+            "prop_speaker_03",
+            "prop_speaker_05",
+            "prop_speaker_06",
+            "prop_speaker_07",
+            "prop_speaker_08"
+        };
+        private static readonly string[] BoozeList = new string[]
+        {
+            "hei_heist_cs_beer_box",
+            "prop_cs_beer_bot_01",
+            "prop_cs_beer_bot_02",
+            "prop_cs_beer_bot_03",
+            "prop_cs_beer_bot_40oz",
+            "prop_cs_beer_bot_40oz_02",
+            "prop_cs_beer_bot_40oz_03",
+            "prop_cs_beer_box",
+            "prop_wine_bot_01",
+            "prop_wine_bot_02",
+            "prop_vodka_bottle",
+            "proc_litter_01",
+            "proc_litter_02",
+            "v_ret_ml_chips1",
+            "v_ret_ml_chips2",
+            "v_ret_ml_chips3",
+            "v_ret_ml_chips4",
+            "winerow",
+            "vodkarow",
+            "spiritsrow",
+            "beerrow_local"
+        };
     }
 }
