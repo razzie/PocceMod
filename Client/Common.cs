@@ -65,7 +65,9 @@ namespace PocceMod.Client
             if (!API.IsModelValid(model))
                 return;
 
-            while (!API.HasCollisionForModelLoaded(model))
+            var timeout = DateTime.Now + TimeSpan.FromSeconds(0.5);
+
+            while (!API.HasCollisionForModelLoaded(model) && DateTime.Now < timeout)
             {
                 API.RequestCollisionForModel(model);
                 await BaseScript.Delay(10);
