@@ -50,6 +50,9 @@ namespace PocceMod.Client
 
         public static async Task RequestModel(uint model)
         {
+            if (!API.IsModelValid(model))
+                return;
+
             while (!API.HasModelLoaded(model))
             {
                 API.RequestModel(model);
@@ -59,6 +62,9 @@ namespace PocceMod.Client
 
         public static async Task RequestCollision(uint model)
         {
+            if (!API.IsModelValid(model))
+                return;
+
             while (!API.HasCollisionForModelLoaded(model))
             {
                 API.RequestCollisionForModel(model);
@@ -66,8 +72,11 @@ namespace PocceMod.Client
             }
         }
 
-        public static async Task NetworkRequestControl(int entity, int timeoutSeconds = 2)
+        public static async Task NetworkRequestControl(int entity, int timeoutSeconds = 1)
         {
+            if (!API.DoesEntityExist(entity))
+                return;
+
             var timeout = DateTime.Now + TimeSpan.FromSeconds(timeoutSeconds);
 
             while (!API.NetworkHasControlOfEntity(entity) && DateTime.Now < timeout)

@@ -194,10 +194,13 @@ namespace PocceMod.Client
 
             foreach (var prop in _props)
             {
-                await Common.NetworkRequestControl(prop);
-                API.SetEntityCoords(prop, 0f, 0f, 0f, true, true, true, false);
-                var tmp_prop = prop;
-                API.DeleteEntity(ref tmp_prop);
+                if (API.DoesEntityExist(prop))
+                {
+                    await Common.NetworkRequestControl(prop);
+                    API.SetEntityCoords(prop, 0f, 0f, 0f, true, true, true, false);
+                    var tmp_prop = prop;
+                    API.DeleteEntity(ref tmp_prop);
+                }
             }
 
             _props.Clear();
@@ -209,9 +212,12 @@ namespace PocceMod.Client
                 return;
 
             var prop = _props[_props.Count - 1];
-            await Common.NetworkRequestControl(prop);
-            API.SetEntityCoords(prop, 0f, 0f, 0f, true, true, true, false);
-            API.DeleteEntity(ref prop);
+            if (API.DoesEntityExist(prop))
+            {
+                await Common.NetworkRequestControl(prop);
+                API.SetEntityCoords(prop, 0f, 0f, 0f, true, true, true, false);
+                API.DeleteEntity(ref prop);
+            }
             _props.RemoveAt(_props.Count - 1);
         }
 
