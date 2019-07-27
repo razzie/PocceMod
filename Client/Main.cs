@@ -30,7 +30,7 @@ namespace PocceMod.Client
                 _menu.AddMenuListItem("Vehicle", "Spawn from list ↕", _menu.VehicleMenu.OpenMenu);
 
             if (Permission.CanDo(Ability.SpawnVehicleByName))
-                _menu.AddMenuListItemAsync("Vehicle", "Spawn by name", VehicleMenu.SpawnByName);
+                _menu.AddMenuListItemAsync("Vehicle", "Spawn by name", _menu.VehicleMenu.SpawnByName);
 
             if (Permission.CanDo(Ability.Autopilot))
                 _menu.AddMenuListItemAsync("Vehicle", "Autopilot (toggle)", Autopilot.Toggle);
