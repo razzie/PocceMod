@@ -65,28 +65,12 @@ namespace PocceMod.Client.Menus
                     CloseMenu();
                 }
             };
-
         }
 
-        public VehicleMenu VehicleMenu
-        {
-            get; private set;
-        }
-
-        public PropMenu PropMenu
-        {
-            get; private set;
-        }
-
-        public SkinMenu SkinMenu
-        {
-            get; private set;
-        }
-
-        public MassScenarioMenu MassScenarioMenu
-        {
-            get; private set;
-        }
+        public VehicleMenu VehicleMenu { get; private set; }
+        public PropMenu PropMenu { get; private set; }
+        public SkinMenu SkinMenu { get; private set; }
+        public MassScenarioMenu MassScenarioMenu { get; private set; }
 
         public static bool IsOpen
         {
