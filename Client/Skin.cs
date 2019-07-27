@@ -48,10 +48,8 @@ namespace PocceMod.Client
             get; private set;
         }
 
-        public async Task Restore(int ped)
+        public void Restore(int ped)
         {
-            await Common.RequestModel(Model);
-
             for (int i = 0; i < ComponentCount; ++i)
             {
                 API.SetPedComponentVariation(ped, i, _drawables[i], _textures[i], _palettes[i]);
@@ -77,12 +75,12 @@ namespace PocceMod.Client
             if (_lookupTable.TryGetValue(model, out string name))
                 return name;
             else
-                return string.Format("{0:X8}", model);
+                return string.Format("0x{0:X8}", model);
         }
 
         public static void Randomize(int ped)
         {
-            for (int i = 0; i < ComponentCount; ++i)
+            /*for (int i = 0; i < ComponentCount; ++i)
             {
                 var palette = API.GetPedPaletteVariation(ped, i);
 
@@ -93,7 +91,9 @@ namespace PocceMod.Client
                 var texture = API.GetRandomIntInRange(0, textures);
 
                 API.SetPedComponentVariation(ped, i, drawable, texture, palette);
-            }
+            }*/
+
+            API.SetPedRandomComponentVariation(ped, false);
         }
 
         private static readonly string[] Models = new string[]

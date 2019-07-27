@@ -61,6 +61,7 @@
     <Compile Include="Client\Menus\Submenu.cs" />
     <Compile Include="Client\Menus\VehicleMenu.cs" />
     <Compile Include="Client\Skin.cs" />
+    <Compile Include="Client\Weapons.cs" />
     <Compile Include="Shared\Ability.cs" />
     <Compile Include="Shared\Config.cs" />
     <Compile Include="Client\Main.cs" />

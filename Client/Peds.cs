@@ -128,18 +128,6 @@ namespace PocceMod.Client
             return ped;
         }
 
-        public static void GiveWeapon(int ped, uint weapon)
-        {
-            API.GiveWeaponToPed(ped, weapon, 1, false, true);
-
-            int ammoInClip = API.GetMaxAmmoInClip(ped, weapon, false);
-            API.SetAmmoInClip(ped, weapon, ammoInClip);
-
-            var ammo = int.MaxValue;
-            API.GetMaxAmmo(ped, weapon, ref ammo);
-            API.SetPedAmmo(ped, weapon, ammo);
-        }
-
         public static async Task Arm(int ped, uint[] weaponList)
         {
             API.TaskSetBlockingOfNonTemporaryEvents(ped, true);
@@ -162,7 +150,7 @@ namespace PocceMod.Client
             {
                 API.SetPedArmour(ped, 200);
                 var weapon = weaponList[API.GetRandomIntInRange(0, weaponList.Length)];
-                GiveWeapon(ped, weapon);
+                Weapons.Give(ped, weapon);
             }
         }
     }

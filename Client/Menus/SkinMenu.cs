@@ -9,7 +9,6 @@ namespace PocceMod.Client.Menus
 {
     public class SkinMenu : Menu
     {
-        private bool _firstUse = true;
         private readonly SkinSet _allSkins = new SkinSet();
         private readonly SkinSet _lastSkins = new SkinSet();
         private SkinSet _source = null;
@@ -35,12 +34,6 @@ namespace PocceMod.Client.Menus
             {
                 if (_source == null)
                     return;
-
-                if (_firstUse)
-                {
-                    Common.Notification("Weapon loadout is lost when chenging skin!");
-                    _firstUse = false;
-                }
 
                 foreach (var items in _source.Elements)
                 {
@@ -113,12 +106,12 @@ namespace PocceMod.Client.Menus
             if (skins != null && skins.Count > index)
             {
                 var skin = skins[index];
-                await Game.Player.ChangeModel(new Model((PedHash)skin.Model));
-                await skin.Restore(API.GetPlayerPed(-1));
+                await ChangeSkin(skin.Model);
+                skin.Restore(API.GetPlayerPed(-1));
             }
         }
 
-        private static async Task ChangeSkin(string model)
+        private static Task ChangeSkin(string model)
         {
             uint hash;
             if (model.StartsWith("0x"))
@@ -126,8 +119,30 @@ namespace PocceMod.Client.Menus
             else
                 hash = (uint)API.GetHashKey(model);
 
-            await Game.Player.ChangeModel(new Model((PedHash)hash));
-            //Skin.Randomize(API.GetPlayerPed(-1));
+            return ChangeSkin(hash);
+        }
+
+        private static async Task ChangeSkin(uint model)
+        {
+            var player = API.GetPlayerPed(-1);
+            if (API.IsPedInAnyVehicle(player, false))
+            {
+                Common.Notification("Skin change is not allowed in vehicles");
+                return;
+            }
+
+            var loadout = Weapons.Get(player);
+
+            await Common.RequestModel(model);
+            API.SetPlayerModel(API.PlayerId(), model);
+            player = API.GetPlayerPed(-1); // new ped was created for the player
+            
+            API.ClearAllPedProps(player);
+            API.ClearPedDecorations(player);
+            API.ClearPedFacialDecorations(player);
+            API.SetPedRandomComponentVariation(player, false);
+
+            Weapons.Give(player, loadout);
         }
     }
 }

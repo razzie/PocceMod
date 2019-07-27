@@ -199,7 +199,7 @@ namespace PocceMod.Client
         public static void EquipRopeGun()
         {
             var player = API.GetPlayerPed(-1);
-            Peds.GiveWeapon(player, Ropegun);
+            Weapons.Give(player, Ropegun);
             API.SetCurrentPedVehicleWeapon(player, Ropegun);
         }
 
