@@ -101,6 +101,9 @@ namespace PocceMod.Client
             if (entity2 == 0)
                 entity2 = RootObject;
 
+            if (!API.DoesEntityExist(entity1) || !API.DoesEntityExist(entity2))
+                return;
+
             var rope = new RopeWrapper(new Player(player), entity1, entity2, offset1, offset2, (ModeFlag)mode);
             _ropes.AddRope(rope);
 
