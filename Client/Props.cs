@@ -127,9 +127,9 @@ namespace PocceMod.Client
         {
             var pedModel = (uint)API.GetEntityModel(ped);
             var heading = API.GetEntityHeading(ped);
-            var headingRad = MathUtil.DegreesToRadians(heading);
+            var headingRad = heading * (Math.PI / 180f);
             var pos = API.GetEntityCoords(ped, true);
-            var offset = new Vector3((float)Math.Sin(headingRad), (float)Math.Cos(headingRad), -1f);
+            var offset = new Vector3(-(float)Math.Sin(headingRad), (float)Math.Cos(headingRad), -1f);
 
             return SpawnAtCoords(model, pos + offset, new Vector3(0f, 0f, heading));
         }

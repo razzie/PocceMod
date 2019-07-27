@@ -103,6 +103,7 @@ namespace PocceMod.Client
             var pos = trySafeCoords ? GetSafeCoords(coords) : coords;
             var ped = API.CreatePed(pedType, model, pos.X, pos.Y, pos.Z, 0f, true, false);
             API.SetModelAsNoLongerNeeded(model);
+            API.SetEntityHeading(ped, API.GetRandomFloatInRange(0f, 360f));
             return ped;
         }
 
@@ -124,7 +125,6 @@ namespace PocceMod.Client
             var model = modelList[API.GetRandomIntInRange(0, modelList.Length)];
             var coords = Common.GetRandomSpawnCoordsInRange(center, minRange, maxRange, out float heading);
             var ped = await Spawn(model, coords, false, pedType);
-            API.SetEntityHeading(ped, heading);
             return ped;
         }
 
