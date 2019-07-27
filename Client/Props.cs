@@ -167,7 +167,7 @@ namespace PocceMod.Client
                 var offset = new Vector3(API.GetRandomFloatInRange(-0.25f, 0.25f), API.GetRandomFloatInRange(-0.25f, 0.25f), API.GetRandomFloatInRange(0f, 0.5f));
                 var ball = await SpawnAtCoords(model, coords + offset, Vector3.Zero);
                 Ropes.Attach(root, ball, Vector3.Zero, Vector3.Zero);
-                AntiGravity.Add(ball, 2f);
+                AntiGravity.Add(ball, 1.5f);
                 balls.Add(ball);
             }
 

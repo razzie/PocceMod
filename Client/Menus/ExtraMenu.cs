@@ -101,7 +101,7 @@ namespace PocceMod.Client.Menus
             if (AntiGravity.Contains(vehicle))
                 AntiGravity.Remove(vehicle);
             else
-                AntiGravity.Add(vehicle, 1.5f);
+                AntiGravity.Add(vehicle, 1f);
         }
 
         public static async Task Balloons()

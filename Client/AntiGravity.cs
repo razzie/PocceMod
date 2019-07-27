@@ -10,10 +10,11 @@ namespace PocceMod.Client
     public class AntiGravity : BaseScript
     {
         private static readonly Dictionary<int, float> _entities = new Dictionary<int, float>();
+        private static DateTime _lastTick = DateTime.MinValue;
 
         public AntiGravity()
         {
-            EventHandlers["PocceMod:AntiGravityAdd"] += new Action<int, float>(async (entity, force) => _entities.Add(await Common.WaitForNetEntity(entity), force * 10f));
+            EventHandlers["PocceMod:AntiGravityAdd"] += new Action<int, float>(async (entity, force) => _entities.Add(await Common.WaitForNetEntity(entity), force * 800f));
             EventHandlers["PocceMod:AntiGravityRemove"] += new Action<int>(async entity => _entities.Remove(await Common.WaitForNetEntity(entity)));
 
             Tick += Update;
@@ -38,9 +39,13 @@ namespace PocceMod.Client
         {
             if (_entities.Count == 0)
             {
+                _lastTick = DateTime.MinValue;
                 await Delay(100);
                 return;
             }
+
+            var now = DateTime.Now;
+            var elapsed = (_lastTick == DateTime.MinValue) ? 0.01666666666f : (float)((now - _lastTick).TotalSeconds);
 
             foreach (var pair in _entities.ToArray())
             {
@@ -53,8 +58,10 @@ namespace PocceMod.Client
                     continue;
                 }
 
-                API.ApplyForceToEntityCenterOfMass(entity, 0, 0f, 0f, force, false, false, true, false);
+                API.ApplyForceToEntityCenterOfMass(entity, 0, 0f, 0f, force * elapsed, false, false, true, false);
             }
+
+            _lastTick = now;
         }
     }
 }
