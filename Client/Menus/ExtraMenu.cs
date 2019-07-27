@@ -107,9 +107,8 @@ namespace PocceMod.Client.Menus
         public static async Task Balloons()
         {
             var player = Common.GetPlayerPedOrVehicle();
-            var coords = API.GetEntityCoords(player, false);
-
-            coords.Z += API.IsEntityAVehicle(player) ? Props.GetEntityHeight(player) : 1f;
+            var coords = Common.GetEntityTopCoords(player);
+            coords.Z += 0.5f;
 
             var balloon = await Props.SpawnBalloons(coords);
             Ropes.Attach(player, balloon, Vector3.Zero, Vector3.Zero);

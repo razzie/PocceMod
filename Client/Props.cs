@@ -144,20 +144,13 @@ namespace PocceMod.Client
         {
             var pos = API.GetEntityCoords(entity, API.IsEntityAPed(entity));
             var heading = API.GetEntityHeading(entity);
-            var entityModel = (uint)API.GetEntityModel(entity);
-            Vector3 entityMin = Vector3.Zero;
-            Vector3 entityMax = Vector3.Zero;
-            API.GetModelDimensions(entityModel, ref entityMin, ref entityMax);
+            Common.GetEntityMinMaxZ(entity, out float minZ, out float maxZ);
 
-            Vector3 propMin = Vector3.Zero;
-            Vector3 propMax = Vector3.Zero;
-            API.GetModelDimensions((uint)API.GetHashKey(model), ref propMin, ref propMax);
-
-            var prop = await SpawnAtCoords(model, new Vector3(pos.X, pos.Y, pos.Z + entityMax.Z - propMin.Z), new Vector3(0f, 0f, heading));
-            if (!API.DoesEntityHavePhysics(prop) || propMax.Z - propMin.Z > 3f) // large objects glitch too much
-                API.AttachEntityToEntity(prop, entity, 0, 0f, 0f, -propMin.Z, 0f, 0f, 0f, false, false, false, false, 0, true);
+            var prop = await SpawnAtCoords(model, new Vector3(pos.X, pos.Y, pos.Z + maxZ), new Vector3(0f, 0f, heading));
+            if (!API.DoesEntityHavePhysics(prop))
+                API.AttachEntityToEntity(prop, entity, -1, 0f, 0f, maxZ, 0f, 0f, 0f, false, false, false, false, 0, true);
             else
-                API.AttachEntityToEntityPhysically(prop, entity, 0, 0, 0f, 0f, entityMax.Z, 0f, 0f, propMin.Z, 0f, 0f, 0f, 100f, true, false, true, true, 2);
+                API.AttachEntityToEntityPhysically(prop, entity, -1, -1, 0f, 0f, maxZ, 0f, 0f, 0f, 0f, 0f, 0f, 100f, true, true, false, true, 2);
 
             return prop;
         }
@@ -221,15 +214,6 @@ namespace PocceMod.Client
             _props.RemoveAt(_props.Count - 1);
         }
 
-        public static float GetEntityHeight(int entity)
-        {
-            var model = (uint)API.GetEntityModel(entity);
-            var min = Vector3.Zero;
-            var max = Vector3.Zero;
-            API.GetModelDimensions(model, ref min, ref max);
-            return max.Z - min.Z;
-        }
-
         private static Task Update()
         {
             if (MainMenu.IsOpen || _props.Count == 0)
@@ -245,7 +229,7 @@ namespace PocceMod.Client
             if (Vector2.DistanceSquared(coords, (Vector2)pos) < 100f)
             {
                 Common.GetCamHorizontalForwardAndRightVectors(out Vector3 forward, out Vector3 right);
-                var speed = Math.Max(0.05f * GetEntityHeight(prop), 0.05f);
+                var speed = Math.Max(0.05f * Common.GetEntityHeight(prop), 0.05f);
                 forward *= speed;
                 right *= speed;
 

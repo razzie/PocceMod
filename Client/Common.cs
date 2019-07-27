@@ -132,6 +132,31 @@ namespace PocceMod.Client
             return found;
         }
 
+        public static void GetEntityMinMaxZ(int entity, out float minZ, out float maxZ)
+        {
+            var model = (uint)API.GetEntityModel(entity);
+            var min = Vector3.Zero;
+            var max = Vector3.Zero;
+            API.GetModelDimensions(model, ref min, ref max);
+
+            minZ = min.Z;
+            maxZ = max.Z;
+        }
+
+        public static float GetEntityHeight(int entity)
+        {
+            GetEntityMinMaxZ(entity, out float minZ, out float maxZ);
+            return maxZ - minZ;
+        }
+
+        public static Vector3 GetEntityTopCoords(int entity)
+        {
+            var coords = API.GetEntityCoords(entity, API.IsEntityAPed(entity));
+            GetEntityMinMaxZ(entity, out float minZ, out float maxZ);
+            coords.Z += maxZ;
+            return coords;
+        }
+
         public static bool EnsurePlayerIsInVehicle(out int player, out int vehicle, bool notification = true)
         {
             vehicle = 0;
