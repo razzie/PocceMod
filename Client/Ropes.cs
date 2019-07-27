@@ -72,6 +72,9 @@ namespace PocceMod.Client
             }
             else if (API.IsEntityAVehicle(entity))
             {
+                if (API.GetPedInVehicleSeat(entity, -1) == API.GetPlayerPed(-1))
+                    return false;
+
                 var players = Vehicles.GetPlayers(entity);
                 return players.Any(player => player != playerID);
             }
