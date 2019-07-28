@@ -29,7 +29,7 @@ namespace PocceMod.Client
             EventHandlers["PocceMod:AddRope"] += new Func<int, int, int, Vector3, Vector3, int, Task>(AddRope);
             EventHandlers["PocceMod:ClearRopes"] += new Action<int>(ClearRopes);
             EventHandlers["PocceMod:ClearLastRope"] += new Action<int>(ClearLastRope);
-            EventHandlers["PocceMod:ClearEntityRopes"] += new Action<int>(ClearEntityRopes);
+            EventHandlers["PocceMod:ClearEntityRopes"] += new Func<int, Task>(ClearEntityRopes);
 
             TriggerServerEvent("PocceMod:RequestRopes");
 
@@ -124,9 +124,9 @@ namespace PocceMod.Client
             _ropes.ClearLastRope(new Player(player));
         }
 
-        private static void ClearEntityRopes(int entity)
+        private static async Task ClearEntityRopes(int entity)
         {
-            _ropes.ClearEntityRopes(entity);
+            _ropes.ClearEntityRopes(await Common.WaitForNetEntity(entity));
         }
 
         public static void PlayerAttach(int entity, Vector3 offset, ModeFlag mode = ModeFlag.Normal)
@@ -193,7 +193,7 @@ namespace PocceMod.Client
 
         public static void ClearPlayer()
         {
-            TriggerServerEvent("PocceMod:ClearEntityRopes", Common.GetPlayerPedOrVehicle());
+            TriggerServerEvent("PocceMod:ClearEntityRopes", API.ObjToNet(Common.GetPlayerPedOrVehicle()));
         }
 
         public static void EquipRopeGun()
