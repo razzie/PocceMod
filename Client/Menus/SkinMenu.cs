@@ -90,7 +90,7 @@ namespace PocceMod.Client.Menus
 
             foreach (var ped in peds)
             {
-                var skin = new Skin(ped);
+                var skin = Skin.FromPed(ped);
                 _lastSkins.Add(skin);
                 _allSkins.Add(skin);
                 Common.Notification("model: " + skin.Name);
@@ -104,7 +104,7 @@ namespace PocceMod.Client.Menus
         {
             _lastSkins.Clear();
 
-            var skin = new Skin(API.GetPlayerPed(-1));
+            var skin = Skin.FromPed(API.GetPlayerPed(-1));
             _lastSkins.Add(skin);
             _allSkins.Add(skin);
             Common.Notification("model: " + skin.Name);

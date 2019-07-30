@@ -1,7 +1,7 @@
-﻿using CitizenFX.Core.Native;
+﻿using CitizenFX.Core;
+using CitizenFX.Core.Native;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace PocceMod.Client
 {
@@ -21,7 +21,7 @@ namespace PocceMod.Client
             }
         }
 
-        public Skin(int ped)
+        internal Skin(int ped)
         {
             _drawables = new int[ComponentCount];
             _textures = new int[ComponentCount];
@@ -48,7 +48,7 @@ namespace PocceMod.Client
             get; private set;
         }
 
-        public void Restore(int ped)
+        public virtual void Restore(int ped)
         {
             for (int i = 0; i < ComponentCount; ++i)
             {
@@ -58,16 +58,27 @@ namespace PocceMod.Client
 
         public override bool Equals(object value)
         {
-            var skin = value as Skin;
-            return skin != null && Name == skin.Name &&
-                Enumerable.SequenceEqual(_drawables, skin._drawables) &&
-                Enumerable.SequenceEqual(_textures, skin._textures) &&
-                Enumerable.SequenceEqual(_palettes, skin._palettes);
+            var other = value as Skin;
+            return other != null && Model == other.Model &&
+                Enumerable.SequenceEqual(_drawables, other._drawables) &&
+                Enumerable.SequenceEqual(_textures, other._textures) &&
+                Enumerable.SequenceEqual(_palettes, other._palettes);
         }
 
         public override int GetHashCode()
         {
             return base.GetHashCode();
+        }
+
+        public static Skin FromPed(int ped)
+        {
+            return IsMultiplayerPed(ped) ? new MultiplayerSkin(ped) : new Skin(ped);
+        }
+
+        public static bool IsMultiplayerPed(int ped)
+        {
+            var model = (uint)API.GetEntityModel(ped);
+            return (model == (uint)API.GetHashKey("mp_m_freemode_01") || model == (uint)API.GetHashKey("mp_f_freemode_01"));
         }
 
         public static string ModelToName(uint model)
@@ -76,24 +87,6 @@ namespace PocceMod.Client
                 return name;
             else
                 return string.Format("0x{0:X8}", model);
-        }
-
-        public static void Randomize(int ped)
-        {
-            /*for (int i = 0; i < ComponentCount; ++i)
-            {
-                var palette = API.GetPedPaletteVariation(ped, i);
-
-                var drawables = API.GetNumberOfPedDrawableVariations(ped, i);
-                var drawable = API.GetRandomIntInRange(0, drawables);
-
-                var textures = API.GetNumberOfPedTextureVariations(ped, i, drawable);
-                var texture = API.GetRandomIntInRange(0, textures);
-
-                API.SetPedComponentVariation(ped, i, drawable, texture, palette);
-            }*/
-
-            API.SetPedRandomComponentVariation(ped, false);
         }
 
         private static readonly string[] Models = new string[]
@@ -802,6 +795,134 @@ namespace PocceMod.Client
             "u_m_y_tattoo_01",
             "u_m_y_zombie_01"
         };
+    }
+
+    public class MultiplayerSkin : Skin
+    {
+        public class HeadOverlay
+        {
+            public HeadOverlay(int style, int colorType, int firstColor, int secondColor, float opacity)
+            {
+                Style = style;
+                ColorType = colorType;
+                FirstColor = firstColor;
+                SecondColor = secondColor;
+                Opacity = opacity;
+            }
+
+            public int Style { get; set; }
+            public int ColorType { get; set; }
+            public int FirstColor { get; set; }
+            public int SecondColor { get; set; }
+            public float Opacity { get; set; }
+
+            public override bool Equals(object value)
+            {
+                var other = value as HeadOverlay;
+                return other != null &&
+                    Style == other.Style &&
+                    ColorType == other.ColorType &&
+                    FirstColor == other.FirstColor &&
+                    SecondColor == other.SecondColor &&
+                    Opacity == other.Opacity;
+            }
+
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
+        }
+
+        private const int HeadOverlaysCount = 12;
+        private readonly int _hairColor;
+        private readonly int _hairHighlightColor;
+        private readonly int _shapeFirstID;
+        private readonly int _shapeSecondID;
+        private readonly int _shapeThirdID;
+        private readonly int _skinFirstID;
+        private readonly int _skinSecondID;
+        private readonly int _skinThirdID;
+        private readonly float _shapeMix;
+        private readonly float _skinMix;
+        private readonly float _thirdMix;
+        private readonly bool _isParent;
+        private readonly HeadOverlay[] _headOverlays;
+
+        internal MultiplayerSkin(int ped) : base(ped)
+        {
+            _hairColor = API.GetPedHairColor(ped);
+            _hairHighlightColor = API.GetPedHairHighlightColor(ped);
+
+            var data = new Ped(ped).GetHeadBlendData();
+            _shapeFirstID = data.FirstFaceShape;
+            _shapeSecondID = data.SecondFaceShape;
+            _shapeThirdID = data.ThirdFaceShape;
+            _skinFirstID = data.FirstSkinTone;
+            _skinSecondID = data.SecondSkinTone;
+            _skinThirdID = data.ThirdSkinTone;
+            _shapeMix = data.ParentFaceShapePercent;
+            _skinMix = data.ParentSkinTonePercent;
+            _thirdMix = data.ParentThirdUnkPercent;
+            _isParent = data.IsParentInheritance;
+
+            _headOverlays = new HeadOverlay[HeadOverlaysCount];
+
+            for (int i = 0; i < HeadOverlaysCount; ++i)
+            {
+                int style = 0;
+                int colorType = 0;
+                int firstColor = 0;
+                int secondColor = 0;
+                float opacity = 0f;
+                API.GetPedHeadOverlayData(ped, i, ref style, ref colorType, ref firstColor, ref secondColor, ref opacity);
+                _headOverlays[i] = new HeadOverlay(style, colorType, firstColor, secondColor, opacity);
+            }
+        }
+
+        public override void Restore(int ped)
+        {
+            base.Restore(ped);
+
+            API.SetPedHeadBlendData(ped,
+                _shapeFirstID, _shapeSecondID, _shapeThirdID,
+                _skinFirstID, _skinSecondID, _skinThirdID,
+                _shapeMix, _skinMix, _thirdMix,
+                _isParent);
+
+            API.SetPedHairColor(ped, _hairColor, _hairHighlightColor);
+
+            for (int i = 0; i < HeadOverlaysCount; ++i)
+            {
+                var headOverlay = _headOverlays[i];
+                API.SetPedHeadOverlay(ped, i, headOverlay.Style, headOverlay.Opacity);
+                API.SetPedHeadOverlayColor(ped, i, headOverlay.ColorType, headOverlay.FirstColor, headOverlay.SecondColor);
+            }
+        }
+
+        public override bool Equals(object value)
+        {
+            var other = value as MultiplayerSkin;
+            return other != null &&
+                _hairColor == other._hairColor &&
+                _hairHighlightColor == other._hairHighlightColor &&
+                _shapeFirstID == other._shapeFirstID &&
+                _shapeSecondID == other._shapeSecondID &&
+                _shapeThirdID == other._shapeThirdID &&
+                _skinFirstID == other._skinFirstID &&
+                _skinSecondID == other._skinSecondID &&
+                _skinThirdID == other._skinThirdID &&
+                _shapeMix == other._shapeMix &&
+                _skinMix == other._skinMix &&
+                _thirdMix == other._thirdMix &&
+                _isParent == other._isParent &&
+                Enumerable.SequenceEqual(_headOverlays, other._headOverlays) &&
+                base.Equals(value);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 
     public class SkinSet
