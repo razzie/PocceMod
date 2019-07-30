@@ -93,8 +93,21 @@ namespace PocceMod.Client.Menus
                 var skin = new Skin(ped);
                 _lastSkins.Add(skin);
                 _allSkins.Add(skin);
-                Common.Notification("ped: " + skin.Name);
+                Common.Notification("model: " + skin.Name);
             }
+
+            if (_lastSkins.Count > 0)
+                ShowLastSkins();
+        }
+
+        public void DetectPlayerSkin()
+        {
+            _lastSkins.Clear();
+
+            var skin = new Skin(API.GetPlayerPed(-1));
+            _lastSkins.Add(skin);
+            _allSkins.Add(skin);
+            Common.Notification("model: " + skin.Name);
 
             if (_lastSkins.Count > 0)
                 ShowLastSkins();

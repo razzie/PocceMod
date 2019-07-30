@@ -109,7 +109,10 @@ namespace PocceMod.Client
 
             #region Skin
             if (Permission.CanDo(Ability.IdentifySkins))
+            {
                 _menu.AddMenuListItem("Skin", "Detect nearby skins", _menu.SkinMenu.DetectSkins);
+                _menu.AddMenuListItem("Skin", "Detect player skin", _menu.SkinMenu.DetectPlayerSkin);
+            }
 
             if (Permission.CanDo(Ability.ChangeSkin))
             {
