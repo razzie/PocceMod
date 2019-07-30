@@ -28,14 +28,14 @@ namespace PocceMod.Client
                 var model = SpeakerList[API.GetRandomIntInRange(0, SpeakerList.Length)];
                 var prop = await Props.SpawnInRange(center, model, 1f, radius);
                 API.DecorSetInt(prop, SpeakerRadioDecor, station);
-                API.SetEntityAsNoLongerNeeded(ref prop);
+                // cleanup later in update
             }
 
             for (int i = 0; i < peds; ++i)
             {
                 var ped = await Peds.SpawnInRange(Config.PocceList, center, 1f, radius);
                 API.TaskStartScenarioInPlace(ped, "WORLD_HUMAN_PARTYING", 0, true);
-                API.SetEntityAsNoLongerNeeded(ref ped);
+                API.SetPedAsNoLongerNeeded(ref ped);
             }
 
             for (int i = 0; i < balloons; ++i)
@@ -95,7 +95,7 @@ namespace PocceMod.Client
             foreach (int ped in peds)
             {
                 int tmp_ped = ped;
-                API.SetEntityAsNoLongerNeeded(ref tmp_ped);
+                API.SetPedAsNoLongerNeeded(ref tmp_ped);
             }
         }
 
@@ -149,6 +149,9 @@ namespace PocceMod.Client
                     API.SetEmitterRadioStation("SE_Script_Placed_Prop_Emitter_Boombox", API.GetRadioStationName(station));
                     API.SetStaticEmitterEnabled("SE_Script_Placed_Prop_Emitter_Boombox", true);
                     _speakers.Add(prop);
+
+                    var tmp_prop = prop;
+                    API.SetEntityAsNoLongerNeeded(ref tmp_prop);
                 }
             }
 

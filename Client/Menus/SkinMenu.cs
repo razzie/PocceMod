@@ -154,6 +154,7 @@ namespace PocceMod.Client.Menus
             API.ClearPedDecorations(player);
             API.ClearPedFacialDecorations(player);
             API.SetPedRandomComponentVariation(player, false);
+            API.SetModelAsNoLongerNeeded(model);
 
             Weapons.Give(player, loadout);
         }

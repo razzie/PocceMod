@@ -92,6 +92,7 @@ namespace PocceMod.Client
                 var model = (uint)API.GetHashKey("prop_devin_rope_01");
                 await Common.RequestModel(model);
                 RootObject = API.CreateObject((int)model, 0f, 0f, 0f, false, false, false);
+                API.SetModelAsNoLongerNeeded(model);
                 API.FreezeEntityPosition(RootObject, true);
             }
 

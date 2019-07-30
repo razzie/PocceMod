@@ -97,7 +97,7 @@ namespace PocceMod.Client
             }
         }
 
-        public static async Task<int> SpawnAtCoords(string model, Vector3 coords, Vector3 rotation, bool freeze = false, bool addToList = true)
+        public static async Task<int> SpawnAtCoords(string model, Vector3 coords, Vector3 rotation)
         {
             var hash = (uint)API.GetHashKey(model);
             if (!API.IsModelValid(hash))
@@ -108,8 +108,7 @@ namespace PocceMod.Client
 
             await Common.RequestModel(hash);
             var prop = API.CreateObject((int)hash, coords.X, coords.Y, coords.Z, true, false, false);
-            if (addToList)
-                _props.Add(prop);
+            _props.Add(prop);
 
             API.SetModelAsNoLongerNeeded(hash);
 
@@ -117,7 +116,7 @@ namespace PocceMod.Client
             API.DecorSetBool(prop, PropDecor, true);
             await Common.RequestCollision(hash);
 
-            if (!API.DoesEntityHavePhysics(prop) || freeze)
+            if (!API.DoesEntityHavePhysics(prop))
                 API.FreezeEntityPosition(prop, true);
 
             return prop;
@@ -147,6 +146,8 @@ namespace PocceMod.Client
             Common.GetEntityMinMaxZ(entity, out float minZ, out float maxZ);
 
             var prop = await SpawnAtCoords(model, new Vector3(pos.X, pos.Y, pos.Z + maxZ), new Vector3(0f, 0f, heading));
+            API.FreezeEntityPosition(prop, false);
+
             if (!API.DoesEntityHavePhysics(prop))
                 API.AttachEntityToEntity(prop, entity, -1, 0f, 0f, maxZ, 0f, 0f, 0f, false, false, false, false, 0, true);
             else
