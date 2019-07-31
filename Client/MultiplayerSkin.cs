@@ -94,6 +94,16 @@ namespace PocceMod.Client
             }
         }
 
+        public int Father
+        {
+            get { return _shapeFirstID; }
+        }
+
+        public int Mother
+        {
+            get { return _shapeSecondID; }
+        }
+
         public override void Restore(int ped)
         {
             base.Restore(ped);

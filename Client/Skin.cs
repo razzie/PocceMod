@@ -47,6 +47,11 @@ namespace PocceMod.Client
             get; private set;
         }
 
+        public bool IsMultiplayer
+        {
+            get { return (Model == (uint)API.GetHashKey("mp_m_freemode_01") || Model == (uint)API.GetHashKey("mp_f_freemode_01")); }
+        }
+
         public virtual void Restore(int ped)
         {
             for (int i = 0; i < ComponentCount; ++i)

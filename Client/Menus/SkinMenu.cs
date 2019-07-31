@@ -93,7 +93,7 @@ namespace PocceMod.Client.Menus
                 var skin = Skin.FromPed(ped);
                 _lastSkins.Add(skin);
                 _allSkins.Add(skin);
-                Common.Notification("model: " + skin.Name);
+                ShowNotification(skin);
             }
 
             if (_lastSkins.Count > 0)
@@ -107,10 +107,23 @@ namespace PocceMod.Client.Menus
             var skin = Skin.FromPed(API.GetPlayerPed(-1));
             _lastSkins.Add(skin);
             _allSkins.Add(skin);
-            Common.Notification("model: " + skin.Name);
+            ShowNotification(skin);
 
             if (_lastSkins.Count > 0)
                 ShowLastSkins();
+        }
+
+        private static void ShowNotification(Skin skin)
+        {
+            if (skin is MultiplayerSkin)
+            {
+                var mpSkin = skin as MultiplayerSkin;
+                Common.Notification(string.Format("model: {0} (father: {1}, mother: {2})", skin.Name, mpSkin.Father, mpSkin.Model));
+            }
+            else
+            {
+                Common.Notification("model: " + skin.Name);
+            }
         }
 
         private static async Task ChangeSkin(MenuListItem item, int index)
