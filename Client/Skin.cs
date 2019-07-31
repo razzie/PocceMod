@@ -11,6 +11,8 @@ namespace PocceMod.Client
         private readonly int[] _drawables;
         private readonly int[] _textures;
         private readonly int[] _palettes;
+        private readonly int[] _props;
+        private readonly int[] _propTextures;
 
         static Skin()
         {
@@ -25,12 +27,16 @@ namespace PocceMod.Client
             _drawables = new int[ComponentCount];
             _textures = new int[ComponentCount];
             _palettes = new int[ComponentCount];
+            _props = new int[ComponentCount];
+            _propTextures = new int[ComponentCount];
 
             for (int i = 0; i < ComponentCount; ++i)
             {
                 _drawables[i] = API.GetPedDrawableVariation(ped, i);
                 _textures[i] = API.GetPedTextureVariation(ped, i);
                 _palettes[i] = API.GetPedPaletteVariation(ped, i);
+                _props[i] = API.GetPedPropIndex(ped, i);
+                _propTextures[i] = API.GetPedPropTextureIndex(ped, i);
             }
 
             Model = (uint)API.GetEntityModel(ped);
@@ -57,6 +63,9 @@ namespace PocceMod.Client
             for (int i = 0; i < ComponentCount; ++i)
             {
                 API.SetPedComponentVariation(ped, i, _drawables[i], _textures[i], _palettes[i]);
+
+                if (_props[i] > -1)
+                    API.SetPedPropIndex(ped, i, _props[i], _propTextures[i], true);
             }
         }
 
@@ -66,7 +75,9 @@ namespace PocceMod.Client
             return other != null && Model == other.Model &&
                 Enumerable.SequenceEqual(_drawables, other._drawables) &&
                 Enumerable.SequenceEqual(_textures, other._textures) &&
-                Enumerable.SequenceEqual(_palettes, other._palettes);
+                Enumerable.SequenceEqual(_palettes, other._palettes) &&
+                Enumerable.SequenceEqual(_props, other._props) &&
+                Enumerable.SequenceEqual(_propTextures, other._propTextures);
         }
 
         public override int GetHashCode()
