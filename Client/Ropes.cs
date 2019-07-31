@@ -361,7 +361,19 @@ namespace PocceMod.Client
             switch (_scenario)
             {
                 case Scenario.EntityToEntity:
-                    API.AttachEntitiesToRope(_handle, Entity1, Entity2, pos1.X, pos1.Y, pos1.Z, pos2.X, pos2.Y, pos2.Z, _length, false, false, null, null);
+                    string bone1 = null;
+                    string bone2 = null;
+                    if (API.IsEntityAPed(Entity1))
+                    {
+                        pos1 = Vector3.Zero;
+                        bone1 = "SKEL_ROOT"; // "SKEL_R_Hand";
+                    }
+                    if (API.IsEntityAPed(Entity2))
+                    {
+                        pos2 = Vector3.Zero;
+                        bone2 = "SKEL_ROOT"; // "SKEL_R_Hand";
+                    }
+                    API.AttachEntitiesToRope(_handle, Entity1, Entity2, pos1.X, pos1.Y, pos1.Z, pos2.X, pos2.Y, pos2.Z, _length, false, false, bone1, bone2);
                     break;
 
                 case Scenario.EntityToGround:
