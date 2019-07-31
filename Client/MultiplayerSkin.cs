@@ -41,6 +41,7 @@ namespace PocceMod.Client
         }
 
         private const int HeadOverlaysCount = 12;
+        private const int FaceFeaturesCount = 20;
         private readonly int _hairColor;
         private readonly int _hairHighlightColor;
         private readonly int _shapeFirstID;
@@ -54,6 +55,7 @@ namespace PocceMod.Client
         private readonly float _thirdMix;
         private readonly bool _isParent;
         private readonly HeadOverlay[] _headOverlays;
+        private readonly float[] _faceFeatures;
 
         internal MultiplayerSkin(int ped) : base(ped)
         {
@@ -73,6 +75,7 @@ namespace PocceMod.Client
             _isParent = data.IsParentInheritance;
 
             _headOverlays = new HeadOverlay[HeadOverlaysCount];
+            _faceFeatures = new float[FaceFeaturesCount];
 
             for (int i = 0; i < HeadOverlaysCount; ++i)
             {
@@ -83,6 +86,11 @@ namespace PocceMod.Client
                 float opacity = 0f;
                 API.GetPedHeadOverlayData(ped, i, ref style, ref colorType, ref firstColor, ref secondColor, ref opacity);
                 _headOverlays[i] = new HeadOverlay(style, colorType, firstColor, secondColor, opacity);
+            }
+
+            for (int i = 0; i < FaceFeaturesCount; ++i)
+            {
+                _faceFeatures[i] = API.GetPedFaceFeature(ped, i);
             }
         }
 
@@ -104,6 +112,11 @@ namespace PocceMod.Client
                 API.SetPedHeadOverlay(ped, i, headOverlay.Style, headOverlay.Opacity);
                 API.SetPedHeadOverlayColor(ped, i, headOverlay.ColorType, headOverlay.FirstColor, headOverlay.SecondColor);
             }
+
+            for (int i = 0; i < FaceFeaturesCount; ++i)
+            {
+                API.SetPedFaceFeature(ped, i, _faceFeatures[i]);
+            }
         }
 
         public override bool Equals(object value)
@@ -123,6 +136,7 @@ namespace PocceMod.Client
                 _thirdMix == other._thirdMix &&
                 _isParent == other._isParent &&
                 Enumerable.SequenceEqual(_headOverlays, other._headOverlays) &&
+                Enumerable.SequenceEqual(_faceFeatures, other._faceFeatures) &&
                 base.Equals(value);
         }
 
