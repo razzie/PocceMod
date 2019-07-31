@@ -35,7 +35,7 @@ namespace PocceMod.Client
             API.DecorRegister(LightMultiplierDecor, 1);
             API.DecorRegister(StateFlagsDecor, 3);
 
-            EventHandlers["PocceMod:EMP"] += new Action<int>(vehicle => EMP(API.NetToVeh(vehicle)));
+            EventHandlers["PocceMod:EMP"] += new Func<int, Task>(async vehicle => await EMP(API.NetToVeh(vehicle)));
             EventHandlers["PocceMod:SetIndicator"] += new Action<int, int>((vehicle, state) => SetIndicator(API.NetToVeh(vehicle), state));
 
             Tick += Update;
@@ -194,21 +194,21 @@ namespace PocceMod.Client
             return vehicle;
         }
 
-        public static void EMP(float rangeSquared = 900f)
+        public static async Task EMP()
         {
             API.StartScreenEffect("RaceTurbo", 500, false);
 
-            var vehicles = Get(DefaultFilters, rangeSquared);
+            var vehicles = Get(DefaultFilters, 900f);
             foreach (var vehicle in vehicles)
             {
                 if (GetPlayers(vehicle).Count > 0)
                     TriggerServerEvent("PocceMod:EMP", API.VehToNet(vehicle));
 
-                EMP(vehicle);
+                await EMP(vehicle);
             }
         }
 
-        private static void EMP(int vehicle)
+        private static async Task EMP(int vehicle)
         {
             var model = (uint)API.GetEntityModel(vehicle);
             if (API.IsThisModelAHeli(model) || API.IsThisModelAPlane(model))
@@ -217,6 +217,11 @@ namespace PocceMod.Client
                 API.SetVehicleEngineHealth(vehicle, 0f);
             
             API.SetVehicleLights(vehicle, 1);
+
+            await Common.RequestPtfxAsset("core");
+            API.UseParticleFxAssetNextCall("core");
+            var engineBone = API.GetEntityBoneIndexByName(vehicle, "engine");
+            API.StartNetworkedParticleFxLoopedOnEntityBone("ent_amb_elec_crackle", vehicle, 0f, 0f, 0.1f, 0f, 0f, 0f, engineBone, 1f, false, false, false);
         }
 
         public static void EnableUltrabrightHeadlight(int vehicle)

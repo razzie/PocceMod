@@ -132,7 +132,7 @@ namespace PocceMod.Client
                 _menu.AddMenuListItem("Extra", "Ultrabright headlight", ExtraMenu.UltrabrightHeadlight);
 
             if (Permission.CanDo(Ability.EMP))
-                _menu.AddMenuListItem("Extra", "EMP", () => Vehicles.EMP());
+                _menu.AddMenuListItemAsync("Extra", "EMP", Vehicles.EMP);
 
             if (Permission.CanDo(Ability.CargobobMagnet))
                 _menu.AddMenuListItem("Extra", "Cargobob magnet", ExtraMenu.CargobobMagnet);

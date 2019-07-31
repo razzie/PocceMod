@@ -74,6 +74,15 @@ namespace PocceMod.Client
             }
         }
 
+        public static async Task RequestPtfxAsset(string name)
+        {
+            while (!API.HasNamedPtfxAssetLoaded(name))
+            {
+                API.RequestNamedPtfxAsset(name);
+                await BaseScript.Delay(10);
+            }
+        }
+
         public static async Task NetworkRequestControl(int entity, int timeoutSeconds = 1)
         {
             if (!API.DoesEntityExist(entity))
