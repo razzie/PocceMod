@@ -53,6 +53,9 @@ namespace PocceMod.Client.Menus
         public async Task SpawnByName()
         {
             var model = await Common.GetUserInput("Spawn vehicle by name", "", 30);
+            if (string.IsNullOrEmpty(model))
+                return;
+
             AddVehicle(model);
             await Vehicles.Spawn(model);
         }
