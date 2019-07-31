@@ -112,7 +112,7 @@ namespace PocceMod.Client
             API.SetEntityAsMissionEntity(ped, true, true);
             API.TaskSetBlockingOfNonTemporaryEvents(ped, true);
             API.SetPedKeepTask(ped, true);
-            await Delay(10);
+            await Delay(0);
 
             Wander(ped, vehicle);
         }
@@ -173,17 +173,17 @@ namespace PocceMod.Client
             var driver = API.GetPedInVehicleSeat(vehicle, -1);
 
             if (!IsOwnedAutopilot(driver))
-                return Delay(1000);
+                return Delay(100);
 
             if (!API.AnyPassengersRappeling(vehicle) && Common.GetWaypoint(out Vector3 wp, false))
             {
                 // waypoint hasn't changed
                 if (API.DecorGetInt(driver, WaypointHashDecor) == wp.GetHashCode())
-                    return Delay(1000);
+                    return Delay(100);
 
                 API.DecorSetInt(driver, WaypointHashDecor, wp.GetHashCode());
                 GotoWaypoint(driver, vehicle, wp);
-                return Delay(1000);
+                return Delay(100);
             }
 
             // waypoint was removed
@@ -193,7 +193,7 @@ namespace PocceMod.Client
                 Wander(driver, vehicle);
             }
 
-            return Delay(1000);
+            return Delay(100);
         }
 
         private static Task UpdateNearby()
