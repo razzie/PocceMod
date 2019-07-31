@@ -52,6 +52,7 @@
     <Compile Include="Shared\Config.cs" />
     <Compile Include="Shared\Permission.cs" />
     <Compile Include="Shared\Rope.cs" />
+    <Compile Include="Shared\RopeSet.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
