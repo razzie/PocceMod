@@ -27,6 +27,7 @@
         EMPOtherPlayer,
         CargobobMagnet,
         UltrabrightHeadlight,
+        CompressVehicle,
         AntiGravity,
         Balloons,
         IdentifySkins,
