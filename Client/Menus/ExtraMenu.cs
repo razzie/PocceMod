@@ -1,6 +1,5 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace PocceMod.Client.Menus
@@ -56,13 +55,12 @@ namespace PocceMod.Client.Menus
             }
         }
 
-        public static void UltrabrightHeadlight()
+        public static void ToggleUltrabrightHeadlight()
         {
             if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
                 return;
 
-            Vehicles.EnableUltrabrightHeadlight(vehicle);
-            Common.Notification("Use arrow up/down keys to change brightness");
+            Vehicles.ToggleUltrabrightHeadlight(vehicle);
         }
 
         public static void CargobobMagnet()

@@ -129,7 +129,7 @@ namespace PocceMod.Client
                 _menu.AddMenuListItemAsync("Extra", "Rappel from heli", ExtraMenu.RappelFromHeli);
 
             if (Permission.CanDo(Ability.UltrabrightHeadlight))
-                _menu.AddMenuListItem("Extra", "Ultrabright headlight", ExtraMenu.UltrabrightHeadlight);
+                _menu.AddMenuListItem("Extra", "Ultrabright headlight (toggle)", ExtraMenu.ToggleUltrabrightHeadlight);
 
             if (Permission.CanDo(Ability.EMP))
                 _menu.AddMenuListItemAsync("Extra", "EMP", Vehicles.EMP);

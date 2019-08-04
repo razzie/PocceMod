@@ -224,13 +224,23 @@ namespace PocceMod.Client
             API.StartNetworkedParticleFxLoopedOnEntityBone("ent_amb_elec_crackle", vehicle, 0f, 0f, 0.1f, 0f, 0f, 0f, engineBone, 1f, false, false, false);
         }
 
-        public static void EnableUltrabrightHeadlight(int vehicle)
+        public static void ToggleUltrabrightHeadlight(int vehicle, bool notification = true)
         {
             if (!API.IsEntityAVehicle(vehicle))
                 return;
 
             if (!API.DecorExistOn(vehicle, LightMultiplierDecor))
+            {
                 API.DecorSetFloat(vehicle, LightMultiplierDecor, 1f);
+
+                if (notification)
+                    Common.Notification("Use arrow up/down keys to change brightness");
+            }
+            else
+            {
+                API.DecorRemove(vehicle, LightMultiplierDecor);
+                API.SetVehicleLightMultiplier(vehicle, 1f);
+            }
         }
 
         private static float GetLightMultiplier(int vehicle)
@@ -385,6 +395,9 @@ namespace PocceMod.Client
 
             if (!MainMenu.IsOpen && API.DecorExistOn(vehicle, LightMultiplierDecor))
             {
+                if (!API.IsVehicleEngineOn(vehicle))
+                    API.SetVehicleEngineOn(vehicle, true, false, true);
+
                 if (API.IsControlPressed(0, 172)) // up
                 {
                     SetLightMultiplier(vehicle, GetLightMultiplier(vehicle) + 0.1f);
