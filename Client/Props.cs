@@ -215,10 +215,19 @@ namespace PocceMod.Client
             _props.RemoveAt(_props.Count - 1);
         }
 
+        private static bool IsAnyPropControlPressed()
+        {
+            return (PropUndoKey > 0 && API.IsControlJustPressed(0, PropUndoKey)) ||
+                API.IsControlPressed(0, 172) ||
+                API.IsControlPressed(0, 173) ||
+                API.IsControlPressed(0, 174) ||
+                API.IsControlPressed(0, 175);
+        }
+
         private static Task Update()
         {
-            if (MainMenu.IsOpen || _props.Count == 0)
-                return Delay(1000);
+            if (MainMenu.IsOpen || _props.Count == 0 || !IsAnyPropControlPressed())
+                return Delay(100);
 
             var player = API.GetPlayerPed(-1);
             var coords = (Vector2)API.GetEntityCoords(player, true);
@@ -276,11 +285,9 @@ namespace PocceMod.Client
 
                 if (PropUndoKey > 0 && API.IsControlJustPressed(0, PropUndoKey))
                     return ClearLast();
-
-                return Task.FromResult(0);
             }
 
-            return Delay(1000);
+            return Task.FromResult(0);
         }
     }
 }
