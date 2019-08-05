@@ -1,5 +1,6 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using PocceMod.Shared;
 using System.Threading.Tasks;
 
 namespace PocceMod.Client.Menus
@@ -90,6 +91,13 @@ namespace PocceMod.Client.Menus
             {
                 Common.Notification("Player is not in a heli");
             }
+        }
+
+        public static async Task SpawnTrashPed()
+        {
+            var ped = await Peds.Spawn(Config.TrashPedList);
+            BaseScript.TriggerServerEvent("PocceMod:Burn", API.PedToNet(ped));
+            API.SetPedAsNoLongerNeeded(ref ped);
         }
 
         public static void CompressVehicle()

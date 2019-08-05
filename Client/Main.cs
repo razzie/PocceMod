@@ -3,7 +3,6 @@ using CitizenFX.Core.Native;
 using PocceMod.Client.Menus;
 using PocceMod.Shared;
 using System;
-using System.Threading.Tasks;
 
 namespace PocceMod.Client
 {
@@ -138,7 +137,7 @@ namespace PocceMod.Client
                 _menu.AddMenuListItem("Extra", "Cargobob magnet", ExtraMenu.CargobobMagnet);
 
             if (Permission.CanDo(Ability.SpawnTrashPed))
-                _menu.AddMenuListItemAsync("Extra", "Trash ped", SpawnTrashPed);
+                _menu.AddMenuListItemAsync("Extra", "Trash ped", ExtraMenu.SpawnTrashPed);
 
             if (Permission.CanDo(Ability.CompressVehicle))
                 _menu.AddMenuListItem("Extra", "Compress vehicle", ExtraMenu.CompressVehicle);
@@ -149,13 +148,6 @@ namespace PocceMod.Client
             if (Permission.CanDo(Ability.Balloons))
                 _menu.AddMenuListItemAsync("Extra", "Balloons", ExtraMenu.Balloons);
             #endregion
-        }
-
-        public static async Task SpawnTrashPed()
-        {
-            var ped = await Peds.Spawn(Config.TrashPedList);
-            TriggerServerEvent("PocceMod:Burn", API.PedToNet(ped));
-            API.SetEntityAsNoLongerNeeded(ref ped);
         }
     }
 }
