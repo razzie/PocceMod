@@ -165,7 +165,7 @@ namespace PocceMod.Client
             for (int i = 0; i < API.GetRandomIntInRange(3, 6); ++i)
             {
                 var model = models[API.GetRandomIntInRange(0, models.Length)];
-                var offset = new Vector3(API.GetRandomFloatInRange(-0.25f, 0.25f), API.GetRandomFloatInRange(-0.25f, 0.25f), API.GetRandomFloatInRange(0f, 0.5f));
+                var offset = new Vector3(API.GetRandomFloatInRange(-0.25f, 0.25f), API.GetRandomFloatInRange(-0.25f, 0.25f), API.GetRandomFloatInRange(0f, 0.75f));
                 var ball = await SpawnAtCoords(model, coords + offset, Vector3.Zero);
                 Ropes.Attach(root, ball, Vector3.Zero, Vector3.Zero);
                 AntiGravity.Add(ball, 1.5f);
