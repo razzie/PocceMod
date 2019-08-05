@@ -226,13 +226,12 @@ namespace PocceMod.Client
             var prop = _props[_props.Count - 1];
             var pos = API.GetEntityCoords(prop, false);
             var rotation = API.GetEntityRotation(prop, 0);
-            var propHeight = Common.GetEntityHeight(prop);
-            var minDistance = (propHeight < 1f ? 1f : propHeight) * 3f;
+            var sizeFactor = MathUtil.Clamp(Common.GetEntityHeight(prop), 1f, 16f);
 
-            if (Vector2.DistanceSquared(coords, (Vector2)pos) < minDistance * minDistance)
+            if (Vector2.DistanceSquared(coords, (Vector2)pos) < sizeFactor * sizeFactor)
             {
                 Common.GetCamHorizontalForwardAndRightVectors(out Vector3 forward, out Vector3 right);
-                var speed = Math.Max(0.05f * propHeight, 0.05f);
+                var speed = 0.05f * sizeFactor;
                 forward *= speed;
                 right *= speed;
 
