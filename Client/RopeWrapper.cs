@@ -1,5 +1,6 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using System;
 
 namespace PocceMod.Client
 {
@@ -31,6 +32,8 @@ namespace PocceMod.Client
 
             if ((Mode & ModeFlag.Grapple) == ModeFlag.Grapple)
                 API.StartRopeWinding(_handle);
+
+            Created = DateTime.Now;
         }
 
         public bool Exists
@@ -41,6 +44,8 @@ namespace PocceMod.Client
                 return API.DoesRopeExist(ref rope);
             }
         }
+
+        public DateTime Created { get; }
 
         private static Scenario GetScenario(int entity1, int entity2)
         {
@@ -106,9 +111,15 @@ namespace PocceMod.Client
 
         public override void Update()
         {
-            // if a rope is shot, it ceases to exist
-            if (_handle == -1 || !Exists)
+            if (_handle == -1)
                 return;
+
+            // if a rope is shot, it ceases to exist
+            if (!Exists)
+            {
+                Clear();
+                return;
+            }
 
             if ((Entity1 != 0 && !API.DoesEntityExist(Entity1)) ||
                 (Entity2 != 0 && !API.DoesEntityExist(Entity2)))
@@ -117,7 +128,15 @@ namespace PocceMod.Client
                 return;
             }
 
-            if (_scenario != Scenario.GroundToGround)
+            if (_scenario == Scenario.GroundToGround)
+            {
+                if (Created + TimeSpan.FromMinutes(1) < DateTime.Now)
+                {
+                    Clear();
+                    return;
+                }
+            }
+            else
             {
                 // if length is negative, rope is detached
                 if (API.GetRopeLength(_handle) < 0f)
