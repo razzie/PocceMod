@@ -130,6 +130,9 @@ namespace PocceMod.Client
             if (Permission.CanDo(Ability.UltrabrightHeadlight))
                 _menu.AddMenuListItem("Extra", "Ultrabright headlight (toggle)", ExtraMenu.ToggleUltrabrightHeadlight);
 
+            if (Permission.CanDo(Ability.BackToTheFuture))
+                _menu.AddMenuListItem("Extra", "Back to the Future", ExtraMenu.ToggleBackToTheFuture);
+
             if (Permission.CanDo(Ability.EMP))
                 _menu.AddMenuListItemAsync("Extra", "EMP", Vehicles.EMP);
 

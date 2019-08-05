@@ -64,6 +64,14 @@ namespace PocceMod.Client.Menus
             Vehicles.ToggleUltrabrightHeadlight(vehicle);
         }
 
+        public static void ToggleBackToTheFuture()
+        {
+            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
+                return;
+
+            Vehicles.ToggleBackToTheFuture(vehicle);
+        }
+
         public static void CargobobMagnet()
         {
             var player = API.GetPlayerPed(-1);

@@ -26,7 +26,8 @@ namespace PocceMod.Client
             TiresIntact = 2,
             EngineIntact = 4,
             Cruising = 8,
-            EMP = 16
+            EMP = 16,
+            BackToTheFuture = 32
         }
 
         public enum Light
@@ -259,6 +260,19 @@ namespace PocceMod.Client
                 API.DecorRemove(vehicle, LightMultiplierDecor);
                 API.SetVehicleLightMultiplier(vehicle, 1f);
             }
+        }
+
+        public static void ToggleBackToTheFuture(int vehicle)
+        {
+            var model = (uint)API.GetEntityModel(vehicle);
+            if (!API.IsThisModelACar(model) && !API.IsThisModelABike(model) && !API.IsThisModelAQuadbike(model))
+            {
+                Common.Notification("Only cars, bikes and quadbikes are supported");
+                return;
+            }
+
+            var state = GetLastState(vehicle, StateFlag.BackToTheFuture);
+            SetState(vehicle, StateFlag.BackToTheFuture, !state);
         }
 
         private static float GetLightMultiplier(int vehicle)
@@ -511,7 +525,22 @@ namespace PocceMod.Client
 
         private static async Task UpdateEffects()
         {
-            await Delay(1000);
+            await Delay(100);
+
+            var player = API.GetPlayerPed(-1);
+            if (API.IsPedInAnyVehicle(player, false))
+            {
+                var vehicle = API.GetVehiclePedIsIn(player, false);
+                if (GetLastState(vehicle, StateFlag.BackToTheFuture))
+                {
+                    var wheelBones = new string[] { "wheel_lr", "wheel_rr", "wheelr" }.Select(wheel => API.GetEntityBoneIndexByName(vehicle, wheel));
+                    foreach (var wheel in wheelBones)
+                    {
+                        var coords = API.GetWorldPositionOfEntityBone(vehicle, wheel);
+                        API.StartScriptFire(coords.X, coords.Y, coords.Z, 3, true);
+                    }
+                }
+            }
 
             foreach (var pair in _effects.ToArray())
             {

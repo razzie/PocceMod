@@ -27,6 +27,7 @@
         EMPOtherPlayer,
         CargobobMagnet,
         UltrabrightHeadlight,
+        BackToTheFuture,
         CompressVehicle,
         AntiGravity,
         Balloons,
