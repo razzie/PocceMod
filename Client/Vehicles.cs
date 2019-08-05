@@ -243,17 +243,15 @@ namespace PocceMod.Client
             SetState(vehicle, StateFlag.EMP, true);
         }
 
-        public static void ToggleUltrabrightHeadlight(int vehicle, bool notification = true)
+        public static void ToggleUltrabrightHeadlight()
         {
-            if (!API.IsEntityAVehicle(vehicle))
+            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
                 return;
 
             if (!API.DecorExistOn(vehicle, LightMultiplierDecor))
             {
                 API.DecorSetFloat(vehicle, LightMultiplierDecor, 1f);
-
-                if (notification)
-                    Common.Notification("Use arrow up/down keys to change brightness");
+                Common.Notification("Use arrow up/down keys to change brightness");
             }
             else
             {
@@ -262,8 +260,11 @@ namespace PocceMod.Client
             }
         }
 
-        public static void ToggleBackToTheFuture(int vehicle)
+        public static void ToggleBackToTheFuture()
         {
+            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
+                return;
+
             var model = (uint)API.GetEntityModel(vehicle);
             if (!API.IsThisModelACar(model) && !API.IsThisModelABike(model) && !API.IsThisModelAQuadbike(model))
             {
@@ -279,6 +280,80 @@ namespace PocceMod.Client
                 API.SetVehicleTyresCanBurst(vehicle, false);
                 API.SetDisableVehiclePetrolTankFires(vehicle, true);
             }
+        }
+
+        public static void CargobobMagnet()
+        {
+            var player = API.GetPlayerPed(-1);
+            if (API.IsPedInAnyHeli(player))
+            {
+                var heli = API.GetVehiclePedIsIn(player, false);
+                if (API.GetPedInVehicleSeat(heli, -1) != player)
+                {
+                    Common.Notification("Player is not the pilot of this heli");
+                    return;
+                }
+
+                if (API.IsCargobobMagnetActive(heli))
+                {
+                    API.SetCargobobPickupMagnetActive(heli, false);
+                    API.RetractCargobobHook(heli);
+                }
+                else
+                {
+                    API.EnableCargobobHook(heli, 1);
+                    API.SetCargobobPickupMagnetActive(heli, true);
+                }
+            }
+            else
+            {
+                Common.Notification("Player is not in a heli");
+            }
+        }
+        
+        public static void CompressVehicle()
+        {
+            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
+                return;
+
+            TriggerServerEvent("PocceMod:CompressVehicle", API.VehToNet(vehicle));
+        }
+
+        private static async Task Compress(int vehicle)
+        {
+            var model = (uint)API.GetEntityModel(vehicle);
+            var min = Vector3.Zero;
+            var max = Vector3.Zero;
+            API.GetModelDimensions(model, ref min, ref max);
+
+            var front = API.GetOffsetFromEntityInWorldCoords(vehicle, 0f, max.Y, 0f);
+            var rear = API.GetOffsetFromEntityInWorldCoords(vehicle, 0f, min.Y, 0f);
+            var left = API.GetOffsetFromEntityInWorldCoords(vehicle, min.X, 0f, 0f);
+            var right = API.GetOffsetFromEntityInWorldCoords(vehicle, max.X, 0f, 0f);
+            var top = API.GetOffsetFromEntityInWorldCoords(vehicle, 0f, 0f, max.Z);
+
+            var sides = new Vector3[] { front, rear, left, right, top };
+
+            for (int i = 0; i < 5; ++i)
+            {
+                foreach (var side in sides)
+                {
+                    API.SetVehicleDamage(vehicle, side.X, side.Y, side.Z, 100000f, i, false);
+                }
+
+                await Delay(100);
+            }
+        }
+
+        public static void ToggleAntiGravity()
+        {
+            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
+                return;
+
+            if (AntiGravity.Contains(vehicle))
+                AntiGravity.Remove(vehicle);
+            else
+                AntiGravity.Add(vehicle, 1f);
         }
 
         private static float GetLightMultiplier(int vehicle)
@@ -362,32 +437,6 @@ namespace PocceMod.Client
                     API.SetVehicleIndicatorLights(vehicle, 0, true);
                     API.SetVehicleIndicatorLights(vehicle, 1, true);
                     break;
-            }
-        }
-
-        private static async Task Compress(int vehicle)
-        {
-            var model = (uint)API.GetEntityModel(vehicle);
-            var min = Vector3.Zero;
-            var max = Vector3.Zero;
-            API.GetModelDimensions(model, ref min, ref max);
-
-            var front = API.GetOffsetFromEntityInWorldCoords(vehicle, 0f, max.Y, 0f);
-            var rear = API.GetOffsetFromEntityInWorldCoords(vehicle, 0f, min.Y, 0f);
-            var left = API.GetOffsetFromEntityInWorldCoords(vehicle, min.X, 0f, 0f);
-            var right = API.GetOffsetFromEntityInWorldCoords(vehicle, max.X, 0f, 0f);
-            var top = API.GetOffsetFromEntityInWorldCoords(vehicle, 0f, 0f, max.Z);
-
-            var sides = new Vector3[] { front, rear, left, right, top };
-
-            for (int i = 0; i < 5; ++i)
-            {
-                foreach (var side in sides)
-                {
-                    API.SetVehicleDamage(vehicle, side.X, side.Y, side.Z, 100000f, i, false);
-                }
-
-                await Delay(100);
             }
         }
 

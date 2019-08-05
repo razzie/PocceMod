@@ -56,75 +56,11 @@ namespace PocceMod.Client.Menus
             }
         }
 
-        public static void ToggleUltrabrightHeadlight()
-        {
-            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
-                return;
-
-            Vehicles.ToggleUltrabrightHeadlight(vehicle);
-        }
-
-        public static void ToggleBackToTheFuture()
-        {
-            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
-                return;
-
-            Vehicles.ToggleBackToTheFuture(vehicle);
-        }
-
-        public static void CargobobMagnet()
-        {
-            var player = API.GetPlayerPed(-1);
-            if (API.IsPedInAnyHeli(player))
-            {
-                var heli = API.GetVehiclePedIsIn(player, false);
-                if (API.GetPedInVehicleSeat(heli, -1) != player)
-                {
-                    Common.Notification("Player is not the pilot of this heli");
-                    return;
-                }
-
-                if (API.IsCargobobMagnetActive(heli))
-                {
-                    API.SetCargobobPickupMagnetActive(heli, false);
-                    API.RetractCargobobHook(heli);
-                }
-                else
-                {
-                    API.EnableCargobobHook(heli, 1);
-                    API.SetCargobobPickupMagnetActive(heli, true);
-                }
-            }
-            else
-            {
-                Common.Notification("Player is not in a heli");
-            }
-        }
-
         public static async Task SpawnTrashPed()
         {
             var ped = await Peds.Spawn(Config.TrashPedList);
             BaseScript.TriggerServerEvent("PocceMod:Burn", API.PedToNet(ped));
             API.SetPedAsNoLongerNeeded(ref ped);
-        }
-
-        public static void CompressVehicle()
-        {
-            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
-                return;
-
-            BaseScript.TriggerServerEvent("PocceMod:CompressVehicle", API.VehToNet(vehicle));
-        }
-
-        public static void ToggleAntiGravity()
-        {
-            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
-                return;
-
-            if (AntiGravity.Contains(vehicle))
-                AntiGravity.Remove(vehicle);
-            else
-                AntiGravity.Add(vehicle, 1f);
         }
 
         public static async Task Balloons()

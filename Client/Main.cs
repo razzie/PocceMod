@@ -120,6 +120,23 @@ namespace PocceMod.Client
             }
             #endregion
 
+            #region Upgrade
+            if (Permission.CanDo(Ability.BackToTheFuture))
+                _menu.AddMenuListItem("Upgrade", "Back to the Future (toggle)", Vehicles.ToggleBackToTheFuture);
+
+            if (Permission.CanDo(Ability.UltrabrightHeadlight))
+                _menu.AddMenuListItem("Upgrade", "Ultrabright headlight (toggle)", Vehicles.ToggleUltrabrightHeadlight);
+
+            if (Permission.CanDo(Ability.CargobobMagnet))
+                _menu.AddMenuListItem("Upgrade", "Cargobob magnet", Vehicles.CargobobMagnet);
+
+            if (Permission.CanDo(Ability.CompressVehicle))
+                _menu.AddMenuListItem("Upgrade", "Compress vehicle", Vehicles.CompressVehicle);
+
+            if (Permission.CanDo(Ability.AntiGravity))
+                _menu.AddMenuListItem("Upgrade", "Anti-gravity (toggle)", Vehicles.ToggleAntiGravity);
+            #endregion
+
             #region Extra
             if (Permission.CanDo(Ability.OceanWaves))
                 _menu.AddMenuListItem("Extra", "Crazy ocean waves (toggle)", ExtraMenu.ToggleCrazyOceanWaves);
@@ -127,27 +144,12 @@ namespace PocceMod.Client
             if (Permission.CanDo(Ability.RappelFromHeli))
                 _menu.AddMenuListItemAsync("Extra", "Rappel from heli", ExtraMenu.RappelFromHeli);
 
-            if (Permission.CanDo(Ability.UltrabrightHeadlight))
-                _menu.AddMenuListItem("Extra", "Ultrabright headlight (toggle)", ExtraMenu.ToggleUltrabrightHeadlight);
-
-            if (Permission.CanDo(Ability.BackToTheFuture))
-                _menu.AddMenuListItem("Extra", "Back to the Future", ExtraMenu.ToggleBackToTheFuture);
-
             if (Permission.CanDo(Ability.EMP))
                 _menu.AddMenuListItemAsync("Extra", "EMP", Vehicles.EMP);
 
-            if (Permission.CanDo(Ability.CargobobMagnet))
-                _menu.AddMenuListItem("Extra", "Cargobob magnet", ExtraMenu.CargobobMagnet);
-
             if (Permission.CanDo(Ability.SpawnTrashPed))
                 _menu.AddMenuListItemAsync("Extra", "Trash ped", ExtraMenu.SpawnTrashPed);
-
-            if (Permission.CanDo(Ability.CompressVehicle))
-                _menu.AddMenuListItem("Extra", "Compress vehicle", ExtraMenu.CompressVehicle);
-
-            if (Permission.CanDo(Ability.AntiGravity))
-                _menu.AddMenuListItem("Extra", "Anti-gravity (toggle)", ExtraMenu.ToggleAntiGravity);
-
+            
             if (Permission.CanDo(Ability.Balloons))
                 _menu.AddMenuListItemAsync("Extra", "Balloons", ExtraMenu.Balloons);
             #endregion
