@@ -20,7 +20,7 @@ namespace PocceMod.Client
         }
 
         [Flags]
-        private enum StateFlag
+        public enum StateFlag
         {
             HazardLight = 1,
             TiresIntact = 2,
@@ -41,7 +41,7 @@ namespace PocceMod.Client
         public const Filter DefaultFilters = Filter.PlayerVehicle;
         private const string LightMultiplierDecor = "POCCE_VEHICLE_LIGHT_MULTIPLIER";
         private const string StateFlagsDecor = "POCCE_VEHICLE_STATE_FLAGS";
-        private static readonly Dictionary<int, int> _effects = new Dictionary<int, int>();
+        //private static readonly Dictionary<int, int> _effects = new Dictionary<int, int>();
 
         public Vehicles()
         {
@@ -385,13 +385,13 @@ namespace PocceMod.Client
             }
         }
 
-        private static bool GetLastState(int vehicle, StateFlag flag)
+        public static bool GetLastState(int vehicle, StateFlag flag)
         {
             var state = (StateFlag)API.DecorGetInt(vehicle, StateFlagsDecor);
             return (state & flag) == flag;
         }
 
-        private static void SetState(int vehicle, StateFlag flag, bool value)
+        public static void SetState(int vehicle, StateFlag flag, bool value)
         {
             var state = (StateFlag)API.DecorGetInt(vehicle, StateFlagsDecor);
 
@@ -403,7 +403,7 @@ namespace PocceMod.Client
             API.DecorSetInt(vehicle, StateFlagsDecor, (int)state);
         }
 
-        private static bool AreTiresIntact(int vehicle)
+        public static bool AreTiresIntact(int vehicle)
         {
             var wheels = API.GetVehicleNumberOfWheels(vehicle);
             for (int wheel = 0; wheel < wheels; ++wheel)
@@ -527,49 +527,19 @@ namespace PocceMod.Client
         {
             await Delay(100);
 
-            var player = API.GetPlayerPed(-1);
-            if (API.IsPedInAnyVehicle(player, false))
-            {
-                var vehicle = API.GetVehiclePedIsIn(player, false);
-                if (GetLastState(vehicle, StateFlag.BackToTheFuture))
-                {
-                    var wheelBones = new string[] { "wheel_lr", "wheel_rr", "wheelr" }.Select(wheel => API.GetEntityBoneIndexByName(vehicle, wheel));
-                    foreach (var wheel in wheelBones)
-                    {
-                        var coords = API.GetWorldPositionOfEntityBone(vehicle, wheel);
-                        API.StartScriptFire(coords.X, coords.Y, coords.Z, 3, true);
-                    }
-                }
-            }
-
-            foreach (var pair in _effects.ToArray())
-            {
-                var vehicle = pair.Key;
-                var effect = pair.Value;
-
-                if (!API.DoesEntityExist(vehicle) || API.GetVehicleEngineHealth(vehicle) > 100f)
-                {
-                    SetState(vehicle, StateFlag.EMP, false);
-                    API.StopParticleFxLooped(effect, false);
-                    API.RemoveParticleFx(effect, false);
-                    _effects.Remove(vehicle);
-                }
-            }
-
-            var vehicles = Get(Filter.None).Where(vehicle => GetLastState(vehicle, StateFlag.EMP) && !_effects.ContainsKey(vehicle)).ToArray();
-            if (vehicles.Length == 0)
+            var vehicles = Get(Filter.None);
+            if (vehicles.Count == 0)
                 return;
 
-            await Common.RequestPtfxAsset("core");
-
-            foreach (var vehicle in vehicles)
+            foreach (var vehicle in vehicles.Where(vehicle => GetLastState(vehicle, StateFlag.EMP)))
             {
-                API.UseParticleFxAssetNextCall("core");
-                var engineBone = API.GetEntityBoneIndexByName(vehicle, "engine");
-                var effect = API.StartParticleFxLoopedOnEntityBone("ent_amb_elec_crackle", vehicle, 0f, 0f, 0.1f, 0f, 0f, 0f, engineBone, 1f, false, false, false);
-                _effects.Add(vehicle, effect);
+                await Effects.AddEMPEffect(vehicle);
             }
 
+            foreach (var vehicle in vehicles.Where(vehicle => GetLastState(vehicle, StateFlag.BackToTheFuture) && API.GetVehicleCurrentAcceleration(vehicle) > 0.01f))
+            {
+                Effects.AddWheelFireEffect(vehicle);
+            }
         }
     }
 }
