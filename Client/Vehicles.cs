@@ -270,6 +270,17 @@ namespace PocceMod.Client
             API.SetVehicleLightMultiplier(vehicle, multiplier);
         }
 
+        private static void TurnOnLights(int vehicle)
+        {
+            bool lightsOn = false;
+            bool highbeamsOn = false;
+            API.GetVehicleLightsState(vehicle, ref lightsOn, ref highbeamsOn);
+
+            if (!lightsOn && !highbeamsOn)
+                API.SetVehicleLights(vehicle, 0);
+
+        }
+
         private static void SetIndicator(int vehicle, int state)
         {
             switch (state)
@@ -407,6 +418,33 @@ namespace PocceMod.Client
             UpdateState(vehicle);
         }
 
+        private static bool ControlHeadlights(int vehicle)
+        {
+            if (!MainMenu.IsOpen && API.DecorExistOn(vehicle, LightMultiplierDecor))
+            {
+                if (API.IsControlPressed(0, 172)) // up
+                {
+                    if (!API.IsVehicleEngineOn(vehicle))
+                        API.SetVehicleEngineOn(vehicle, true, true, false);
+
+                    SetLightMultiplier(vehicle, GetLightMultiplier(vehicle) + 0.1f);
+                    TurnOnLights(vehicle);
+                    return true;
+                }
+                else if (API.IsControlPressed(0, 173)) // down
+                {
+                    if (!API.IsVehicleEngineOn(vehicle))
+                        API.SetVehicleEngineOn(vehicle, true, true, false);
+
+                    SetLightMultiplier(vehicle, GetLightMultiplier(vehicle) - 0.1f);
+                    TurnOnLights(vehicle);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private static Task Update()
         {
             var player = API.GetPlayerPed(-1);
@@ -422,31 +460,21 @@ namespace PocceMod.Client
                     SetState(vehicle, StateFlag.HazardLight, true);
                     TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(vehicle), 3);
                 }
-                return Delay(1000);
+
+                if (ControlHeadlights(vehicle))
+                    return Task.FromResult(0);
+                else
+                    return Delay(1000);
             }
             else if (API.GetPedInVehicleSeat(vehicle, -1) != player)
             {
                 return Delay(1000);
             }
 
-            if (!MainMenu.IsOpen && API.DecorExistOn(vehicle, LightMultiplierDecor))
-            {
-                if (!API.IsVehicleEngineOn(vehicle))
-                    API.SetVehicleEngineOn(vehicle, true, false, true);
-
-                if (API.IsControlPressed(0, 172)) // up
-                {
-                    SetLightMultiplier(vehicle, GetLightMultiplier(vehicle) + 0.1f);
-                    return Task.FromResult(0);
-                }
-                else if (API.IsControlPressed(0, 173)) // down
-                {
-                    SetLightMultiplier(vehicle, GetLightMultiplier(vehicle) - 0.1f);
-                    return Task.FromResult(0);
-                }
-            }
-
-            return Delay(100);
+            if (ControlHeadlights(vehicle))
+                return Task.FromResult(0);
+            else
+                return Delay(100);
         }
 
         private static async Task UpdateEffects()
