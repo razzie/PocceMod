@@ -292,6 +292,16 @@ namespace PocceMod.Client
             if (API.IsControlJustPressed(0, attackControl) && TryShootRopegun(48f, out int target, out Vector3 offset))
             {
                 PlayerAttach(target, offset, grapple ? ModeFlag.Ropegun | ModeFlag.Grapple : ModeFlag.Ropegun);
+
+                if (!API.IsPlayerFreeAiming(playerID)) // force shoot effect
+                {
+                    var coords = (target == 0) ? offset : API.GetOffsetFromEntityInWorldCoords(target, offset.X, offset.Y, offset.Z);
+
+                    if (API.IsPedInAnyVehicle(player, false))
+                        API.SetVehicleShootAtTarget(player, 0, coords.X, coords.Y, coords.Z);
+                    else
+                        API.SetPedShootsAtCoord(player, coords.X, coords.Y, coords.Z, false);
+                }
             }
         }
 
