@@ -29,6 +29,14 @@ namespace PocceMod.Client
             EMP = 16
         }
 
+        public enum Light
+        {
+            Headlight,
+            LeftIndicator,
+            RightIndicator,
+            HazardLight
+        }
+
         public const Filter DefaultFilters = Filter.PlayerVehicle;
         private const string LightMultiplierDecor = "POCCE_VEHICLE_LIGHT_MULTIPLIER";
         private const string StateFlagsDecor = "POCCE_VEHICLE_STATE_FLAGS";
@@ -270,15 +278,45 @@ namespace PocceMod.Client
             API.SetVehicleLightMultiplier(vehicle, multiplier);
         }
 
-        private static void TurnOnLights(int vehicle)
+        public static void TurnOnLight(int vehicle, Light light)
         {
-            bool lightsOn = false;
-            bool highbeamsOn = false;
-            API.GetVehicleLightsState(vehicle, ref lightsOn, ref highbeamsOn);
+            if (!API.IsVehicleEngineOn(vehicle))
+                API.SetVehicleEngineOn(vehicle, true, true, false);
 
-            if (!lightsOn && !highbeamsOn)
-                API.SetVehicleLights(vehicle, 0);
+            switch (light)
+            {
+                case Light.Headlight:
+                    API.SetVehicleLights(vehicle, 3);
+                    break;
 
+                case Light.LeftIndicator:
+                    TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(vehicle), 1);
+                    break;
+
+                case Light.RightIndicator:
+                    TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(vehicle), 2);
+                    break;
+
+                case Light.HazardLight:
+                    TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(vehicle), 3);
+                    break;
+            }
+        }
+
+        public static void TurnOffLight(int vehicle, Light light)
+        {
+            switch (light)
+            {
+                case Light.Headlight:
+                    API.SetVehicleLights(vehicle, 1);
+                    break;
+
+                case Light.LeftIndicator:
+                case Light.RightIndicator:
+                case Light.HazardLight:
+                    TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(vehicle), 0);
+                    break;
+            }
         }
 
         private static void SetIndicator(int vehicle, int state)
@@ -406,13 +444,13 @@ namespace PocceMod.Client
                 if (!GetLastState(vehicle, StateFlag.HazardLight))
                 {
                     SetState(vehicle, StateFlag.HazardLight, true);
-                    TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(vehicle), 3);
+                    TurnOnLight(vehicle, Light.HazardLight);
                 }
             }
             else if (speed > 5f && GetLastState(vehicle, StateFlag.HazardLight))
             {
                 SetState(vehicle, StateFlag.HazardLight, false);
-                TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(vehicle), 0);
+                TurnOffLight(vehicle, Light.HazardLight);
             }
 
             UpdateState(vehicle);
@@ -424,20 +462,14 @@ namespace PocceMod.Client
             {
                 if (API.IsControlPressed(0, 172)) // up
                 {
-                    if (!API.IsVehicleEngineOn(vehicle))
-                        API.SetVehicleEngineOn(vehicle, true, true, false);
-
                     SetLightMultiplier(vehicle, GetLightMultiplier(vehicle) + 0.1f);
-                    TurnOnLights(vehicle);
+                    TurnOnLight(vehicle, Light.Headlight);
                     return true;
                 }
                 else if (API.IsControlPressed(0, 173)) // down
                 {
-                    if (!API.IsVehicleEngineOn(vehicle))
-                        API.SetVehicleEngineOn(vehicle, true, true, false);
-
                     SetLightMultiplier(vehicle, GetLightMultiplier(vehicle) - 0.1f);
-                    TurnOnLights(vehicle);
+                    TurnOnLight(vehicle, Light.Headlight);
                     return true;
                 }
             }
@@ -458,7 +490,7 @@ namespace PocceMod.Client
                 if (speed > 1f && !GetLastState(vehicle, StateFlag.HazardLight))
                 {
                     SetState(vehicle, StateFlag.HazardLight, true);
-                    TriggerServerEvent("PocceMod:SetIndicator", API.VehToNet(vehicle), 3);
+                    TurnOnLight(vehicle, Light.HazardLight);
                 }
 
                 if (ControlHeadlights(vehicle))
