@@ -271,8 +271,14 @@ namespace PocceMod.Client
                 return;
             }
 
-            var state = GetLastState(vehicle, StateFlag.BackToTheFuture);
-            SetState(vehicle, StateFlag.BackToTheFuture, !state);
+            var state = !GetLastState(vehicle, StateFlag.BackToTheFuture);
+            SetState(vehicle, StateFlag.BackToTheFuture, state);
+
+            if (state)
+            {
+                API.SetVehicleTyresCanBurst(vehicle, false);
+                API.SetDisableVehiclePetrolTankFires(vehicle, true);
+            }
         }
 
         private static float GetLightMultiplier(int vehicle)
