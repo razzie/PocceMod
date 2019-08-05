@@ -208,7 +208,8 @@ namespace PocceMod.Client
         {
             var player = Common.GetPlayerPedOrVehicle();
             Common.GetAimCoords(out Vector3 rayBegin, out Vector3 rayEnd, distance);
-            var ray = API.CastRayPointToPoint(rayBegin.X, rayBegin.Y, rayBegin.Z, rayEnd.X, rayEnd.Y, rayEnd.Z, 1 | 2 | 4 | 8 | 16 | 32, player, 0);
+            //var ray = API.CastRayPointToPoint(rayBegin.X, rayBegin.Y, rayBegin.Z, rayEnd.X, rayEnd.Y, rayEnd.Z, 1 | 2 | 4 | 8 | 16 | 32, player, 0);
+            var ray = API.StartShapeTestRay(rayBegin.X, rayBegin.Y, rayBegin.Z, rayEnd.X, rayEnd.Y, rayEnd.Z, 1 | 2 | 4 | 8 | 16 | 32, player, 0);
 
             target = 0;
             offset = Vector3.Zero;
@@ -216,7 +217,8 @@ namespace PocceMod.Client
             bool hit = false;
             var coords = Vector3.Zero;
             var normal = Vector3.Zero;
-            API.GetRaycastResult(ray, ref hit, ref coords, ref normal, ref target);
+            //API.GetRaycastResult(ray, ref hit, ref coords, ref normal, ref target);
+            API.GetShapeTestResult(ray, ref hit, ref coords, ref normal, ref target);
 
             if (hit)
             {
@@ -226,22 +228,28 @@ namespace PocceMod.Client
                         return true;
 
                     case 2:
-                        offset = API.GetOffsetFromEntityGivenWorldCoords(target, coords.X, coords.Y, coords.Z);
+                        if (coords == Vector3.Zero)
+                            offset = coords;
+                        else
+                            offset = API.GetOffsetFromEntityGivenWorldCoords(target, coords.X, coords.Y, coords.Z);
                         return true;
 
                     case 3:
                         if (API.NetworkDoesEntityExistWithNetworkId(target))
                         {
-                            offset = API.GetOffsetFromEntityGivenWorldCoords(target, coords.X, coords.Y, coords.Z);
+                            if (coords == Vector3.Zero)
+                                offset = coords;
+                            else
+                                offset = API.GetOffsetFromEntityGivenWorldCoords(target, coords.X, coords.Y, coords.Z);
                             return true;
                         }
                         break;
                 }
 
-                if (Permission.CanDo(Ability.RopeGunStaticObjects))
+                if (Permission.CanDo(Ability.RopeGunStaticObjects) && coords != Vector3.Zero)
                 {
-                    target = 0;
                     offset = coords;
+                    target = 0;
                     return true;
                 }
             }
@@ -259,7 +267,19 @@ namespace PocceMod.Client
                 return;
             }
 
-            if (!API.IsPlayerFreeAiming(playerID))
+            bool isAiming = false;
+            if (API.IsPlayerFreeAiming(playerID))
+            {
+                isAiming = true;
+            }
+            else if (API.IsControlPressed(0, 25) && // INPUT_AIM
+                (API.IsPedFalling(player) || API.IsPedJumping(player)))
+            {
+                API.ShowHudComponentThisFrame(14); // crosshair
+                isAiming = true;
+            }
+
+            if (!isAiming)
                 return;
 
             var attackControl = API.IsPedInAnyVehicle(player, false) ? 69 : 24;  // INPUT_VEH_ATTACK; INPUT_ATTACK
