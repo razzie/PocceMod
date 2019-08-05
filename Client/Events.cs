@@ -24,6 +24,9 @@ namespace PocceMod.Client
             var center = API.GetEntityCoords(API.GetPlayerPed(-1), true);
             var station = API.GetPlayerRadioStationIndex();
 
+            if (station == 255) // OFF
+                station = 19; // RADIO_19_USER
+
             for (int i = 0; i < speakers; ++i)
             {
                 var model = SpeakerList[API.GetRandomIntInRange(0, SpeakerList.Length)];
