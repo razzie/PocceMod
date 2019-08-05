@@ -1,8 +1,10 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
 using PocceMod.Client.Menus;
+using PocceMod.Shared;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PocceMod.Client
@@ -23,12 +25,14 @@ namespace PocceMod.Client
             HazardLight = 1,
             TiresIntact = 2,
             EngineIntact = 4,
-            Cruising = 8
+            Cruising = 8,
+            EMP = 16
         }
 
         public const Filter DefaultFilters = Filter.PlayerVehicle;
         private const string LightMultiplierDecor = "POCCE_VEHICLE_LIGHT_MULTIPLIER";
         private const string StateFlagsDecor = "POCCE_VEHICLE_STATE_FLAGS";
+        private static readonly Dictionary<int, int> _effects = new Dictionary<int, int>();
 
         public Vehicles()
         {
@@ -40,6 +44,7 @@ namespace PocceMod.Client
             EventHandlers["PocceMod:CompressVehicle"] += new Func<int, Task>(async vehicle => await Compress(API.NetToVeh(vehicle)));
 
             Tick += Update;
+            Tick += UpdateEffects;
         }
 
         public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 3600f)
@@ -203,7 +208,12 @@ namespace PocceMod.Client
             foreach (var vehicle in vehicles)
             {
                 if (GetPlayers(vehicle).Count > 0)
+                {
+                    if (!Permission.CanDo(Ability.EMPOtherPlayer))
+                        continue;
+
                     TriggerServerEvent("PocceMod:EMP", API.VehToNet(vehicle));
+                }
 
                 await EMP(vehicle);
             }
@@ -211,6 +221,8 @@ namespace PocceMod.Client
 
         private static async Task EMP(int vehicle)
         {
+            await Common.NetworkRequestControl(vehicle);
+
             var model = (uint)API.GetEntityModel(vehicle);
             if (API.IsThisModelAHeli(model) || API.IsThisModelAPlane(model))
                 API.SetVehicleEngineHealth(vehicle, 1f);
@@ -219,10 +231,7 @@ namespace PocceMod.Client
             
             API.SetVehicleLights(vehicle, 1);
 
-            await Common.RequestPtfxAsset("core");
-            API.UseParticleFxAssetNextCall("core");
-            var engineBone = API.GetEntityBoneIndexByName(vehicle, "engine");
-            API.StartNetworkedParticleFxLoopedOnEntityBone("ent_amb_elec_crackle", vehicle, 0f, 0f, 0.1f, 0f, 0f, 0f, engineBone, 1f, false, false, false);
+            SetState(vehicle, StateFlag.EMP, true);
         }
 
         public static void ToggleUltrabrightHeadlight(int vehicle, bool notification = true)
@@ -438,6 +447,37 @@ namespace PocceMod.Client
             }
 
             return Delay(100);
+        }
+
+        private static async Task UpdateEffects()
+        {
+            await Delay(1000);
+
+            var vehicles = Get(Filter.None).Where(vehicle => GetLastState(vehicle, StateFlag.EMP) && !_effects.ContainsKey(vehicle)).ToArray();
+            if (vehicles.Length == 0)
+                return;
+
+            await Common.RequestPtfxAsset("core");
+            API.UseParticleFxAssetNextCall("core");
+
+            foreach (var vehicle in vehicles)
+            {
+                var engineBone = API.GetEntityBoneIndexByName(vehicle, "engine");
+                var effect = API.StartParticleFxLoopedOnEntityBone("ent_amb_elec_crackle", vehicle, 0f, 0f, 0.1f, 0f, 0f, 0f, engineBone, 1f, false, false, false);
+                _effects.Add(vehicle, effect);
+            }
+
+            foreach (var pair in _effects.ToArray())
+            {
+                var vehicle = pair.Key;
+                var effect = pair.Value;
+
+                if (!API.DoesEntityExist(vehicle) || API.GetVehicleEngineHealth(vehicle) > 100f)
+                {
+                    API.StopParticleFxLooped(effect, false);
+                    _effects.Remove(vehicle);
+                }
+            }
         }
     }
 }
