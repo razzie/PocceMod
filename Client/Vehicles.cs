@@ -481,20 +481,6 @@ namespace PocceMod.Client
         {
             await Delay(1000);
 
-            var vehicles = Get(Filter.None).Where(vehicle => GetLastState(vehicle, StateFlag.EMP) && !_effects.ContainsKey(vehicle)).ToArray();
-            if (vehicles.Length == 0)
-                return;
-
-            await Common.RequestPtfxAsset("core");
-            API.UseParticleFxAssetNextCall("core");
-
-            foreach (var vehicle in vehicles)
-            {
-                var engineBone = API.GetEntityBoneIndexByName(vehicle, "engine");
-                var effect = API.StartParticleFxLoopedOnEntityBone("ent_amb_elec_crackle", vehicle, 0f, 0f, 0.1f, 0f, 0f, 0f, engineBone, 1f, false, false, false);
-                _effects.Add(vehicle, effect);
-            }
-
             foreach (var pair in _effects.ToArray())
             {
                 var vehicle = pair.Key;
@@ -502,10 +488,27 @@ namespace PocceMod.Client
 
                 if (!API.DoesEntityExist(vehicle) || API.GetVehicleEngineHealth(vehicle) > 100f)
                 {
+                    SetState(vehicle, StateFlag.EMP, false);
                     API.StopParticleFxLooped(effect, false);
+                    API.RemoveParticleFx(effect, false);
                     _effects.Remove(vehicle);
                 }
             }
+
+            var vehicles = Get(Filter.None).Where(vehicle => GetLastState(vehicle, StateFlag.EMP) && !_effects.ContainsKey(vehicle)).ToArray();
+            if (vehicles.Length == 0)
+                return;
+
+            await Common.RequestPtfxAsset("core");
+
+            foreach (var vehicle in vehicles)
+            {
+                API.UseParticleFxAssetNextCall("core");
+                var engineBone = API.GetEntityBoneIndexByName(vehicle, "engine");
+                var effect = API.StartParticleFxLoopedOnEntityBone("ent_amb_elec_crackle", vehicle, 0f, 0f, 0.1f, 0f, 0f, 0f, engineBone, 1f, false, false, false);
+                _effects.Add(vehicle, effect);
+            }
+
         }
     }
 }
