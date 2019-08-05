@@ -198,7 +198,14 @@ namespace PocceMod.Client
 
         public static void ClearPlayer()
         {
-            TriggerServerEvent("PocceMod:ClearEntityRopes", API.ObjToNet(Common.GetPlayerPedOrVehicle()));
+            var player = API.GetPlayerPed(-1);
+            TriggerServerEvent("PocceMod:ClearEntityRopes", API.PedToNet(player));
+
+            if (API.IsPedInAnyVehicle(player, false))
+            {
+                int vehicle = API.GetVehiclePedIsIn(player, false);
+                TriggerServerEvent("PocceMod:ClearEntityRopes", API.VehToNet(vehicle));
+            }
         }
 
         public static void EquipRopeGun()
