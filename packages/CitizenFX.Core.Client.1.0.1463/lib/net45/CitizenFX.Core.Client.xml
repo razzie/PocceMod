@@ -27778,6 +27778,11 @@
             It's the default blip you can see on enemies during freeroam in singleplayer (the one that fades out quickly).
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.DOES_RAYFIRE_MAP_OBJECT_EXIST">
+            <summary>
+            Returns true if a destructible object with this handle exists, false otherwise.
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.DOES_ROPE_EXIST">
             <summary>
             Ptr is correct
@@ -30094,6 +30099,14 @@
             p2 0 if success, -1 if failed
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_RAYFIRE_MAP_OBJECT">
+            <summary>
+            Gets a destructible object's handle  
+            Example:  
+            OBJECT::_B48FCED898292E52(-809.9619750976562, 170.919, 75.7406997680664, 3.0, "des_tvsmash");  
+            All found arguments for p4 starts with "des_" like "DES_FIB_Floor" and "des_shipsink".
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_REGISTERED_COMMANDS">
             <summary>
             Returns all commands that are registered in the command system.
@@ -30308,6 +30321,14 @@
             locked is 1 if door is found and unlocked.  
             -------------  
             the locked bool is either 0(unlocked)(false) or 1(locked)(true)
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.GET_STATE_OF_RAYFIRE_MAP_OBJECT">
+            <summary>
+            Get a destructible object's state.  
+            Substract 1 to get the real state.  
+            See SET_STATE_OF_RAYFIRE_MAP_OBJECT to see the different states  
+            For example, if the object just spawned (state 2), the native will return 3.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_STREET_NAME_AT_COORD">
@@ -34730,6 +34751,11 @@
             Harcoded limit for radius is 30.0f
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_HEAD_BLEND_PALETTE_COLOR">
+            <summary>
+            Preview: &lt;https://gfycat.com/MaleRareAmazonparrot&gt;
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_HELI_BLADES_FULL_SPEED">
             <summary>
             Equivalent of SET_HELI_BLADES_SPEED(vehicleHandle, 1.0f);  
@@ -36171,6 +36197,16 @@
             225 door types, model names and coords found in stripclub.c4:  
             pastebin.com/gywnbzsH  
             get door info: pastebin.com/i14rbekD
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash.SET_STATE_OF_RAYFIRE_MAP_OBJECT">
+            <summary>
+            Defines the state of a destructible object.  
+            Use the GET_RAYFIRE_MAP_OBJECT native to find an object's handle with its name / coords  
+            State 2 == object just spawned  
+            State 4 == Beginning of the animation  
+            State 6 == Start animation  
+            State 9 == End of the animation
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_STATIC_EMITTER_ENABLED">
@@ -39237,11 +39273,6 @@
             console hash 0x4778CA0A
             </summary>
         </member>
-        <member name="F:CitizenFX.Core.Native.Hash._DOES_DES_OBJECT_EXIST">
-            <summary>
-            Returns true if a destructible object with this handle exists, false otherwise.
-            </summary>
-        </member>
         <member name="F:CitizenFX.Core.Native.Hash._DOES_DOOR_EXIST">
             <summary>
             Example:  
@@ -39732,22 +39763,6 @@
                 alignas(8) int minute;  
                 alignas(8) int second;  
             };
-            </summary>
-        </member>
-        <member name="F:CitizenFX.Core.Native.Hash._GET_DES_OBJECT">
-            <summary>
-            Gets a destructible object's handle  
-            Example:  
-            OBJECT::_B48FCED898292E52(-809.9619750976562, 170.919, 75.7406997680664, 3.0, "des_tvsmash");  
-            All found arguments for p4 starts with "des_" like "DES_FIB_Floor" and "des_shipsink".
-            </summary>
-        </member>
-        <member name="F:CitizenFX.Core.Native.Hash._GET_DES_OBJECT_STATE">
-            <summary>
-            Get a destrictible object's state.  
-            Substract 1 to get the real state.  
-            See _SET_DES_OBJECT_STATE to see the different states  
-            For example, if the object just spawned (state 2), the native will return 3.
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash._GET_ENTITY_COLLISON_DISABLED">
@@ -41477,16 +41492,6 @@
             MulleDK19: This starts moving the VTOL engines towards the specified angle ratio (0f-1f).
             </summary>
         </member>
-        <member name="F:CitizenFX.Core.Native.Hash._SET_DES_OBJECT_STATE">
-            <summary>
-            Defines the state of a destructible object.  
-            Use the "0xB48FCED898292E52" native to find an object's handle with its name / coords  
-            State 2 == object just spawned  
-            State 4 == Beginning of the animation  
-            State 6 == Start animation  
-            State 9 == End of the animation
-            </summary>
-        </member>
         <member name="F:CitizenFX.Core.Native.Hash._SET_DIRECTOR_MODE">
             <summary>
             If toggle is true, hides special ability bar / character name in the pause menu  
@@ -42730,6 +42735,11 @@
             Deprecated name, use DOES_CARGOBOB_HAVE_PICK_UP_ROPE instead
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash._DOES_DES_OBJECT_EXIST">
+            <summary>
+            Deprecated name, use DOES_RAYFIRE_MAP_OBJECT_EXIST instead
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash.SET_CAMERA_ENDTIME">
             <summary>
             Deprecated name, use ENABLE_CLOWN_BLOOD_VFX instead
@@ -42810,6 +42820,16 @@
             Deprecated name, use GET_PREV_WEATHER_TYPE_HASH_NAME instead
             </summary>
         </member>
+        <member name="F:CitizenFX.Core.Native.Hash._GET_DES_OBJECT">
+            <summary>
+            Deprecated name, use GET_RAYFIRE_MAP_OBJECT instead
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash._GET_DES_OBJECT_ANIM_PROGRESS">
+            <summary>
+            Deprecated name, use GET_RAYFIRE_MAP_OBJECT_ANIM_PHASE instead
+            </summary>
+        </member>
         <member name="F:CitizenFX.Core.Native.Hash._GET_SCALEFORM_MOVIE_FUNCTION_RETURN_INT">
             <summary>
             Deprecated name, use GET_SCALEFORM_MOVIE_METHOD_RETURN_VALUE_INT instead
@@ -42833,6 +42853,11 @@
         <member name="F:CitizenFX.Core.Native.Hash._GET_RAYCAST_RESULT">
             <summary>
             Deprecated name, use GET_SHAPE_TEST_RESULT instead
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash._GET_DES_OBJECT_STATE">
+            <summary>
+            Deprecated name, use GET_STATE_OF_RAYFIRE_MAP_OBJECT instead
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash._FORMAT_TIME">
@@ -42993,6 +43018,11 @@
         <member name="F:CitizenFX.Core.Native.Hash._SET_STREAMED_SCRIPT_AS_NO_LONGER_NEEDED">
             <summary>
             Deprecated name, use SET_SCRIPT_WITH_NAME_HASH_AS_NO_LONGER_NEEDED instead
+            </summary>
+        </member>
+        <member name="F:CitizenFX.Core.Native.Hash._SET_DES_OBJECT_STATE">
+            <summary>
+            Deprecated name, use SET_STATE_OF_RAYFIRE_MAP_OBJECT instead
             </summary>
         </member>
         <member name="F:CitizenFX.Core.Native.Hash.GET_VEHICLE_DEFORMATION_GET_TREE">
@@ -46156,16 +46186,6 @@
             console hash 0x4778CA0A
             </summary>
         </member>
-        <member name="M:CitizenFX.Core.Native.API.DoesDesObjectExist(System.Int32)">
-            <summary>
-            Returns true if a destructible object with this handle exists, false otherwise.
-            </summary>
-        </member>
-        <member name="M:CitizenFX.Core.Native.API.N_0x52af537a0c5b8aad(System.Int32)">
-            <summary>
-            Returns true if a destructible object with this handle exists, false otherwise.
-            </summary>
-        </member>
         <member name="M:CitizenFX.Core.Native.API.DoesDoorExist(System.UInt32)">
             <summary>
             Example:
@@ -46198,6 +46218,21 @@
             <summary>
             Returns whether the ped's blip is controlled by the game.
             It's the default blip you can see on enemies during freeroam in singleplayer (the one that fades out quickly).
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.DoesRayfireMapObjectExist(System.Int32)">
+            <summary>
+            Returns true if a destructible object with this handle exists, false otherwise.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.N_0x52af537a0c5b8aad(System.Int32)">
+            <summary>
+            Returns true if a destructible object with this handle exists, false otherwise.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.DoesDesObjectExist(System.Int32)">
+            <summary>
+            Returns true if a destructible object with this handle exists, false otherwise.
             </summary>
         </member>
         <member name="M:CitizenFX.Core.Native.API.DoesRopeExist(System.Int32@)">
@@ -48279,38 +48314,6 @@
             This function is hard-coded to always return 1.
             </summary>
         </member>
-        <member name="M:CitizenFX.Core.Native.API.GetDesObject(System.Single,System.Single,System.Single,System.Single,System.String)">
-            <summary>
-            Gets a destructible object's handle
-            Example:
-            OBJECT::_B48FCED898292E52(-809.9619750976562, 170.919, 75.7406997680664, 3.0, "des_tvsmash");
-            All found arguments for p4 starts with "des_" like "DES_FIB_Floor" and "des_shipsink".
-            </summary>
-        </member>
-        <member name="M:CitizenFX.Core.Native.API.N_0xb48fced898292e52(System.Single,System.Single,System.Single,System.Single,System.String)">
-            <summary>
-            Gets a destructible object's handle
-            Example:
-            OBJECT::_B48FCED898292E52(-809.9619750976562, 170.919, 75.7406997680664, 3.0, "des_tvsmash");
-            All found arguments for p4 starts with "des_" like "DES_FIB_Floor" and "des_shipsink".
-            </summary>
-        </member>
-        <member name="M:CitizenFX.Core.Native.API.GetDesObjectState(System.Int32)">
-            <summary>
-            Get a destrictible object's state.
-            Substract 1 to get the real state.
-            See _SET_DES_OBJECT_STATE to see the different states
-            For example, if the object just spawned (state 2), the native will return 3.
-            </summary>
-        </member>
-        <member name="M:CitizenFX.Core.Native.API.N_0x899ba936634a322e(System.Int32)">
-            <summary>
-            Get a destrictible object's state.
-            Substract 1 to get the real state.
-            See _SET_DES_OBJECT_STATE to see the different states
-            For example, if the object just spawned (state 2), the native will return 3.
-            </summary>
-        </member>
         <member name="M:CitizenFX.Core.Native.API.GetDisabledControlNormal(System.Int32,System.Int32)">
             <summary>
             control - c# works with (int)GTA.Control.CursorY / (int)GTA.Control.CursorX and returns the mouse movement (additive).
@@ -50311,6 +50314,30 @@
             p2 0 if success, -1 if failed
             </summary>
         </member>
+        <member name="M:CitizenFX.Core.Native.API.GetRayfireMapObject(System.Single,System.Single,System.Single,System.Single,System.String)">
+            <summary>
+            Gets a destructible object's handle
+            Example:
+            OBJECT::_B48FCED898292E52(-809.9619750976562, 170.919, 75.7406997680664, 3.0, "des_tvsmash");
+            All found arguments for p4 starts with "des_" like "DES_FIB_Floor" and "des_shipsink".
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.N_0xb48fced898292e52(System.Single,System.Single,System.Single,System.Single,System.String)">
+            <summary>
+            Gets a destructible object's handle
+            Example:
+            OBJECT::_B48FCED898292E52(-809.9619750976562, 170.919, 75.7406997680664, 3.0, "des_tvsmash");
+            All found arguments for p4 starts with "des_" like "DES_FIB_Floor" and "des_shipsink".
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetDesObject(System.Single,System.Single,System.Single,System.Single,System.String)">
+            <summary>
+            Gets a destructible object's handle
+            Example:
+            OBJECT::_B48FCED898292E52(-809.9619750976562, 170.919, 75.7406997680664, 3.0, "des_tvsmash");
+            All found arguments for p4 starts with "des_" like "DES_FIB_Floor" and "des_shipsink".
+            </summary>
+        </member>
         <member name="M:CitizenFX.Core.Native.API.GetRegisteredCommands">
             <summary>
             Returns all commands that are registered in the command system.
@@ -50710,6 +50737,30 @@
             locked is 1 if door is found and unlocked.
             -------------
             the locked bool is either 0(unlocked)(false) or 1(locked)(true)
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetStateOfRayfireMapObject(System.Int32)">
+            <summary>
+            Get a destructible object's state.
+            Substract 1 to get the real state.
+            See SET_STATE_OF_RAYFIRE_MAP_OBJECT to see the different states
+            For example, if the object just spawned (state 2), the native will return 3.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.N_0x899ba936634a322e(System.Int32)">
+            <summary>
+            Get a destructible object's state.
+            Substract 1 to get the real state.
+            See SET_STATE_OF_RAYFIRE_MAP_OBJECT to see the different states
+            For example, if the object just spawned (state 2), the native will return 3.
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.GetDesObjectState(System.Int32)">
+            <summary>
+            Get a destructible object's state.
+            Substract 1 to get the real state.
+            See SET_STATE_OF_RAYFIRE_MAP_OBJECT to see the different states
+            For example, if the object just spawned (state 2), the native will return 3.
             </summary>
         </member>
         <member name="M:CitizenFX.Core.Native.API.GetStreetNameAtCoord(System.Single,System.Single,System.Single,System.UInt32@,System.UInt32@)">
@@ -55797,11 +55848,6 @@
             RESET_*
             </summary>
         </member>
-        <member name="M:CitizenFX.Core.Native.API.N_0xcc9682b8951c5229(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
-            <summary>
-            p4 seems to vary from 0 to 3.
-            </summary>
-        </member>
         <member name="M:CitizenFX.Core.Native.API.N_0xccd078c2665d2973(System.Boolean)">
             <summary>
             **This native does absolutely nothing, just a nullsub**
@@ -60370,26 +60416,6 @@
             NOTE: Debugging functions are not present in the retail version of the game.
             </summary>
         </member>
-        <member name="M:CitizenFX.Core.Native.API.SetDesObjectState(System.Int32,System.Int32)">
-            <summary>
-            Defines the state of a destructible object.
-            Use the "0xB48FCED898292E52" native to find an object's handle with its name / coords
-            State 2 == object just spawned
-            State 4 == Beginning of the animation
-            State 6 == Start animation
-            State 9 == End of the animation
-            </summary>
-        </member>
-        <member name="M:CitizenFX.Core.Native.API.N_0x5c29f698d404c5e1(System.Int32,System.Int32)">
-            <summary>
-            Defines the state of a destructible object.
-            Use the "0xB48FCED898292E52" native to find an object's handle with its name / coords
-            State 2 == object just spawned
-            State 4 == Beginning of the animation
-            State 6 == Start animation
-            State 9 == End of the animation
-            </summary>
-        </member>
         <member name="M:CitizenFX.Core.Native.API.SetDesiredVerticalFlightPhase(System.Int32,System.Single)">
             <summary>
             MulleDK19: This starts moving the VTOL engines towards the specified angle ratio (0f-1f).
@@ -61094,6 +61120,18 @@
             <summary>
             Harcoded limit for radius is 30.0f
             </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetHeadBlendPaletteColor(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Preview: &lt;https://gfycat.com/MaleRareAmazonparrot&gt;
+            </summary>
+            <param name="id">From 0 to 3.</param>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.N_0xcc9682b8951c5229(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Preview: &lt;https://gfycat.com/MaleRareAmazonparrot&gt;
+            </summary>
+            <param name="id">From 0 to 3.</param>
         </member>
         <member name="M:CitizenFX.Core.Native.API.SetHeliBladesFullSpeed(System.Int32)">
             <summary>
@@ -63633,6 +63671,36 @@
             225 door types, model names and coords found in stripclub.c4:
             pastebin.com/gywnbzsH
             get door info: pastebin.com/i14rbekD
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetStateOfRayfireMapObject(System.Int32,System.Int32)">
+            <summary>
+            Defines the state of a destructible object.
+            Use the GET_RAYFIRE_MAP_OBJECT native to find an object's handle with its name / coords
+            State 2 == object just spawned
+            State 4 == Beginning of the animation
+            State 6 == Start animation
+            State 9 == End of the animation
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.N_0x5c29f698d404c5e1(System.Int32,System.Int32)">
+            <summary>
+            Defines the state of a destructible object.
+            Use the GET_RAYFIRE_MAP_OBJECT native to find an object's handle with its name / coords
+            State 2 == object just spawned
+            State 4 == Beginning of the animation
+            State 6 == Start animation
+            State 9 == End of the animation
+            </summary>
+        </member>
+        <member name="M:CitizenFX.Core.Native.API.SetDesObjectState(System.Int32,System.Int32)">
+            <summary>
+            Defines the state of a destructible object.
+            Use the GET_RAYFIRE_MAP_OBJECT native to find an object's handle with its name / coords
+            State 2 == object just spawned
+            State 4 == Beginning of the animation
+            State 6 == Start animation
+            State 9 == End of the animation
             </summary>
         </member>
         <member name="M:CitizenFX.Core.Native.API.SetStaticEmitterEnabled(System.String,System.Boolean)">
@@ -68138,6 +68206,189 @@
              <remarks>
             	Formats the SizeF as a string in coordinate notation.
              </remarks>
+        </member>
+        <member name="M:System.Diagnostics.EnhancedStackFrame.GetFileColumnNumber">
+            <summary>
+                 Gets the column number in the file that contains the code that is executing. 
+                 This information is typically extracted from the debugging symbols for the executable.
+            </summary>
+            <returns>The file column number, or 0 (zero) if the file column number cannot be determined.</returns>
+        </member>
+        <member name="M:System.Diagnostics.EnhancedStackFrame.GetFileLineNumber">
+            <summary>
+                Gets the line number in the file that contains the code that is executing. 
+                This information is typically extracted from the debugging symbols for the executable.
+            </summary>
+            <returns>The file line number, or 0 (zero) if the file line number cannot be determined.</returns>
+        </member>
+        <member name="M:System.Diagnostics.EnhancedStackFrame.GetFileName">
+            <summary>
+                Gets the file name that contains the code that is executing. 
+                This information is typically extracted from the debugging symbols for the executable.
+            </summary>
+            <returns>The file name, or null if the file name cannot be determined.</returns>
+        </member>
+        <member name="M:System.Diagnostics.EnhancedStackFrame.GetILOffset">
+            <summary>
+               Gets the offset from the start of the Microsoft intermediate language (MSIL)
+               code for the method that is executing. This offset might be an approximation
+               depending on whether or not the just-in-time (JIT) compiler is generating debugging
+               code. The generation of this debugging information is controlled by the System.Diagnostics.DebuggableAttribute.
+            </summary>
+            <returns>The offset from the start of the MSIL code for the method that is executing.</returns>
+        </member>
+        <member name="M:System.Diagnostics.EnhancedStackFrame.GetMethod">
+            <summary>
+                Gets the method in which the frame is executing.
+            </summary>
+            <returns>The method in which the frame is executing.</returns>
+        </member>
+        <member name="M:System.Diagnostics.EnhancedStackFrame.GetNativeOffset">
+            <summary>
+                Gets the offset from the start of the native just-in-time (JIT)-compiled code
+                for the method that is being executed. The generation of this debugging information
+                is controlled by the System.Diagnostics.DebuggableAttribute class.
+            </summary>
+            <returns>The offset from the start of the JIT-compiled code for the method that is being executed.</returns>
+        </member>
+        <member name="M:System.Diagnostics.EnhancedStackFrame.ToString">
+            <summary>
+                Builds a readable representation of the stack trace.
+            </summary>
+            <returns>A readable representation of the stack trace.</returns>
+        </member>
+        <member name="P:System.Diagnostics.EnhancedStackTrace.FrameCount">
+            <summary>
+            Gets the number of frames in the stack trace.
+            </summary>
+            <returns>The number of frames in the stack trace.</returns>
+        </member>
+        <member name="M:System.Diagnostics.EnhancedStackTrace.GetFrame(System.Int32)">
+            <summary>
+            Gets the specified stack frame.
+            </summary>
+            <param name="index">The index of the stack frame requested.</param>
+            <returns>The specified stack frame.</returns>
+        </member>
+        <member name="M:System.Diagnostics.EnhancedStackTrace.GetFrames">
+            <summary>
+                Returns a copy of all stack frames in the current stack trace.
+            </summary>
+            <returns>
+                An array of type System.Diagnostics.StackFrame representing the function calls
+                in the stack trace.
+            </returns>
+        </member>
+        <member name="M:System.Diagnostics.EnhancedStackTrace.ToString">
+            <summary>
+            Builds a readable representation of the stack trace.
+            </summary>
+            <returns>A readable representation of the stack trace.</returns>
+        </member>
+        <member name="M:System.Diagnostics.EnhancedStackTrace.TryGetFullPath(System.String)">
+            <summary>
+            Tries to convert a given <paramref name="filePath"/> to a full path.
+            Returns original value if the conversion isn't possible or a given path is relative.
+            </summary>
+        </member>
+        <member name="T:System.Diagnostics.ExceptionExtentions">
+            <nodoc />
+        </member>
+        <member name="M:System.Diagnostics.ExceptionExtentions.Demystify``1(``0)">
+            <summary>
+            Demystifies the given <paramref name="exception"/> and tracks the original stack traces for the whole exception tree.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.ExceptionExtentions.ToStringDemystified(System.Exception)">
+            <summary>
+            Gets demystified string representation of the <paramref name="exception"/>.
+            </summary>
+            <remarks>
+            <see cref="M:System.Diagnostics.ExceptionExtentions.Demystify``1(``0)"/> method mutates the exception instance that can cause
+            issues if a system relies on the stack trace be in the specific form.
+            Unlike <see cref="M:System.Diagnostics.ExceptionExtentions.Demystify``1(``0)"/> this method is pure. It calls <see cref="M:System.Diagnostics.ExceptionExtentions.Demystify``1(``0)"/> first,
+            computes a demystified string representation and then restores the original state of the exception back.
+            </remarks>
+        </member>
+        <member name="T:System.Diagnostics.Internal.ReflectionHelper">
+            <summary>
+            A helper class that contains utilities methods for dealing with reflection.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.Internal.ReflectionHelper.IsReadOnlyAttribute(System.Type)">
+            <summary>
+            Returns true if <paramref name="type"/> is <code>System.Runtime.CompilerServices.IsReadOnlyAttribute</code>.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.Internal.ReflectionHelper.IsValueTuple(System.Type)">
+            <summary>
+            Returns true if the <paramref name="type"/> is a value tuple type.
+            </summary>
+        </member>
+        <member name="M:System.Diagnostics.Internal.ReflectionHelper.IsTupleElementNameAttribue(System.Attribute)">
+            <summary>
+            Returns true if the given <paramref name="attribute"/> is of type <code>TupleElementNameAttribute</code>.
+            </summary>
+            <remarks>
+            To avoid compile-time depencency hell with System.ValueTuple, this method uses reflection and not checks statically that 
+            the given <paramref name="attribute"/> is <code>TupleElementNameAttribute</code>.
+            </remarks>
+        </member>
+        <member name="M:System.Diagnostics.Internal.ReflectionHelper.GetTransformerNames(System.Attribute)">
+            <summary>
+            Returns 'TransformNames' property value from a given <paramref name="attribute"/>.
+            </summary>
+            <remarks>
+            To avoid compile-time depencency hell with System.ValueTuple, this method uses reflection 
+            instead of casting the attribute to a specific type.
+            </remarks>
+        </member>
+        <member name="M:System.Diagnostics.TypeNameHelper.GetTypeDisplayName(System.Type,System.Boolean,System.Boolean)">
+            <summary>
+            Pretty print a type name.
+            </summary>
+            <param name="type">The <see cref="T:System.Type"/>.</param>
+            <param name="fullName"><c>true</c> to print a fully qualified name.</param>
+            <param name="includeGenericParameterNames"><c>true</c> to include generic parameter names.</param>
+            <returns>The pretty printed type name.</returns>
+        </member>
+        <member name="M:System.Diagnostics.TypeNameHelper.GetTypeNameForGenericType(System.Type)">
+            <summary>
+            Returns a name of given generic type without '`'.
+            </summary>
+        </member>
+        <member name="P:System.Collections.Generic.Enumerable.EnumerableIList`1.Item(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="P:System.Collections.Generic.Enumerable.EnumerableIList`1.Count">
+            <inheritdoc />
+        </member>
+        <member name="P:System.Collections.Generic.Enumerable.EnumerableIList`1.IsReadOnly">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Collections.Generic.Enumerable.EnumerableIList`1.Add(`0)">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Collections.Generic.Enumerable.EnumerableIList`1.Clear">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Collections.Generic.Enumerable.EnumerableIList`1.Contains(`0)">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Collections.Generic.Enumerable.EnumerableIList`1.CopyTo(`0[],System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Collections.Generic.Enumerable.EnumerableIList`1.IndexOf(`0)">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Collections.Generic.Enumerable.EnumerableIList`1.Insert(System.Int32,`0)">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Collections.Generic.Enumerable.EnumerableIList`1.Remove(`0)">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Collections.Generic.Enumerable.EnumerableIList`1.RemoveAt(System.Int32)">
+            <inheritdoc />
         </member>
     </members>
 </doc>
