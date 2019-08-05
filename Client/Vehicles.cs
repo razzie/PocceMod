@@ -180,7 +180,7 @@ namespace PocceMod.Client
             var vehicle = API.CreateVehicle(hash, pos.X, pos.Y, pos.Z + 1f, heading, true, false);
             API.SetPedIntoVehicle(player, vehicle, -1);
 
-            if (API.GetEntityHeightAboveGround(vehicle) > 10f)
+            if (API.GetEntityHeightAboveGround(vehicle) > 10f && (API.IsPedFalling(player) || API.IsPedJumping(player)))
             {
                 if (API.IsThisModelAHeli(hash))
                 {
