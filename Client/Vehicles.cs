@@ -41,7 +41,6 @@ namespace PocceMod.Client
         public const Filter DefaultFilters = Filter.PlayerVehicle;
         private const string LightMultiplierDecor = "POCCE_VEHICLE_LIGHT_MULTIPLIER";
         private const string StateFlagsDecor = "POCCE_VEHICLE_STATE_FLAGS";
-        //private static readonly Dictionary<int, int> _effects = new Dictionary<int, int>();
 
         public Vehicles()
         {
@@ -277,6 +276,7 @@ namespace PocceMod.Client
 
             if (state)
             {
+                Common.Notification("Back to the Future!");
                 API.SetVehicleTyresCanBurst(vehicle, false);
                 API.SetDisableVehiclePetrolTankFires(vehicle, true);
             }
@@ -546,6 +546,21 @@ namespace PocceMod.Client
             return false;
         }
 
+        public static bool IsVehicleSpeeding(int vehicle)
+        {
+            if (API.IsVehicleInBurnout(vehicle))
+                return true;
+
+            var speed = API.GetEntitySpeed(vehicle);
+            var rpm = API.GetVehicleCurrentRpm(vehicle);
+            var gear = API.GetVehicleCurrentGear(vehicle);
+
+            if (speed > 1f && speed < 20f && rpm > 0.25f && gear > 0)
+                return true;
+
+            return false;
+        }
+
         private static Task Update()
         {
             var player = API.GetPlayerPed(-1);
@@ -591,9 +606,13 @@ namespace PocceMod.Client
                 await Effects.AddEMPEffect(vehicle);
             }
 
-            foreach (var vehicle in vehicles.Where(vehicle => GetLastState(vehicle, StateFlag.BackToTheFuture) && API.GetVehicleCurrentAcceleration(vehicle) > 0.01f))
+            foreach (var vehicle in vehicles.Where(vehicle => GetLastState(vehicle, StateFlag.BackToTheFuture)))
             {
-                Effects.AddWheelFireEffect(vehicle);
+                if (IsVehicleSpeeding(vehicle))
+                    Effects.AddWheelFireEffect(vehicle);
+
+                if (API.IsEntityOnFire(vehicle))
+                    API.StopEntityFire(vehicle);
             }
         }
     }

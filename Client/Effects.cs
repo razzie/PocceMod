@@ -112,7 +112,7 @@ namespace PocceMod.Client
         {
             private readonly DateTime _expires;
             private readonly int[] _fires;
-            private readonly int _key;
+            private readonly int _vehicle;
 
             public WheelFireEffect(int vehicle)
             {
@@ -122,17 +122,17 @@ namespace PocceMod.Client
                 foreach (var wheel in wheelBones)
                 {
                     var coords = API.GetWorldPositionOfEntityBone(vehicle, wheel);
-                    fires.Add(API.StartScriptFire(coords.X, coords.Y, coords.Z, 3, true));
+                    fires.Add(API.StartScriptFire(coords.X, coords.Y, coords.Z, 1, true));
                 }
 
                 _expires = DateTime.Now + TimeSpan.FromSeconds(1);
                 _fires = fires.ToArray();
-                _key = vehicle;
+                _vehicle = vehicle;
             }
 
             public int Key
             {
-                get { return _key; }
+                get { return _vehicle; }
             }
 
             public bool Expired
