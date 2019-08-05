@@ -2,6 +2,7 @@
 using CitizenFX.Core.Native;
 using PocceMod.Shared;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PocceMod.Client
@@ -138,27 +139,24 @@ namespace PocceMod.Client
 
         private static Task Update()
         {
-            var props = Props.Get();
-            foreach (var prop in props)
-            {
-                if (API.DecorExistOn(prop, SpeakerRadioDecor) && !_speakers.Contains(prop))
-                {
-                    var station = API.DecorGetInt(prop, SpeakerRadioDecor);
-                    //API.N_0x651d3228960d08af("SE_Script_Placed_Prop_Emitter_Boombox", prop);
-                    Function.Call((Hash)0x651d3228960d08af, "SE_Script_Placed_Prop_Emitter_Boombox", prop);
-                    API.SetEmitterRadioStation("SE_Script_Placed_Prop_Emitter_Boombox", API.GetRadioStationName(station));
-                    API.SetStaticEmitterEnabled("SE_Script_Placed_Prop_Emitter_Boombox", true);
-                    _speakers.Add(prop);
-
-                    var tmp_prop = prop;
-                    API.SetEntityAsNoLongerNeeded(ref tmp_prop);
-                }
-            }
-
             foreach (var speaker in _speakers.ToArray())
             {
                 if (!API.DoesEntityExist(speaker))
                     _speakers.Remove(speaker);
+            }
+
+            var newSpeakers = Props.Get().Where(prop => API.DecorExistOn(prop, SpeakerRadioDecor) && !_speakers.Contains(prop));
+            foreach (var speaker in newSpeakers)
+            {
+                var station = API.DecorGetInt(speaker, SpeakerRadioDecor);
+                //API.N_0x651d3228960d08af("SE_Script_Placed_Prop_Emitter_Boombox", prop);
+                Function.Call((Hash)0x651d3228960d08af, "SE_Script_Placed_Prop_Emitter_Boombox", speaker);
+                API.SetEmitterRadioStation("SE_Script_Placed_Prop_Emitter_Boombox", API.GetRadioStationName(station));
+                API.SetStaticEmitterEnabled("SE_Script_Placed_Prop_Emitter_Boombox", true);
+                _speakers.Add(speaker);
+
+                var tmp_prop = speaker;
+                API.SetEntityAsNoLongerNeeded(ref tmp_prop);
             }
 
             return Delay(1000);
