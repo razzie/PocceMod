@@ -276,8 +276,7 @@ namespace PocceMod.Client
             {
                 isAiming = true;
             }
-            else if (API.IsControlPressed(0, 25) && // INPUT_AIM
-                (API.IsPedFalling(player) || API.IsPedJumping(player)))
+            else if (API.IsControlPressed(0, 25)) // INPUT_AIM
             {
                 API.ShowHudComponentThisFrame(14); // crosshair
                 isAiming = true;
