@@ -230,6 +230,8 @@ namespace PocceMod.Client
 
             if (Vector2.DistanceSquared(coords, (Vector2)pos) < sizeFactor * sizeFactor)
             {
+                API.NetworkRequestControlOfEntity(prop);
+
                 Common.GetCamHorizontalForwardAndRightVectors(out Vector3 forward, out Vector3 right);
                 var speed = 0.05f * sizeFactor;
                 forward *= speed;
@@ -246,6 +248,18 @@ namespace PocceMod.Client
                         API.SetEntityCoords(prop, pos.X - right.X, pos.Y - right.Y, pos.Z, false, true, false, false);
                     else if (API.IsControlPressed(0, 175)) // right
                         API.SetEntityCoords(prop, pos.X + right.X, pos.Y + right.Y, pos.Z, false, true, false, false);
+                }
+                else if (API.IsControlPressed(0, 36)) // LEFT_CTRL
+                {
+                    if (API.IsControlPressed(0, 172)) // up
+                        API.SetEntityRotation(prop, rotation.X + 1f, rotation.Y, rotation.Z, 0, true);
+                    else if (API.IsControlPressed(0, 173)) // down
+                        API.SetEntityRotation(prop, rotation.X - 1f, rotation.Y, rotation.Z, 0, true);
+
+                    if (API.IsControlPressed(0, 174)) // left
+                        API.SetEntityRotation(prop, rotation.X, rotation.Y + 1f, rotation.Z, 0, true);
+                    else if (API.IsControlPressed(0, 175)) // right
+                        API.SetEntityRotation(prop, rotation.X, rotation.Y - 1f, rotation.Z, 0, true);
                 }
                 else
                 {
