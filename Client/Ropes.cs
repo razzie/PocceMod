@@ -275,7 +275,7 @@ namespace PocceMod.Client
         {
             await Delay(10);
 
-            foreach (var rope in _ropes.GetRopes().Cast<RopeWrapper>())
+            foreach (var rope in _ropes.GetRopes())
             {
                 rope.Update();
             }

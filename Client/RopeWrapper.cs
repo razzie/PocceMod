@@ -104,7 +104,7 @@ namespace PocceMod.Client
             }
         }
 
-        public void Update()
+        public override void Update()
         {
             // if a rope is shot, it ceases to exist
             if (_handle == -1 || !Exists)

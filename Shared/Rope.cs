@@ -31,6 +31,10 @@ namespace PocceMod.Shared
         public Vector3 Offset2 { get; private set; }
         public ModeFlag Mode { get; private set; }
         
+        public virtual void Update()
+        {
+        }
+
         public virtual void Clear()
         {
         }
