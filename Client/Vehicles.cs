@@ -37,6 +37,7 @@ namespace PocceMod.Client
 
             EventHandlers["PocceMod:EMP"] += new Func<int, Task>(async vehicle => await EMP(API.NetToVeh(vehicle)));
             EventHandlers["PocceMod:SetIndicator"] += new Action<int, int>((vehicle, state) => SetIndicator(API.NetToVeh(vehicle), state));
+            EventHandlers["PocceMod:CompressVehicle"] += new Func<int, Task>(async vehicle => await Compress(API.NetToVeh(vehicle)));
 
             Tick += Update;
         }
@@ -283,6 +284,32 @@ namespace PocceMod.Client
                     API.SetVehicleIndicatorLights(vehicle, 0, true);
                     API.SetVehicleIndicatorLights(vehicle, 1, true);
                     break;
+            }
+        }
+
+        private static async Task Compress(int vehicle)
+        {
+            var model = (uint)API.GetEntityModel(vehicle);
+            var min = Vector3.Zero;
+            var max = Vector3.Zero;
+            API.GetModelDimensions(model, ref min, ref max);
+
+            var front = API.GetOffsetFromEntityInWorldCoords(vehicle, 0f, max.Y, 0f);
+            var rear = API.GetOffsetFromEntityInWorldCoords(vehicle, 0f, min.Y, 0f);
+            var left = API.GetOffsetFromEntityInWorldCoords(vehicle, min.X, 0f, 0f);
+            var right = API.GetOffsetFromEntityInWorldCoords(vehicle, max.X, 0f, 0f);
+            var top = API.GetOffsetFromEntityInWorldCoords(vehicle, 0f, 0f, max.Z);
+
+            var sides = new Vector3[] { front, rear, left, right, top };
+
+            for (int i = 0; i < 5; ++i)
+            {
+                foreach (var side in sides)
+                {
+                    API.SetVehicleDamage(vehicle, side.X, side.Y, side.Z, 100000f, i, false);
+                }
+
+                await Delay(100);
             }
         }
 

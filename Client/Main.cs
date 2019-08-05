@@ -141,7 +141,7 @@ namespace PocceMod.Client
                 _menu.AddMenuListItemAsync("Extra", "Trash ped", SpawnTrashPed);
 
             if (Permission.CanDo(Ability.CompressVehicle))
-                _menu.AddMenuListItemAsync("Extra", "Compress vehicle", ExtraMenu.CompressVehicle);
+                _menu.AddMenuListItem("Extra", "Compress vehicle", ExtraMenu.CompressVehicle);
 
             if (Permission.CanDo(Ability.AntiGravity))
                 _menu.AddMenuListItem("Extra", "Anti-gravity (toggle)", ExtraMenu.ToggleAntiGravity);
