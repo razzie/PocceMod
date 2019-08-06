@@ -21,6 +21,11 @@ namespace PocceMod.Shared
         private static readonly Dictionary<Ability, Group> _permissions = new Dictionary<Ability, Group>();
         private static readonly Dictionary<Player, Group> _playerGroups = new Dictionary<Player, Group>();
 
+        static Permission()
+        {
+            IgnorePermissions = Config.GetConfigBool("IgnorePermissions");
+        }
+
         public Permission()
         {
             foreach (var ability in (Ability[])Enum.GetValues(typeof(Ability)))
@@ -41,6 +46,8 @@ namespace PocceMod.Shared
 #endif
         }
 
+        public static bool IgnorePermissions { get; }
+
         private static void AddPlayer(Player player, Group playerGroup)
         {
             _playerGroups[player] = playerGroup;
@@ -49,6 +56,9 @@ namespace PocceMod.Shared
 
         public static bool CanDo(Player player, Ability ability)
         {
+            if (IgnorePermissions)
+                return true;
+
             if (!_playerGroups.TryGetValue(player, out Group playerGroup))
                 return false;
 

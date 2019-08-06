@@ -12,7 +12,10 @@ namespace PocceMod.Client
 
         public Main()
         {
-            Permission.Granted += (player, group) => SetupMenu();
+            if (Permission.IgnorePermissions)
+                SetupMenu();
+            else
+                Permission.Granted += (player, group) => SetupMenu();
 
             EventHandlers["PocceMod:Burn"] += new Action<int>(async entity =>
             {
