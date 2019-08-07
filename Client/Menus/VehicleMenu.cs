@@ -1,4 +1,5 @@
-﻿using CitizenFX.Core.Native;
+﻿using CitizenFX.Core;
+using CitizenFX.Core.Native;
 using MenuAPI;
 using PocceMod.Shared;
 using System.Collections.Generic;
@@ -13,6 +14,13 @@ namespace PocceMod.Client.Menus
         {
             foreach (var vehicle in Config.VehicleList)
             {
+                var model = (uint)API.GetHashKey(vehicle);
+                if (!API.IsModelValid(model))
+                {
+                    Debug.WriteLine("[PocceMod] invalid vehicle: " + vehicle);
+                    continue;
+                }
+
                 AddVehicle(vehicle);
             }
 
