@@ -1,0 +1,16 @@
+﻿CUSTOMIZING CONFIG:
+If you want to include additonal models in a list (like props) or overwrite some values in the config
+create a new file named *.custom.ini (like props.custom.ini or config.custom.ini) and add new items or
+config lines you want to overwrite the original with.
+Of course you can modify the original .ini files too, but there is a risk they are gonna get overwritten
+by the next mod update.
+
+DEBUG MISSING ITEMS:
+In case you missed an item in the config, a debug line "[PocceMod] missing config item: xyz" will warn
+you about it in the logs (both server and client side).
+
+PERMISSIONS:
+Set up permissions by adding something similar to server.cfg or permissions.cfg (if you have it):
+add_principal identifier.steam:your_steam_hex_id group.admin
+add_principal identifier.steam:your_steam_hex_id group.moderator
+If you have vMenu set up, you probably have this already.

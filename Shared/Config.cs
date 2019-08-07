@@ -2,6 +2,7 @@
 using CitizenFX.Core.Native;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PocceMod.Shared
 {
@@ -134,8 +135,16 @@ namespace PocceMod.Shared
 
         private static string[] GetConfigList(string cfg)
         {
-            var content = API.LoadResourceFile(API.GetCurrentResourceName(), "config/" + cfg + ".ini");
-            return content.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            var original = API.LoadResourceFile(API.GetCurrentResourceName(), "config/" + cfg + ".ini");
+            var custom = API.LoadResourceFile(API.GetCurrentResourceName(), "config/" + cfg + ".custom.ini");
+
+            var origList = original.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            var customList = custom.Split(new string[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (customList.Length > 0)
+                return origList.Concat(customList).ToArray();
+            else
+                return origList;
         }
 
         private static uint[] GetConfigModels(string cfg)

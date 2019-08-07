@@ -67,6 +67,9 @@
     <Compile Include="Client\Skin.cs" />
     <Compile Include="Client\SkinSet.cs" />
     <Compile Include="Client\Weapons.cs" />
+    <None Include="config\README">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Compile Include="Shared\Ability.cs" />
     <Compile Include="Shared\Config.cs" />
     <Compile Include="Client\Main.cs" />
