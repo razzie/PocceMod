@@ -41,6 +41,12 @@ namespace PocceMod.Client
         public const Filter DefaultFilters = Filter.PlayerVehicle;
         private const string LightMultiplierDecor = "POCCE_VEHICLE_LIGHT_MULTIPLIER";
         private const string StateFlagsDecor = "POCCE_VEHICLE_STATE_FLAGS";
+        private static readonly bool _autoHazardLights;
+
+        static Vehicles()
+        {
+            _autoHazardLights = !Config.GetConfigBool("DisableAutoHazardLights");
+        }
 
         public Vehicles()
         {
@@ -588,11 +594,12 @@ namespace PocceMod.Client
             var vehicle = API.GetVehiclePedIsIn(player, !API.IsPedInAnyVehicle(player, false));
             var speed = API.GetEntitySpeed(vehicle);
 
-            UpdateAutoHazardLights(vehicle);
+            if (_autoHazardLights)
+                UpdateAutoHazardLights(vehicle);
 
             if (API.IsVehicleSeatFree(vehicle, -1))
             {
-                if (speed > 1f && !GetLastState(vehicle, StateFlag.HazardLight))
+                if (_autoHazardLights && speed > 1f && !GetLastState(vehicle, StateFlag.HazardLight))
                 {
                     SetState(vehicle, StateFlag.HazardLight, true);
                     TurnOnLight(vehicle, Light.HazardLight);
