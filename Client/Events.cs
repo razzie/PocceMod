@@ -30,7 +30,7 @@ namespace PocceMod.Client
             for (int i = 0; i < speakers; ++i)
             {
                 var model = SpeakerList[API.GetRandomIntInRange(0, SpeakerList.Length)];
-                var prop = await Props.SpawnInRange(center, model, 1f, radius);
+                var prop = await Props.SpawnInRange(center, model, 1f, radius, false);
                 API.DecorSetInt(prop, SpeakerRadioDecor, station);
                 // cleanup later in update
             }
@@ -56,7 +56,7 @@ namespace PocceMod.Client
             for (int i = 0; i < booze; ++i)
             {
                 var model = BoozeList[API.GetRandomIntInRange(0, BoozeList.Length)];
-                var prop = await Props.SpawnInRange(center, model, 1f, radius);
+                var prop = await Props.SpawnInRange(center, model, 1f, radius, false);
                 API.SetEntityAsNoLongerNeeded(ref prop);
             }
         }
