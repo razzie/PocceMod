@@ -9,12 +9,19 @@ namespace PocceMod.Client.Menus
 {
     public class MainMenu : Menu
     {
+        private static readonly int MenuKey;
         private readonly Dictionary<int, Func<Task>> _menuItemActions = new Dictionary<int, Func<Task>>();
         private readonly Dictionary<int, List<Func<Task>>> _menuListItemActions = new Dictionary<int, List<Func<Task>>>();
 
         static MainMenu()
         {
-            MenuController.MenuToggleKey = Control.SelectCharacterMichael;
+            MenuKey = Config.GetConfigInt("MenuKey");
+            if (MenuKey == 0)
+            {
+                Common.Notification("No PocceMod menu key configured");
+            }
+
+            MenuController.MenuToggleKey = (Control)MenuKey; // Control.SelectCharacterMichael;
             MenuController.EnableMenuToggleKeyOnController = false;
             MenuController.DontOpenAnyMenu = true;
 
@@ -26,12 +33,6 @@ namespace PocceMod.Client.Menus
             {
                 Common.Notification("Unsupported aspect ratio! PocceMod menu is force left aligned");
                 MenuController.MenuAlignment = MenuController.MenuAlignmentOption.Left;
-            }
-
-            var menukey = Config.GetConfigInt("MenuKey");
-            if (menukey > 0)
-            {
-                MenuController.MenuToggleKey = (Control)menukey;
             }
         }
 
@@ -79,7 +80,9 @@ namespace PocceMod.Client.Menus
 
         public void AddMenuItemAsync(string item, Func<Task> onSelect)
         {
-            MenuController.DontOpenAnyMenu = false;
+            if (MenuKey > 0)
+                MenuController.DontOpenAnyMenu = false;
+
             var menuItem = new MenuItem(item);
             AddMenuItem(menuItem);
             _menuItemActions.Add(menuItem.Index, onSelect);
@@ -92,7 +95,8 @@ namespace PocceMod.Client.Menus
 
         public void AddMenuListItemAsync(string item, string subitem, Func<Task> onSelect)
         {
-            MenuController.DontOpenAnyMenu = false;
+            if (MenuKey > 0)
+                MenuController.DontOpenAnyMenu = false;
 
             foreach (var menuItem in GetMenuItems())
             {
