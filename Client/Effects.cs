@@ -160,7 +160,7 @@ namespace PocceMod.Client
 
             public bool Expired
             {
-                get { return false; }
+                get { return !API.DoesEntityExist(_vehicle) || API.IsEntityDead(_vehicle) || API.IsVehicleSeatFree(_vehicle, -1); }
             }
 
             public Task Init()

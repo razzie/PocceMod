@@ -650,14 +650,14 @@ namespace PocceMod.Client
             if (API.IsPedInFlyingVehicle(player))
             {
                 var vehicle = API.GetVehiclePedIsIn(player, false);
-                if (API.GetPedInVehicleSeat(vehicle, -1) != player)
+                if (API.GetPedInVehicleSeat(vehicle, -1) != player || API.IsEntityDead(vehicle))
                     return Delay(1000);
 
                 if (API.IsControlJustPressed(0, 86)) // INPUT_VEH_HORN
                 {
                     TriggerServerEvent("PocceMod:ToggleHorn", API.VehToNet(vehicle), true);
                 }
-                else if (API.IsControlJustReleased(0, 86) || API.IsControlJustPressed(0, 23)) // INPUT_VEH_HORN || INPUT_ENTER
+                else if (API.IsControlJustReleased(0, 86))
                 {
                     TriggerServerEvent("PocceMod:ToggleHorn", API.VehToNet(vehicle), false);
                 }
