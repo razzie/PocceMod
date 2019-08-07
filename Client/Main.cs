@@ -18,6 +18,12 @@ namespace PocceMod.Client
             else
                 Permission.Granted += (player, group) => SetupMenu();
 
+            EventHandlers["PocceMod:OpenMenu"] += new Action(() =>
+            {
+                if (_menu != null)
+                    _menu.OpenMenu();
+            });
+
             EventHandlers["PocceMod:Burn"] += new Action<int>(async entity =>
             {
                 API.StartEntityFire(await Common.WaitForNetEntity(entity));
