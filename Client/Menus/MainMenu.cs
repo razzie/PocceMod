@@ -19,6 +19,7 @@ namespace PocceMod.Client.Menus
             if (MenuKey == 0)
             {
                 Common.Notification("No PocceMod menu key configured");
+                MenuKey = -1;
             }
 
             MenuController.MenuToggleKey = (Control)MenuKey; // Control.SelectCharacterMichael;
@@ -80,8 +81,7 @@ namespace PocceMod.Client.Menus
 
         public void AddMenuItemAsync(string item, Func<Task> onSelect)
         {
-            if (MenuKey > 0)
-                MenuController.DontOpenAnyMenu = false;
+            MenuController.DontOpenAnyMenu = false;
 
             var menuItem = new MenuItem(item);
             AddMenuItem(menuItem);
@@ -95,8 +95,7 @@ namespace PocceMod.Client.Menus
 
         public void AddMenuListItemAsync(string item, string subitem, Func<Task> onSelect)
         {
-            if (MenuKey > 0)
-                MenuController.DontOpenAnyMenu = false;
+            MenuController.DontOpenAnyMenu = false;
 
             foreach (var menuItem in GetMenuItems())
             {
