@@ -50,9 +50,29 @@ namespace PocceMod.Client
             EventHandlers["PocceMod:EMP"] += new Func<int, Task>(async vehicle => await EMP(API.NetToVeh(vehicle)));
             EventHandlers["PocceMod:SetIndicator"] += new Action<int, int>((vehicle, state) => SetIndicator(API.NetToVeh(vehicle), state));
             EventHandlers["PocceMod:CompressVehicle"] += new Func<int, Task>(async vehicle => await Compress(API.NetToVeh(vehicle)));
+            EventHandlers["PocceMod:ToggleHorn"] += new Func<int, bool, Task>(async (vehicle, state) =>
+            {
+                if (state)
+                    await Effects.AddHornEffect(API.NetToVeh(vehicle));
+                else
+                    Effects.Remove("horn_" + API.NetToVeh(vehicle));
+            });
 
             Tick += Update;
             Tick += UpdateEffects;
+
+            if (Permission.IgnorePermissions)
+            {
+                Tick += UpdateAircraftHorn;
+            }
+            else
+            {
+                Permission.Granted += (player, group) =>
+                {
+                    if (Permission.CanDo(Ability.AircraftHorn))
+                        Tick += UpdateAircraftHorn;
+                };
+            }
         }
 
         public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 3600f)
@@ -614,6 +634,30 @@ namespace PocceMod.Client
                 if (API.IsEntityOnFire(vehicle))
                     API.StopEntityFire(vehicle);
             }
+        }
+
+        private static Task UpdateAircraftHorn()
+        {
+            var player = API.GetPlayerPed(-1);
+            if (API.IsPedInFlyingVehicle(player))
+            {
+                var vehicle = API.GetVehiclePedIsIn(player, false);
+                if (API.GetPedInVehicleSeat(vehicle, -1) != player)
+                    return Delay(1000);
+
+                if (API.IsControlJustPressed(0, 86)) // INPUT_VEH_HORN
+                {
+                    TriggerServerEvent("PocceMod:ToggleHorn", API.VehToNet(vehicle), true);
+                }
+                else if (API.IsControlJustReleased(0, 86) || API.IsControlJustPressed(0, 23)) // INPUT_VEH_HORN || INPUT_ENTER
+                {
+                    TriggerServerEvent("PocceMod:ToggleHorn", API.VehToNet(vehicle), false);
+                }
+
+                return Task.FromResult(0);
+            }
+
+            return Delay(100);
         }
     }
 }

@@ -43,17 +43,11 @@ namespace PocceMod.Client
             }
         }
 
-        public static Task<bool> AddEMPEffect(int vehicle)
-        {
-            var effect = new EMPEffect(vehicle);
-            return Add(effect, true);
-        }
+        public static Task<bool> AddEMPEffect(int vehicle) => Add(new EMPEffect(vehicle), true);
 
-        public static Task<bool> AddWheelFireEffect(int vehicle)
-        {
-            var effect = new WheelFireEffect(vehicle);
-            return Add(effect);
-        }
+        public static Task<bool> AddWheelFireEffect(int vehicle) => Add(new WheelFireEffect(vehicle));
+
+        public static Task<bool> AddHornEffect(int vehicle) => Add(new HornEffect(vehicle), true);
 
         private static Task Update()
         {
@@ -146,6 +140,40 @@ namespace PocceMod.Client
             {
                 foreach (var fire in _fires)
                     API.RemoveScriptFire(fire);
+            }
+        }
+
+        private class HornEffect : IEffect
+        {
+            private readonly int _vehicle;
+            private int _sound;
+
+            public HornEffect(int vehicle)
+            {
+                _vehicle = vehicle;
+            }
+
+            public string Key
+            {
+                get { return "horn_" + _vehicle; }
+            }
+
+            public bool Expired
+            {
+                get { return false; }
+            }
+
+            public Task Init()
+            {
+                _sound = API.GetSoundId();
+                API.PlaySoundFromEntity(_sound, "SIRENS_AIRHORN", _vehicle, null, false, 0);
+                return Task.FromResult(0);
+            }
+
+            public void Clear()
+            {
+                API.StopSound(_sound);
+                API.ReleaseSoundId(_sound);
             }
         }
     }

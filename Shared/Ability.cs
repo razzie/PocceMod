@@ -23,6 +23,7 @@
         PedRiotArmed,
         MassScenario,
         Autopilot,
+        AircraftHorn,
         EMP,
         EMPOtherPlayer,
         CargobobMagnet,

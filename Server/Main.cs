@@ -15,6 +15,7 @@ namespace PocceMod.Server
             EventHandlers["PocceMod:EMP"] += new Action<Player, int>(EMP);
             EventHandlers["PocceMod:CompressVehicle"] += new Action<Player, int>(CompressVehicle);
             EventHandlers["PocceMod:SetIndicator"] += new Action<Player, int, int>(SetIndicator);
+            EventHandlers["PocceMod:ToggleHorn"] += new Action<Player, int, bool>(ToggleHorn);
             EventHandlers["PocceMod:AddRope"] += new Action<Player, int, int, Vector3, Vector3, int>(AddRope);
             EventHandlers["PocceMod:ClearRopes"] += new Action<Player>(ClearRopes);
             EventHandlers["PocceMod:ClearLastRope"] += new Action<Player>(ClearLastRope);
@@ -50,6 +51,12 @@ namespace PocceMod.Server
         private void SetIndicator([FromSource] Player source, int vehicle, int state)
         {
             TriggerClientEvent("PocceMod:SetIndicator", vehicle, state);
+        }
+
+        private void ToggleHorn([FromSource] Player source, int vehicle, bool state)
+        {
+            if (Permission.CanDo(source, Ability.AircraftHorn))
+                TriggerClientEvent("PocceMod:ToggleHorn", vehicle, state);
         }
 
         private void AddRope([FromSource] Player source, int entity1, int entity2, Vector3 offset1, Vector3 offset2, int mode)
