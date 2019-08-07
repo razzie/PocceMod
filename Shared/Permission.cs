@@ -31,7 +31,7 @@ namespace PocceMod.Shared
             foreach (var ability in (Ability[])Enum.GetValues(typeof(Ability)))
             {
                 var group = (Group)Config.GetConfigInt(ability.ToString());
-                _permissions.Add(ability, group);
+                _permissions[ability] = group;
             }
 
 #if CLIENT
