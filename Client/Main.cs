@@ -3,6 +3,7 @@ using CitizenFX.Core.Native;
 using PocceMod.Client.Menus;
 using PocceMod.Shared;
 using System;
+using System.Collections.Generic;
 
 namespace PocceMod.Client
 {
@@ -21,6 +22,8 @@ namespace PocceMod.Client
             {
                 API.StartEntityFire(await Common.WaitForNetEntity(entity));
             });
+
+            API.RegisterCommand("pocce", new Action<int, List<object>, string>(PocceCommand), false);
         }
 
         private static void SetupMenu()
@@ -156,6 +159,12 @@ namespace PocceMod.Client
             if (Permission.CanDo(Ability.Balloons))
                 _menu.AddMenuListItemAsync("Extra", "Balloons", ExtraMenu.Balloons);
             #endregion
+        }
+
+        private static void PocceCommand(int source, List<object> args, string raw)
+        {
+            if (_menu != null)
+                _menu.OpenMenu();
         }
     }
 }
