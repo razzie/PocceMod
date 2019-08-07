@@ -1,4 +1,5 @@
-﻿using CitizenFX.Core.Native;
+﻿using CitizenFX.Core;
+using CitizenFX.Core.Native;
 using System;
 using System.Collections.Generic;
 
@@ -28,9 +29,19 @@ namespace PocceMod.Shared
             }
         }
 
+        public static bool GetConfigString(string item, out string value)
+        {
+            var success = Configuration.TryGetValue(item, out value);
+
+            if (!success)
+                Debug.WriteLine("[PocceMod] missing config item: " + item);
+
+            return success;
+        }
+
         public static int GetConfigInt(string item)
         {
-            if (Configuration.TryGetValue(item, out string value) && int.TryParse(value, out int result))
+            if (GetConfigString(item, out string value) && int.TryParse(value, out int result))
                 return result;
             else
                 return 0;
@@ -38,7 +49,7 @@ namespace PocceMod.Shared
 
         public static bool GetConfigBool(string item)
         {
-            if (Configuration.TryGetValue(item, out string value) && bool.TryParse(value, out bool result))
+            if (GetConfigString(item, out string value) && bool.TryParse(value, out bool result))
                 return result;
             else
                 return false;
@@ -134,10 +145,11 @@ namespace PocceMod.Shared
 
             for (int i = 0; i < list.Length; ++i)
             {
-                if (list[i].StartsWith("0x"))
-                    models[i] = uint.Parse(list[i].Substring(2), System.Globalization.NumberStyles.HexNumber);
+                var model = list[i];
+                if (model.StartsWith("0x"))
+                    models[i] = uint.Parse(model.Substring(2), System.Globalization.NumberStyles.HexNumber);
                 else
-                    models[i] = (uint)API.GetHashKey(list[i]);
+                    models[i] = (uint)API.GetHashKey(model);
             }
 
             return models;
