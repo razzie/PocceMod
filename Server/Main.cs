@@ -61,7 +61,7 @@ namespace PocceMod.Server
 
         private void AddRope([FromSource] Player source, int entity1, int entity2, Vector3 offset1, Vector3 offset2, int mode)
         {
-            if (Permission.CanDo(source, Ability.Rope) || Permission.CanDo(source, Ability.RopeGun))
+            if (Permission.CanDo(source, Ability.Rope) || Permission.CanDo(source, Ability.RopeGun) || Permission.CanDo(source, Ability.Balloons))
             {
                 TriggerClientEvent("PocceMod:AddRope", source.Handle, entity1, entity2, offset1, offset2, (int)mode);
 

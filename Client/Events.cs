@@ -42,12 +42,15 @@ namespace PocceMod.Client
                 API.SetPedAsNoLongerNeeded(ref ped);
             }
 
-            for (int i = 0; i < balloons; ++i)
+            if (Permission.CanDo(Ability.Balloons))
             {
-                var coords = Common.GetRandomSpawnCoordsInRange(center, 1f, radius, out float heading);
-                var balloon = await Props.SpawnBalloons(coords);
-                API.FreezeEntityPosition(balloon, true);
-                API.SetEntityAsNoLongerNeeded(ref balloon);
+                for (int i = 0; i < balloons; ++i)
+                {
+                    var coords = Common.GetRandomSpawnCoordsInRange(center, 1f, radius, out float heading);
+                    var balloon = await Props.SpawnBalloons(coords);
+                    API.FreezeEntityPosition(balloon, true);
+                    API.SetEntityAsNoLongerNeeded(ref balloon);
+                }
             }
 
             for (int i = 0; i < booze; ++i)
