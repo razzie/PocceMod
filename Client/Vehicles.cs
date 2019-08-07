@@ -207,6 +207,7 @@ namespace PocceMod.Client
             await Common.RequestModel(hash);
             var vehicle = API.CreateVehicle(hash, pos.X, pos.Y, pos.Z + 1f, heading, true, false);
             API.SetPedIntoVehicle(player, vehicle, -1);
+            API.SetVehicleNumberPlateText(vehicle, "POCCE");
 
             if (API.GetEntityHeightAboveGround(vehicle) > 10f && (API.IsPedFalling(player) || API.IsPedJumping(player)))
             {
