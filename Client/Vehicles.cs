@@ -525,7 +525,7 @@ namespace PocceMod.Client
             UpdateState(vehicle);
         }
 
-        private static bool ControlHeadlights(int vehicle)
+        private static bool HandleSpecialControls(int vehicle)
         {
             if (!MainMenu.IsOpen && API.DecorExistOn(vehicle, LightMultiplierDecor))
             {
@@ -577,7 +577,7 @@ namespace PocceMod.Client
                     TurnOnLight(vehicle, Light.HazardLight);
                 }
 
-                if (ControlHeadlights(vehicle))
+                if (HandleSpecialControls(vehicle))
                     return Task.FromResult(0);
                 else
                     return Delay(1000);
@@ -587,7 +587,7 @@ namespace PocceMod.Client
                 return Delay(1000);
             }
 
-            if (ControlHeadlights(vehicle))
+            if (HandleSpecialControls(vehicle))
                 return Task.FromResult(0);
             else
                 return Delay(100);
@@ -609,7 +609,7 @@ namespace PocceMod.Client
             foreach (var vehicle in vehicles.Where(vehicle => GetLastState(vehicle, StateFlag.BackToTheFuture)))
             {
                 if (IsVehicleSpeeding(vehicle))
-                    Effects.AddWheelFireEffect(vehicle);
+                    await Effects.AddWheelFireEffect(vehicle);
 
                 if (API.IsEntityOnFire(vehicle))
                     API.StopEntityFire(vehicle);
