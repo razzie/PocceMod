@@ -61,7 +61,7 @@ namespace PocceMod.Client
                 if (state)
                     await Effects.AddHornEffect(API.NetToVeh(vehicle));
                 else
-                    Effects.Remove("horn_" + API.NetToVeh(vehicle));
+                    Effects.RemoveHornEffect(API.NetToVeh(vehicle));
             });
 
             Tick += Update;

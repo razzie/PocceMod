@@ -52,6 +52,10 @@
     <Compile Include="Client\Autopilot.cs" />
     <Compile Include="Client\Common.cs" />
     <Compile Include="Client\Effects.cs" />
+    <Compile Include="Client\Effect\EMPEffect.cs" />
+    <Compile Include="Client\Effect\HornEffect.cs" />
+    <Compile Include="Client\Effect\IEffect.cs" />
+    <Compile Include="Client\Effect\WheelFireEffect.cs" />
     <Compile Include="Client\Events.cs" />
     <Compile Include="Client\Menus\CompanionMenu.cs" />
     <Compile Include="Client\Menus\ExtraMenu.cs" />
