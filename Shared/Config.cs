@@ -16,6 +16,7 @@ namespace PocceMod.Shared
         public static string[] ScenarioList { get; }
         public static string[] VehicleList { get; }
         public static string[] PropList { get; }
+        public static string[] HornList { get; }
 
         static Config()
         {
@@ -36,6 +37,7 @@ namespace PocceMod.Shared
             ScenarioList = GetConfigList("scenarios");
             VehicleList = GetConfigList("vehicles");
             PropList = GetConfigList("props");
+            HornList = GetConfigList("horns");
         }
 
         public static bool GetConfigString(string item, out string value)

@@ -43,12 +43,14 @@ namespace PocceMod.Client.Menus
             PropMenu = new PropMenu();
             SkinMenu = new SkinMenu();
             MassScenarioMenu = new MassScenarioMenu();
+            AircraftHornMenu = new AircraftHornMenu();
 
             MenuController.AddMenu(this);
             MenuController.AddSubmenu(this, VehicleMenu);
             MenuController.AddSubmenu(this, PropMenu);
             MenuController.AddSubmenu(this, SkinMenu);
             MenuController.AddSubmenu(this, MassScenarioMenu);
+            MenuController.AddSubmenu(this, AircraftHornMenu);
 
             OnItemSelect += async (_menu, _item, _index) =>
             {
@@ -69,10 +71,11 @@ namespace PocceMod.Client.Menus
             };
         }
 
-        public VehicleMenu VehicleMenu { get; private set; }
-        public PropMenu PropMenu { get; private set; }
-        public SkinMenu SkinMenu { get; private set; }
-        public MassScenarioMenu MassScenarioMenu { get; private set; }
+        public VehicleMenu VehicleMenu { get; }
+        public PropMenu PropMenu { get; }
+        public SkinMenu SkinMenu { get; }
+        public MassScenarioMenu MassScenarioMenu { get; }
+        public AircraftHornMenu AircraftHornMenu { get; }
 
         public static bool IsOpen
         {

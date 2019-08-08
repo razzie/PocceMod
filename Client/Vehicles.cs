@@ -39,6 +39,7 @@ namespace PocceMod.Client
         }
 
         public const Filter DefaultFilters = Filter.PlayerVehicle;
+        private const string AircraftHornDecor = "POCCE_AIRCRAFT_HORN";
         private const string LightMultiplierDecor = "POCCE_VEHICLE_LIGHT_MULTIPLIER";
         private const string StateFlagsDecor = "POCCE_VEHICLE_STATE_FLAGS";
         private static readonly bool _autoHazardLights;
@@ -50,6 +51,7 @@ namespace PocceMod.Client
 
         public Vehicles()
         {
+            API.DecorRegister(AircraftHornDecor, 3);
             API.DecorRegister(LightMultiplierDecor, 1);
             API.DecorRegister(StateFlagsDecor, 3);
 
@@ -383,6 +385,32 @@ namespace PocceMod.Client
                 AntiGravity.Add(vehicle, 1f);
         }
 
+        public static void SetAircraftHorn(int horn)
+        {
+            var player = API.GetPlayerPed(-1);
+            if (!API.IsPedInFlyingVehicle(player))
+            {
+                Common.Notification("Player is not in a flying vehicle");
+                return;
+            }
+
+            if (!Common.EnsurePlayerIsVehicleDriver(out player, out int vehicle))
+                return;
+
+            SetAircraftHorn(vehicle, horn);
+        }
+
+        private static void SetAircraftHorn(int aircraft, int horn)
+        {
+            API.DecorSetInt(aircraft, AircraftHornDecor, horn);
+        }
+
+        public static string GetAircraftHorn(int aircraft)
+        {
+            var horn = API.DecorGetInt(aircraft, AircraftHornDecor);
+            return (horn < Config.HornList.Length) ? Config.HornList[horn] : "SIRENS_AIRHORN";
+        }
+
         private static float GetLightMultiplier(int vehicle)
         {
             if (!API.DecorExistOn(vehicle, LightMultiplierDecor))
@@ -573,7 +601,7 @@ namespace PocceMod.Client
             return false;
         }
 
-        public static bool IsVehicleSpeeding(int vehicle)
+        private static bool IsVehicleSpeeding(int vehicle)
         {
             if (API.IsVehicleInBurnout(vehicle))
                 return true;
@@ -650,7 +678,7 @@ namespace PocceMod.Client
             if (API.IsPedInFlyingVehicle(player))
             {
                 var vehicle = API.GetVehiclePedIsIn(player, false);
-                if (API.GetPedInVehicleSeat(vehicle, -1) != player || API.IsEntityDead(vehicle))
+                if (API.GetPedInVehicleSeat(vehicle, -1) != player || API.IsEntityDead(vehicle) || !API.DecorExistOn(vehicle, AircraftHornDecor))
                     return Delay(1000);
 
                 if (API.IsControlJustPressed(0, 86)) // INPUT_VEH_HORN

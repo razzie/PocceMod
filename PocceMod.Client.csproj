@@ -57,6 +57,7 @@
     <Compile Include="Client\Effect\IEffect.cs" />
     <Compile Include="Client\Effect\WheelFireEffect.cs" />
     <Compile Include="Client\Events.cs" />
+    <Compile Include="Client\Menus\AircraftHornMenu.cs" />
     <Compile Include="Client\Menus\CompanionMenu.cs" />
     <Compile Include="Client\Menus\ExtraMenu.cs" />
     <Compile Include="Client\Menus\MainMenu.cs" />
@@ -71,6 +72,9 @@
     <Compile Include="Client\Skin.cs" />
     <Compile Include="Client\SkinSet.cs" />
     <Compile Include="Client\Weapons.cs" />
+    <None Include="config\horns.ini">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="config\README">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

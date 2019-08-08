@@ -16,6 +16,8 @@ files {
 	"config/pets.custom.ini",
 	"config/scenarios.ini",
 	"config/scenarios.custom.ini",
+	"config/horns.ini",
+	"config/horns.custom.ini",
 	"MenuAPI.dll",
 	"data/weaponanimations.meta",
 	"data/weapons.meta"

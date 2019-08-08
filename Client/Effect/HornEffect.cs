@@ -26,7 +26,7 @@ namespace PocceMod.Client.Effect
         public Task Init()
         {
             _sound = API.GetSoundId();
-            API.PlaySoundFromEntity(_sound, "SIRENS_AIRHORN", _vehicle, null, false, 0);
+            API.PlaySoundFromEntity(_sound, Vehicles.GetAircraftHorn(_vehicle), _vehicle, null, false, 0);
             return Task.FromResult(0);
         }
 

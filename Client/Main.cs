@@ -147,6 +147,9 @@ namespace PocceMod.Client
 
             if (Permission.CanDo(Ability.AntiGravity))
                 _menu.AddMenuListItem("Upgrade", "Anti-gravity (toggle)", Vehicles.ToggleAntiGravity);
+
+            if (Permission.CanDo(Ability.AircraftHorn))
+                _menu.AddMenuListItem("Upgrade", "Aircraft horn ↕", _menu.AircraftHornMenu.OpenMenu);
             #endregion
 
             #region Extra
