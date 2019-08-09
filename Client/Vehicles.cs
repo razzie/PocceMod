@@ -651,7 +651,7 @@ namespace PocceMod.Client
 
         private static async Task UpdateEffects()
         {
-            await Delay(100);
+            await Delay(20);
 
             var vehicles = Get(Filter.None);
             if (vehicles.Count == 0)
