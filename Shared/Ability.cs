@@ -7,6 +7,7 @@
         SpawnProp,
         SpawnPocceCompanion,
         SpawnPetCompanion,
+        SpawnCustomCompanion,
         SpawnPoccePassengers,
         SpawnTrashPed,
         Rope,

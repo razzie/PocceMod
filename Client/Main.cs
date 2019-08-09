@@ -94,6 +94,12 @@ namespace PocceMod.Client
             if (Permission.CanDo(Ability.SpawnPetCompanion))
                 _menu.AddMenuListItemAsync("Companion", "Spawn pet", CompanionMenu.PetCompanion);
 
+            if (Permission.CanDo(Ability.SpawnCustomCompanion))
+            {
+                _menu.AddMenuListItem("Companion", "Spawn custom ↕", _menu.CompanionMenu.CustomCompanion);
+                _menu.AddMenuListItemAsync("Companion", "Spawn custom by name", CompanionMenu.CustomCompanionByName);
+            }
+
             if (Permission.CanDo(Ability.SpawnPoccePassengers))
                 _menu.AddMenuListItemAsync("Companion", "Pocce passengers", CompanionMenu.PoccePassengers);
             #endregion

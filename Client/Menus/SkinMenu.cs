@@ -1,5 +1,4 @@
-﻿using CitizenFX.Core;
-using CitizenFX.Core.Native;
+﻿using CitizenFX.Core.Native;
 using MenuAPI;
 using PocceMod.Shared;
 using System.Collections.Generic;
@@ -62,6 +61,11 @@ namespace PocceMod.Client.Menus
                 ClearMenuItems();
                 _source = null;
             };
+        }
+
+        public SkinSet DetectedSkins
+        {
+            get { return _allSkins; }
         }
 
         public void OpenMenu(SkinSet source)

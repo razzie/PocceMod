@@ -41,17 +41,14 @@ namespace PocceMod.Client
 
             Model = (uint)API.GetEntityModel(ped);
             Name = ModelToName(Model);
+            IsHuman = API.IsPedHuman(ped);
         }
 
-        public string Name
-        {
-            get; private set;
-        }
+        public string Name { get; }
 
-        public uint Model
-        {
-            get; private set;
-        }
+        public uint Model { get; }
+
+        public bool IsHuman { get; }
 
         public bool IsMultiplayer
         {
