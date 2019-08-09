@@ -64,7 +64,7 @@ namespace PocceMod.Client
                 if (HasFilter(Filter.NonPocceMod) && !API.DecorGetBool(prop, PropDecor))
                     continue;
 
-                if (HasFilter(Filter.NonNetwork) && !API.NetworkDoesEntityExistWithNetworkId(prop))
+                if (HasFilter(Filter.NonNetwork) && !API.NetworkGetEntityIsNetworked(prop))
                     continue;
 
                 if (API.IsEntityAPed(prop) || API.IsEntityAVehicle(prop))

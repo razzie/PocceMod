@@ -246,7 +246,7 @@ namespace PocceMod.Client
                         return true;
 
                     case 3:
-                        if (API.NetworkDoesEntityExistWithNetworkId(target))
+                        if (API.NetworkGetEntityIsNetworked(target))
                         {
                             if (coords == Vector3.Zero)
                                 offset = coords;
