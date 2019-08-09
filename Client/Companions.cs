@@ -177,7 +177,7 @@ namespace PocceMod.Client
                 }
                 else if (API.IsPedHuman(companion))
                 {
-                    if (API.IsPedOnFoot(companion) && !API.IsPedActiveInScenario(companion))
+                    if (API.IsPedOnFoot(companion) && !API.IsPedUsingAnyScenario(companion))
                     {
                         var scenario = (Config.ScenarioList.Length > 0) ? Config.ScenarioList[API.GetRandomIntInRange(0, Config.ScenarioList.Length)] : "WORLD_HUMAN_STAND_MOBILE";
                         API.TaskStartScenarioInPlace(companion, scenario, 0, true);
