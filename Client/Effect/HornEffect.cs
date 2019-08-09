@@ -30,6 +30,10 @@ namespace PocceMod.Client.Effect
             return Task.FromResult(0);
         }
 
+        public void Update()
+        {
+        }
+
         public void Clear()
         {
             API.StopSound(_sound);

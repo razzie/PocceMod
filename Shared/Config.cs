@@ -58,6 +58,14 @@ namespace PocceMod.Shared
                 return 0;
         }
 
+        public static float GetConfigFloat(string item)
+        {
+            if (GetConfigString(item, out string value) && float.TryParse(value, out float result))
+                return result;
+            else
+                return 0f;
+        }
+
         public static bool GetConfigBool(string item)
         {
             if (GetConfigString(item, out string value) && bool.TryParse(value, out bool result))

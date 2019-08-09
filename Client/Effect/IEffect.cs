@@ -7,6 +7,7 @@ namespace PocceMod.Client.Effect
         string Key { get; }
         bool Expired { get; }
         Task Init();
+        void Update();
         void Clear();
     }
 }

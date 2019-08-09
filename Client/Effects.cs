@@ -36,7 +36,7 @@ namespace PocceMod.Client
 
         public static Task<bool> AddEMPEffect(int vehicle) => Add(new EMPEffect(vehicle), true);
 
-        public static Task<bool> AddWheelFireEffect(int vehicle) => Add(new WheelFireEffect(vehicle));
+        public static Task<bool> AddWheelFireEffect(int vehicle) => Add(new WheelFireEffect(vehicle), true);
 
         public static Task<bool> AddHornEffect(int vehicle) => Add(new HornEffect(vehicle), true);
 
@@ -46,6 +46,8 @@ namespace PocceMod.Client
         {
             foreach (var effect in _effects.ToArray())
             {
+                effect.Update();
+
                 if (effect.Expired)
                 {
                     _effects.Remove(effect);

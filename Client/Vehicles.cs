@@ -601,21 +601,6 @@ namespace PocceMod.Client
             return false;
         }
 
-        private static bool IsVehicleSpeeding(int vehicle)
-        {
-            if (API.IsVehicleInBurnout(vehicle))
-                return true;
-
-            var speed = API.GetEntitySpeed(vehicle);
-            var rpm = API.GetVehicleCurrentRpm(vehicle);
-            var gear = API.GetVehicleCurrentGear(vehicle);
-
-            if (speed > 1f && speed < 20f && rpm > 0.25f && gear > 0)
-                return true;
-
-            return false;
-        }
-
         private static Task Update()
         {
             var player = API.GetPlayerPed(-1);
@@ -651,7 +636,7 @@ namespace PocceMod.Client
 
         private static async Task UpdateEffects()
         {
-            await Delay(20);
+            await Delay(100);
 
             var vehicles = Get(Filter.None);
             if (vehicles.Count == 0)
@@ -664,11 +649,7 @@ namespace PocceMod.Client
 
             foreach (var vehicle in vehicles.Where(vehicle => GetLastState(vehicle, StateFlag.BackToTheFuture)))
             {
-                if (IsVehicleSpeeding(vehicle))
-                    await Effects.AddWheelFireEffect(vehicle);
-
-                if (API.IsEntityOnFire(vehicle))
-                    API.StopEntityFire(vehicle);
+                await Effects.AddWheelFireEffect(vehicle);
             }
         }
 

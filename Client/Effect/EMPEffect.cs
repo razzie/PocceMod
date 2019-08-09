@@ -32,6 +32,10 @@ namespace PocceMod.Client.Effect
             _effect = API.StartParticleFxLoopedOnEntityBone("ent_amb_elec_crackle", _vehicle, 0f, 0f, 0.1f, 0f, 0f, 0f, engineBone, 1f, false, false, false);
         }
 
+        public void Update()
+        {
+        }
+
         public void Clear()
         {
             Vehicles.SetState(_vehicle, Vehicles.StateFlag.EMP, false);
