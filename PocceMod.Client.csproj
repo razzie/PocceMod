@@ -64,6 +64,7 @@
     <Compile Include="Client\Menus\MassScenarioMenu.cs" />
     <Compile Include="Client\Menus\PropMenu.cs" />
     <Compile Include="Client\Menus\SkinMenu.cs" />
+    <Compile Include="Client\Menus\SkinSubmenu.cs" />
     <Compile Include="Client\Menus\Submenu.cs" />
     <Compile Include="Client\Menus\VehicleMenu.cs" />
     <Compile Include="Client\MultiplayerSkin.cs" />

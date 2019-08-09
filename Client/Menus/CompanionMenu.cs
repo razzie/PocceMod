@@ -1,59 +1,13 @@
 ﻿using CitizenFX.Core.Native;
-using MenuAPI;
 using PocceMod.Shared;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace PocceMod.Client.Menus
 {
-    public class CompanionMenu : Menu
+    public class CompanionMenu : SkinSubmenu
     {
-        private SkinSet _source = null;
-
-        public CompanionMenu() : base("PocceMod", "select skin")
+        public CompanionMenu() : base(Spawn, true)
         {
-            OnItemSelect += async (_menu, _item, _index) =>
-            {
-                await OnSelect(_item.Text);
-            };
-
-            OnListItemSelect += async (_menu, _listItem, _listIndex, _itemIndex) =>
-            {
-                await OnSelect(_listItem, _listIndex);
-            };
-
-            OnMenuOpen += (_menu) =>
-            {
-                if (_source == null)
-                    return;
-
-                foreach (var items in _source.Elements)
-                {
-                    if (items.Value.Count > 0)
-                    {
-                        var list = new List<string>();
-                        for (int i = 0; i < items.Value.Count; ++i)
-                        {
-                            list.Add("#" + i);
-                        }
-
-                        var menuItem = new MenuListItem(items.Key, list, 0);
-                        menuItem.ItemData = items.Value;
-                        AddMenuItem(menuItem);
-                    }
-                    else
-                    {
-                        var menuItem = new MenuItem(items.Key);
-                        AddMenuItem(menuItem);
-                    }
-                }
-            };
-
-            OnMenuClose += (_menu) =>
-            {
-                ClearMenuItems();
-                _source = null;
-            };
         }
 
         private static async Task<int> SpawnHuman(uint model)
@@ -129,6 +83,21 @@ namespace PocceMod.Client.Menus
             return ped;
         }
 
+        private static async Task Spawn(uint model, Skin skin)
+        {
+            if (skin != null)
+            {
+                var ped = skin.IsHuman ? await SpawnHuman(model) : await SpawnNonhuman(model);
+                skin.Restore(ped);
+                API.SetPedAsNoLongerNeeded(ref ped);
+            }
+            else
+            {
+                var ped = await SpawnHuman(model);
+                API.SetPedAsNoLongerNeeded(ref ped);
+            }
+        }
+
         public static async Task PocceCompanion()
         {
             var pocce = Config.PocceList[API.GetRandomIntInRange(0, Config.PocceList.Length)];
@@ -143,46 +112,10 @@ namespace PocceMod.Client.Menus
             API.SetPedAsNoLongerNeeded(ref ped);
         }
 
-        private static async Task OnSelect(MenuListItem item, int index)
-        {
-            var skins = item.ItemData as List<Skin>;
-            if (skins != null && skins.Count > index)
-            {
-                var skin = skins[index];
-                await CustomCompanion(skin.Model, skin);
-            }
-        }
-
-        private static Task OnSelect(string model)
-        {
-            uint hash;
-            if (model.StartsWith("0x"))
-                hash = uint.Parse(model.Substring(2), System.Globalization.NumberStyles.HexNumber);
-            else
-                hash = (uint)API.GetHashKey(model);
-
-            return CustomCompanion(hash, null);
-        }
-
         public void CustomCompanion()
         {
-            _source = (ParentMenu as MainMenu).SkinMenu.DetectedSkins;
-            OpenMenu();
-        }
-
-        public static async Task CustomCompanion(uint model, Skin skin)
-        {
-            if (skin != null)
-            {
-                var ped = skin.IsHuman ? await SpawnHuman(model) : await SpawnNonhuman(model);
-                skin.Restore(ped);
-                API.SetPedAsNoLongerNeeded(ref ped);
-            }
-            else
-            {
-                var ped = await SpawnHuman(model);
-                API.SetPedAsNoLongerNeeded(ref ped);
-            }
+            var source = (ParentMenu as MainMenu)?.SkinMenu?.AllSkins;
+            OpenMenu(source);
         }
 
         public static async Task CustomCompanionByName()
