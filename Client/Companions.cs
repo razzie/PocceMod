@@ -62,6 +62,94 @@ namespace PocceMod.Client
             API.SetBlipAsFriendly(blip, true);
         }
 
+        public static async Task<int> SpawnHuman(uint model)
+        {
+            if (!API.IsModelAPed(model))
+            {
+                Common.Notification(Skin.ModelToName(model) + " is not a ped model");
+                return -1;
+            }
+
+            int ped;
+            int player = API.GetPlayerPed(-1);
+            var coords = API.GetEntityCoords(player, true);
+
+            if (API.IsPedInAnyVehicle(player, false))
+            {
+                var vehicle = API.GetVehiclePedIsIn(player, false);
+                if (Vehicles.GetFreeSeat(vehicle, out int seat))
+                {
+                    await Common.RequestModel(model);
+                    ped = API.CreatePedInsideVehicle(vehicle, 26, model, seat, true, false);
+                    API.SetModelAsNoLongerNeeded(model);
+                }
+                else if (API.GetEntitySpeed(vehicle) > 0.1f)
+                {
+                    Common.Notification("Player is in a moving vehicle and there are no free seats");
+                    return -1;
+                }
+                else
+                {
+                    ped = await Peds.Spawn(model, coords, true);
+                }
+            }
+            else
+            {
+                ped = await Peds.Spawn(model, coords, true);
+            }
+
+            Add(ped);
+            await Peds.Arm(ped, Config.WeaponList);
+            return ped;
+        }
+
+        public static async Task<int> SpawnNonhuman(uint model)
+        {
+            if (!API.IsModelAPed(model))
+            {
+                Common.Notification(Skin.ModelToName(model) + " is not a ped model");
+                return -1;
+            }
+
+            int player = API.GetPlayerPed(-1);
+            var coords = API.GetEntityCoords(player, true);
+
+            if (API.IsPedInAnyHeli(player))
+            {
+                Common.Notification("Don't spawn that poor pet on a heli");
+                return -1;
+            }
+            else if (API.IsPedInAnyVehicle(player, false))
+            {
+                var vehicle = API.GetVehiclePedIsIn(player, false);
+                if (API.GetVehicleDashboardSpeed(vehicle) > 0.1f)
+                {
+                    Common.Notification("Player is in a moving vehicle");
+                    return -1;
+                }
+            }
+
+            var ped = await Peds.Spawn(model, coords, true, 28);
+            Add(ped);
+            await Peds.Arm(ped, null);
+            return ped;
+        }
+
+        public static async Task Spawn(uint model, Skin skin)
+        {
+            if (skin != null)
+            {
+                var ped = skin.IsHuman ? await SpawnHuman(model) : await SpawnNonhuman(model);
+                skin.Restore(ped);
+                API.SetPedAsNoLongerNeeded(ref ped);
+            }
+            else
+            {
+                var ped = await SpawnHuman(model);
+                API.SetPedAsNoLongerNeeded(ref ped);
+            }
+        }
+
         private static bool CheckAndHandlePlayerCombat(IEnumerable<int> peds, IEnumerable<int> companions)
         {
             var player = API.GetPlayerPed(-1);
