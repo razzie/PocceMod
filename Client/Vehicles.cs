@@ -42,12 +42,6 @@ namespace PocceMod.Client
         private const string AircraftHornDecor = "POCCE_AIRCRAFT_HORN";
         private const string LightMultiplierDecor = "POCCE_VEHICLE_LIGHT_MULTIPLIER";
         private const string StateFlagsDecor = "POCCE_VEHICLE_STATE_FLAGS";
-        private static readonly bool _autoHazardLights;
-
-        static Vehicles()
-        {
-            _autoHazardLights = !Config.GetConfigBool("DisableAutoHazardLights");
-        }
 
         public Vehicles()
         {
@@ -66,21 +60,11 @@ namespace PocceMod.Client
                     Effects.RemoveHornEffect(API.NetToVeh(vehicle));
             });
 
-            Tick += Update;
-            Tick += UpdateEffects;
+            if (!Config.GetConfigBool("DisableAutoHazardLights"))
+                Tick += UpdateAutoHazardLights;
 
-            if (Permission.IgnorePermissions)
-            {
-                Tick += UpdateAircraftHorn;
-            }
-            else
-            {
-                Permission.Granted += (player, group) =>
-                {
-                    if (Permission.CanDo(Ability.AircraftHorn))
-                        Tick += UpdateAircraftHorn;
-                };
-            }
+            Tick += UpdateEffects;
+            Tick += UpdateControls;
         }
 
         public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 3600f)
@@ -580,58 +564,27 @@ namespace PocceMod.Client
             UpdateState(vehicle);
         }
 
-        private static bool HandleSpecialControls(int vehicle)
-        {
-            if (!MainMenu.IsOpen && API.DecorExistOn(vehicle, LightMultiplierDecor))
-            {
-                if (API.IsControlPressed(0, 172)) // up
-                {
-                    SetLightMultiplier(vehicle, GetLightMultiplier(vehicle) + 0.1f);
-                    TurnOnLight(vehicle, Light.Headlight);
-                    return true;
-                }
-                else if (API.IsControlPressed(0, 173)) // down
-                {
-                    SetLightMultiplier(vehicle, GetLightMultiplier(vehicle) - 0.1f);
-                    TurnOnLight(vehicle, Light.Headlight);
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private static Task Update()
+        private static Task UpdateAutoHazardLights()
         {
             var player = API.GetPlayerPed(-1);
             var vehicle = API.GetVehiclePedIsIn(player, !API.IsPedInAnyVehicle(player, false));
-            var speed = API.GetEntitySpeed(vehicle);
-
-            if (_autoHazardLights)
-                UpdateAutoHazardLights(vehicle);
 
             if (API.IsVehicleSeatFree(vehicle, -1))
             {
-                if (_autoHazardLights && speed > 1f && !GetLastState(vehicle, StateFlag.HazardLight))
+                UpdateAutoHazardLights(vehicle);
+
+                if (API.GetEntitySpeed(vehicle) > 1f && !GetLastState(vehicle, StateFlag.HazardLight))
                 {
                     SetState(vehicle, StateFlag.HazardLight, true);
                     TurnOnLight(vehicle, Light.HazardLight);
                 }
-
-                if (HandleSpecialControls(vehicle))
-                    return Task.FromResult(0);
-                else
-                    return Delay(1000);
             }
-            else if (API.GetPedInVehicleSeat(vehicle, -1) != player)
+            else if (API.GetPedInVehicleSeat(vehicle, -1) == player)
             {
-                return Delay(1000);
+                UpdateAutoHazardLights(vehicle);
             }
 
-            if (HandleSpecialControls(vehicle))
-                return Task.FromResult(0);
-            else
-                return Delay(100);
+            return Delay(100);
         }
 
         private static async Task UpdateEffects()
@@ -653,12 +606,16 @@ namespace PocceMod.Client
             }
         }
 
-        private static Task UpdateAircraftHorn()
+        private static Task UpdateControls()
         {
             var player = API.GetPlayerPed(-1);
-            if (API.IsPedInFlyingVehicle(player))
+            var vehicle = API.GetVehiclePedIsIn(player, !API.IsPedInAnyVehicle(player, false));
+
+            if (!API.IsVehicleSeatFree(vehicle, -1) && API.GetPedInVehicleSeat(vehicle, -1) != player)
+                return Delay(100);
+
+            if (API.IsPedInFlyingVehicle(player) && API.DecorExistOn(vehicle, AircraftHornDecor))
             {
-                var vehicle = API.GetVehiclePedIsIn(player, false);
                 if (API.GetPedInVehicleSeat(vehicle, -1) != player || API.IsEntityDead(vehicle) || !API.DecorExistOn(vehicle, AircraftHornDecor))
                     return Delay(1000);
 
@@ -670,11 +627,23 @@ namespace PocceMod.Client
                 {
                     TriggerServerEvent("PocceMod:ToggleHorn", API.VehToNet(vehicle), false);
                 }
-
-                return Task.FromResult(0);
             }
 
-            return Delay(100);
+            if (!MainMenu.IsOpen && API.DecorExistOn(vehicle, LightMultiplierDecor))
+            {
+                if (API.IsControlPressed(0, 172)) // up
+                {
+                    SetLightMultiplier(vehicle, GetLightMultiplier(vehicle) + 0.1f);
+                    TurnOnLight(vehicle, Light.Headlight);
+                }
+                else if (API.IsControlPressed(0, 173)) // down
+                {
+                    SetLightMultiplier(vehicle, GetLightMultiplier(vehicle) - 0.1f);
+                    TurnOnLight(vehicle, Light.Headlight);
+                }
+            }
+
+            return Task.FromResult(0);
         }
     }
 }
