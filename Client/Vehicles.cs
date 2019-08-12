@@ -27,7 +27,8 @@ namespace PocceMod.Client
             EngineIntact = 4,
             Cruising = 8,
             EMP = 16,
-            BackToTheFuture = 32
+            BackToTheFuture = 32,
+            TurboBoost = 64
         }
 
         public enum Light
@@ -293,6 +294,18 @@ namespace PocceMod.Client
                 API.SetVehicleTyresCanBurst(vehicle, false);
                 API.SetDisableVehiclePetrolTankFires(vehicle, true);
             }
+        }
+
+        public static void ToggleTurboBoost()
+        {
+            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
+                return;
+
+            var state = !GetLastState(vehicle, StateFlag.TurboBoost);
+            SetState(vehicle, StateFlag.TurboBoost, state);
+
+            if (state)
+                Common.Notification("Turbo Boost enabled (use vehicle horn)");
         }
 
         public static void CargobobMagnet()
@@ -641,6 +654,13 @@ namespace PocceMod.Client
                     SetLightMultiplier(vehicle, GetLightMultiplier(vehicle) - 0.1f);
                     TurnOnLight(vehicle, Light.Headlight);
                 }
+            }
+
+            if (API.IsControlJustPressed(0, 86) && !API.IsEntityInAir(vehicle) &&
+                !API.IsEntityDead(vehicle) && GetLastState(vehicle, StateFlag.TurboBoost))
+            {
+                API.ApplyForceToEntityCenterOfMass(vehicle, 0, 0f, 0f, 1000f, false, false, true, false);
+                API.ApplyForceToEntityCenterOfMass(vehicle, 0, 0f, 1000f, 0f, false, true, true, false);
             }
 
             return Task.FromResult(0);

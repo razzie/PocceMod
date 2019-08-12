@@ -32,6 +32,7 @@
         BackToTheFuture,
         CompressVehicle,
         AntiGravity,
+        TurboBoost,
         Balloons,
         IdentifySkins,
         ChangeSkin

@@ -156,6 +156,9 @@ namespace PocceMod.Client
 
             if (Permission.CanDo(Ability.AircraftHorn))
                 _menu.AddMenuListItem("Upgrade", "Aircraft horn ↕", _menu.AircraftHornMenu.OpenMenu);
+
+            if (Permission.CanDo(Ability.TurboBoost))
+                _menu.AddMenuListItem("Upgrade", "Turbo Boost (toggle)", Vehicles.ToggleTurboBoost);
             #endregion
 
             #region Extra
