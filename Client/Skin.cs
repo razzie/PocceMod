@@ -22,7 +22,7 @@ namespace PocceMod.Client
             }
         }
 
-        internal Skin(int ped)
+        public Skin(int ped)
         {
             _drawables = new int[ComponentCount];
             _textures = new int[ComponentCount];
@@ -42,6 +42,9 @@ namespace PocceMod.Client
             Model = (uint)API.GetEntityModel(ped);
             Name = ModelToName(Model);
             IsHuman = API.IsPedHuman(ped);
+
+            if (IsMultiplayerPed(ped))
+                MultiplayerSkin = new MultiplayerSkin(ped);
         }
 
         public string Name { get; }
@@ -50,9 +53,11 @@ namespace PocceMod.Client
 
         public bool IsHuman { get; }
 
+        public MultiplayerSkin MultiplayerSkin { get; }
+
         public bool IsMultiplayer
         {
-            get { return (Model == (uint)API.GetHashKey("mp_m_freemode_01") || Model == (uint)API.GetHashKey("mp_f_freemode_01")); }
+            get { return MultiplayerSkin != null; }
         }
 
         public virtual void Restore(int ped)
@@ -64,6 +69,8 @@ namespace PocceMod.Client
                 if (_props[i] > -1)
                     API.SetPedPropIndex(ped, i, _props[i], _propTextures[i], true);
             }
+
+            MultiplayerSkin?.Restore(ped);
         }
 
         public override bool Equals(object value)
@@ -74,17 +81,13 @@ namespace PocceMod.Client
                 Enumerable.SequenceEqual(_textures, other._textures) &&
                 Enumerable.SequenceEqual(_palettes, other._palettes) &&
                 Enumerable.SequenceEqual(_props, other._props) &&
-                Enumerable.SequenceEqual(_propTextures, other._propTextures);
+                Enumerable.SequenceEqual(_propTextures, other._propTextures) &&
+                (MultiplayerSkin == null || MultiplayerSkin.Equals(other.MultiplayerSkin));
         }
 
         public override int GetHashCode()
         {
             return base.GetHashCode();
-        }
-
-        public static Skin FromPed(int ped)
-        {
-            return IsMultiplayerPed(ped) ? new MultiplayerSkin(ped) : new Skin(ped);
         }
 
         public static bool IsMultiplayerPed(int ped)

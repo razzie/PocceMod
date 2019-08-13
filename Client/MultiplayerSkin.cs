@@ -1,10 +1,12 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using System;
 using System.Linq;
 
 namespace PocceMod.Client
 {
-    public class MultiplayerSkin : Skin
+    [Serializable]
+    public class MultiplayerSkin
     {
         public class HeadOverlay
         {
@@ -57,7 +59,7 @@ namespace PocceMod.Client
         private readonly HeadOverlay[] _headOverlays;
         private readonly float[] _faceFeatures;
 
-        internal MultiplayerSkin(int ped) : base(ped)
+        public MultiplayerSkin(int ped)
         {
             _hairColor = API.GetPedHairColor(ped);
             _hairHighlightColor = API.GetPedHairHighlightColor(ped);
@@ -104,10 +106,8 @@ namespace PocceMod.Client
             get { return _shapeSecondID; }
         }
 
-        public override void Restore(int ped)
+        public void Restore(int ped)
         {
-            base.Restore(ped);
-
             API.SetPedHeadBlendData(ped,
                 _shapeFirstID, _shapeSecondID, _shapeThirdID,
                 _skinFirstID, _skinSecondID, _skinThirdID,
@@ -146,8 +146,7 @@ namespace PocceMod.Client
                 _thirdMix == other._thirdMix &&
                 _isParent == other._isParent &&
                 Enumerable.SequenceEqual(_headOverlays, other._headOverlays) &&
-                Enumerable.SequenceEqual(_faceFeatures, other._faceFeatures) &&
-                base.Equals(value);
+                Enumerable.SequenceEqual(_faceFeatures, other._faceFeatures);
         }
 
         public override int GetHashCode()

@@ -36,7 +36,7 @@ namespace PocceMod.Client.Menus
 
             foreach (var ped in peds)
             {
-                var skin = Skin.FromPed(ped);
+                var skin = new Skin(ped);
                 LastSkins.Add(skin);
                 AllSkins.Add(skin);
                 ShowNotification(skin);
@@ -50,7 +50,7 @@ namespace PocceMod.Client.Menus
         {
             LastSkins.Clear();
 
-            var skin = Skin.FromPed(API.GetPlayerPed(-1));
+            var skin = new Skin(API.GetPlayerPed(-1));
             LastSkins.Add(skin);
             AllSkins.Add(skin);
             ShowNotification(skin);
@@ -61,9 +61,9 @@ namespace PocceMod.Client.Menus
 
         private static void ShowNotification(Skin skin)
         {
-            if (skin is MultiplayerSkin)
+            if (skin.IsMultiplayer)
             {
-                var mpSkin = skin as MultiplayerSkin;
+                var mpSkin = skin.MultiplayerSkin;
                 Common.Notification(string.Format("model: {0} (father: {1}, mother: {2})", skin.Name, mpSkin.Father, mpSkin.Mother));
             }
             else
