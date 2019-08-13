@@ -64,7 +64,7 @@ namespace PocceMod.Client.Menus
             if (skin is MultiplayerSkin)
             {
                 var mpSkin = skin as MultiplayerSkin;
-                Common.Notification(string.Format("model: {0} (father: {1}, mother: {2})", skin.Name, mpSkin.Father, mpSkin.Model));
+                Common.Notification(string.Format("model: {0} (father: {1}, mother: {2})", skin.Name, mpSkin.Father, mpSkin.Mother));
             }
             else
             {
