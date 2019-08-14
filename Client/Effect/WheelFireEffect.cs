@@ -107,7 +107,7 @@ namespace PocceMod.Client.Effect
                     {
                         var pos = Vector3.Lerp(_lastCoords[wheel], coords[wheel], (float)step / steps);
                         var fire = API.StartScriptFire(pos.X, pos.Y, pos.Z, 1, true);
-                        _fires.Add(fire, timeout);
+                        _fires[fire] = timeout;
                     }
                 }
 
