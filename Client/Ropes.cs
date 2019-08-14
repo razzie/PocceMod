@@ -320,10 +320,10 @@ namespace PocceMod.Client
                 rope.Update();
             }
 
-            var now = DateTime.Now;
+            var createdBefore = DateTime.Now - TimeSpan.FromMinutes(1);
             foreach (var rope in _ropeCleanupList.ToArray())
             {
-                if (rope.Created + TimeSpan.FromMinutes(1) < now)
+                if (rope.Created < createdBefore)
                 {
                     rope.Clear();
                     _ropeCleanupList.Remove(rope);
