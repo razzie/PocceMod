@@ -1,6 +1,7 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PocceMod.Client
@@ -18,9 +19,8 @@ namespace PocceMod.Client
             API.DecorRegister(FlagDecor, 2);
             API.DecorRegister(PlayerDecor, 3);
             API.DecorRegister(WaypointHashDecor, 3);
-
-            Tick += UpdateCurrent;
-            Tick += UpdateNearby;
+            
+            Tick += Update;
         }
 
         public static async Task Activate()
@@ -165,25 +165,17 @@ namespace PocceMod.Client
             }
         }
 
-        private static Task UpdateCurrent()
+        private static void UpdateOwnedAutopilot(int vehicle, int driver)
         {
-            var player = API.GetPlayerPed(-1);
-            var inVehicle = API.IsPedInAnyVehicle(player, false);
-            var vehicle = API.GetVehiclePedIsIn(player, !inVehicle);
-            var driver = API.GetPedInVehicleSeat(vehicle, -1);
-
-            if (!IsOwnedAutopilot(driver))
-                return Delay(100);
-
             if (!API.AnyPassengersRappeling(vehicle) && Common.GetWaypoint(out Vector3 wp, false))
             {
                 // waypoint hasn't changed
                 if (API.DecorGetInt(driver, WaypointHashDecor) == wp.GetHashCode())
-                    return Delay(100);
+                    return;
 
                 API.DecorSetInt(driver, WaypointHashDecor, wp.GetHashCode());
                 GotoWaypoint(driver, vehicle, wp);
-                return Delay(100);
+                return;
             }
 
             // waypoint was removed
@@ -192,18 +184,13 @@ namespace PocceMod.Client
                 API.DecorSetInt(driver, WaypointHashDecor, 0);
                 Wander(driver, vehicle);
             }
-
-            return Delay(100);
         }
 
-        private static Task UpdateNearby()
+        private static Task Update()
         {
-            var peds = Peds.Get(Peds.Filter.Dead | Peds.Filter.Players);
-            foreach (var ped in peds)
+            var autopilots = Peds.Get(Peds.Filter.Dead | Peds.Filter.Players).Where(ped => IsAutopilot(ped));
+            foreach (var ped in autopilots)
             {
-                if (!IsAutopilot(ped))
-                    continue;
-
                 var vehicle = API.GetVehiclePedIsIn(ped, false);
                 if (API.GetPedInVehicleSeat(vehicle, -1) != ped)
                     continue;
@@ -233,6 +220,9 @@ namespace PocceMod.Client
                     else if (!API.IsMountedWeaponTaskUnderneathDrivingTask(ped))
                         API.ControlMountedWeapon(ped);
                 }
+
+                if (IsOwnedAutopilot(ped))
+                    UpdateOwnedAutopilot(vehicle, ped);
             }
 
             return Delay(100);
