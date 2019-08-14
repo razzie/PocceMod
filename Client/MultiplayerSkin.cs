@@ -1,63 +1,34 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
-using System;
+using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 
 namespace PocceMod.Client
 {
-    [Serializable]
     public class MultiplayerSkin
     {
-        public class HeadOverlay
-        {
-            public HeadOverlay(int style, int colorType, int firstColor, int secondColor, float opacity)
-            {
-                Style = style;
-                ColorType = colorType;
-                FirstColor = firstColor;
-                SecondColor = secondColor;
-                Opacity = opacity;
-            }
-
-            public int Style { get; set; }
-            public int ColorType { get; set; }
-            public int FirstColor { get; set; }
-            public int SecondColor { get; set; }
-            public float Opacity { get; set; }
-
-            public override bool Equals(object value)
-            {
-                var other = value as HeadOverlay;
-                return other != null &&
-                    Style == other.Style &&
-                    ColorType == other.ColorType &&
-                    FirstColor == other.FirstColor &&
-                    SecondColor == other.SecondColor &&
-                    Opacity == other.Opacity;
-            }
-
-            public override int GetHashCode()
-            {
-                return base.GetHashCode();
-            }
-        }
-
         private const int HeadOverlaysCount = 12;
         private const int FaceFeaturesCount = 20;
-        private readonly int _hairColor;
-        private readonly int _hairHighlightColor;
-        private readonly int _shapeFirstID;
-        private readonly int _shapeSecondID;
-        private readonly int _shapeThirdID;
-        private readonly int _skinFirstID;
-        private readonly int _skinSecondID;
-        private readonly int _skinThirdID;
-        private readonly float _shapeMix;
-        private readonly float _skinMix;
-        private readonly float _thirdMix;
-        private readonly bool _isParent;
-        private readonly HeadOverlay[] _headOverlays;
-        private readonly float[] _faceFeatures;
+
+        private int _hairColor;
+        private int _hairHighlightColor;
+        private int _shapeFirstID;
+        private int _shapeSecondID;
+        private int _shapeThirdID;
+        private int _skinFirstID;
+        private int _skinSecondID;
+        private int _skinThirdID;
+        private float _shapeMix;
+        private float _skinMix;
+        private float _thirdMix;
+        private bool _isParent;
+        private HeadOverlay[] _headOverlays;
+        private float[] _faceFeatures;
+
+        private MultiplayerSkin()
+        {
+        }
 
         public MultiplayerSkin(int ped)
         {
@@ -152,6 +123,97 @@ namespace PocceMod.Client
         public override int GetHashCode()
         {
             return base.GetHashCode();
+        }
+
+        public dynamic Serialize()
+        {
+            dynamic result = new ExpandoObject();
+            result.hairColor           = _hairColor;
+            result.hairHighlightColor  = _hairHighlightColor;
+            result.shapeFirstID        = _shapeFirstID;
+            result.shapeSecondID       = _shapeSecondID;
+            result.shapeThirdID        = _shapeThirdID;
+            result.skinFirstID         = _skinFirstID;
+            result.skinSecondID        = _skinSecondID;
+            result.skinThirdID         = _skinThirdID;
+            result.shapeMix            = _shapeMix;
+            result.skinMix             = _skinMix;
+            result.thirdMix            = _thirdMix;
+            result.isParent            = _isParent;
+            result.headOverlays        = _headOverlays.Select(headOverlay => headOverlay.Serialize()).ToArray();
+            result.faceFeatures        = _faceFeatures;
+            return result;
+        }
+
+        public static MultiplayerSkin Deserialize(dynamic data)
+        {
+            return new MultiplayerSkin
+            {
+                _hairColor          = data.hairColor,
+                _hairHighlightColor = data.hairHighlightColor,
+                _shapeFirstID       = data.shapeFirstID,
+                _shapeSecondID      = data.shapeSecondID,
+                _shapeThirdID       = data.shapeThirdID,
+                _skinFirstID        = data.skinFirstID,
+                _skinSecondID       = data.skinSecondID,
+                _skinThirdID        = data.skinThirdID,
+                _shapeMix           = data.shapeMix,
+                _skinMix            = data.skinMix,
+                _thirdMix           = data.thirdMix,
+                _isParent           = data.isParent,
+                _headOverlays       = ((IEnumerable<dynamic>)data.headOverlays).Select<dynamic, HeadOverlay>(headOverlay => HeadOverlay.Deserialize(headOverlay)).ToArray(),
+                _faceFeatures       = ((IEnumerable<object>)data.faceFeatures).Cast<float>().ToArray()
+            };
+        }
+
+        public class HeadOverlay
+        {
+            public HeadOverlay(int style, int colorType, int firstColor, int secondColor, float opacity)
+            {
+                Style = style;
+                ColorType = colorType;
+                FirstColor = firstColor;
+                SecondColor = secondColor;
+                Opacity = opacity;
+            }
+
+            public int Style { get; }
+            public int ColorType { get; }
+            public int FirstColor { get; }
+            public int SecondColor { get; }
+            public float Opacity { get; }
+
+            public override bool Equals(object value)
+            {
+                var other = value as HeadOverlay;
+                return other != null &&
+                    Style == other.Style &&
+                    ColorType == other.ColorType &&
+                    FirstColor == other.FirstColor &&
+                    SecondColor == other.SecondColor &&
+                    Opacity == other.Opacity;
+            }
+
+            public override int GetHashCode()
+            {
+                return base.GetHashCode();
+            }
+
+            public dynamic Serialize()
+            {
+                dynamic result = new ExpandoObject();
+                result.Style = Style;
+                result.ColorType = ColorType;
+                result.FirstColor = FirstColor;
+                result.SecondColor = SecondColor;
+                result.Opacity = Opacity;
+                return result;
+            }
+
+            public static HeadOverlay Deserialize(dynamic data)
+            {
+                return new HeadOverlay(data.Style, data.ColorType, data.FirstColor, data.SecondColor, data.Opacity);
+            }
         }
     }
 }

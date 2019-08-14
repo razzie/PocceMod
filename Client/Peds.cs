@@ -2,11 +2,12 @@
 using CitizenFX.Core.Native;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PocceMod.Client
 {
-    public static class Peds
+    public class Peds : BaseScript
     {
         [Flags]
         public enum Filter
@@ -22,6 +23,15 @@ namespace PocceMod.Client
         }
 
         public const Filter DefaultFilters = Filter.LocalPlayer | Filter.Dead;
+        private static readonly List<int> _knownPeds = new List<int>();
+
+        public Peds()
+        {
+            EventHandlers["PocceMod:RequestMPSkin"] += new Action<int, int>(RequestMPSkin);
+            EventHandlers["PocceMod:SetMPSkin"] += new Action<int, byte[]>(SetMPSkin);
+
+            Tick += Update;
+        }
 
         public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 1600f, int originEntity = -1)
         {
@@ -132,7 +142,7 @@ namespace PocceMod.Client
         {
             API.TaskSetBlockingOfNonTemporaryEvents(ped, true);
             API.SetPedKeepTask(ped, true);
-            await BaseScript.Delay(10);
+            await Delay(10);
 
             API.SetPedCombatAbility(ped, 100);
             API.SetPedCombatMovement(ped, 2);
@@ -152,6 +162,46 @@ namespace PocceMod.Client
                 var weapon = weaponList[API.GetRandomIntInRange(0, weaponList.Length)];
                 Weapons.Give(ped, weapon);
             }
+        }
+
+        private static void RequestMPSkin(int ped, int requestingPlayer)
+        {
+            var skin = new MultiplayerSkin(API.NetToPed(ped));
+            TriggerServerEvent("PocceMod:SetMPSkin", ped, skin.Serialize(), requestingPlayer);
+
+        }
+
+        private static void SetMPSkin(int ped, dynamic data)
+        {
+            var skin = MultiplayerSkin.Deserialize(data);
+            skin.Restore(API.NetToPed(ped));
+        }
+
+        private static Task Update()
+        {
+            foreach (var ped in _knownPeds.ToArray())
+            {
+                if (!API.DoesEntityExist(ped))
+                    _knownPeds.Remove(ped);
+            }
+
+            var playerID = API.PlayerId();
+            var peds = Get(Filter.Players | Filter.Dead).Except(_knownPeds);
+
+            foreach (var ped in peds)
+            {
+                if (Skin.IsMultiplayerPed(ped) &&
+                    API.NetworkGetEntityIsNetworked(ped) &&
+                    API.NetworkGetEntityOwner(ped) != playerID)
+                {
+                    var owner = API.NetworkGetEntityOwner(ped);
+                    TriggerServerEvent("PocceMod:RequestMPSkin", API.PedToNet(ped), API.GetPlayerServerId(owner));
+                }
+            }
+
+            _knownPeds.AddRange(peds);
+
+            return Delay(1000);
         }
     }
 }

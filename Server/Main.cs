@@ -23,6 +23,8 @@ namespace PocceMod.Server
             EventHandlers["PocceMod:RequestRopes"] += new Action<Player>(RequestRopes);
             EventHandlers["PocceMod:AntiGravityAdd"] += new Action<Player, int, float>(AntiGravityAdd);
             EventHandlers["PocceMod:AntiGravityRemove"] += new Action<Player, int>(AntiGravityRemove);
+            EventHandlers["PocceMod:RequestMPSkin"] += new Action<Player, int, int>(RequestMPSkin);
+            EventHandlers["PocceMod:SetMPSkin"] += new Action<Player, int, dynamic, int>(SetMPSkin);
         }
 
         private void PlayerDropped([FromSource] Player source, string reason)
@@ -106,6 +108,16 @@ namespace PocceMod.Server
         {
             if (Permission.CanDo(source, Ability.AntiGravity) || Permission.CanDo(source, Ability.Balloons))
                 TriggerClientEvent("PocceMod:AntiGravityRemove", entity);
+        }
+
+        private void RequestMPSkin([FromSource] Player source, int ped, int ownerPlayer)
+        {
+            Players[ownerPlayer].TriggerEvent("PocceMod:RequestMPSkin", ped, source.Handle);
+        }
+
+        private void SetMPSkin([FromSource] Player source, int ped, dynamic skin, int requestingPlayer)
+        {
+            Players[requestingPlayer].TriggerEvent("PocceMod:SetMPSkin", ped, skin);
         }
     }
 }
