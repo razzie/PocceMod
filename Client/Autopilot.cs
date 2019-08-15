@@ -205,7 +205,7 @@ namespace PocceMod.Client
 
         private static Task Update()
         {
-            var autopilots = Peds.Get(Peds.Filter.Dead | Peds.Filter.Players).Where(ped => IsAutopilot(ped));
+            var autopilots = Peds.Get(Peds.Filter.Dead | Peds.Filter.Players, 3600f).Where(ped => IsAutopilot(ped));
             foreach (var ped in autopilots)
             {
                 var vehicle = API.GetVehiclePedIsIn(ped, false);
@@ -236,6 +236,18 @@ namespace PocceMod.Client
                         API.SetVehicleSearchlight(vehicle, true, true);
                     else if (!API.IsMountedWeaponTaskUnderneathDrivingTask(ped))
                         API.ControlMountedWeapon(ped);
+                }
+                else if (API.IsThisModelAPlane(vehicleModel))
+                {
+                    if (!API.IsEntityInAir(vehicle))
+                    {
+                        API.ApplyForceToEntity(vehicle, 0, 0f, 0f, 200f, 0f, 1f, 0f, -1, true, true, true, false, false);
+                        API.ApplyForceToEntityCenterOfMass(vehicle, 0, 0f, 200f, 0f, false, true, true, false);
+
+                        var pos = API.GetEntityCoords(vehicle, false);
+                        API.TaskPlaneLand(ped, vehicle, pos.X, pos.Y, pos.Z, pos.X, pos.Y, pos.Z);
+                        API.DecorSetInt(ped, WaypointHashDecor, 0);
+                    }
                 }
 
                 if (IsOwnedAutopilot(ped))
