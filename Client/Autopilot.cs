@@ -40,12 +40,26 @@ namespace PocceMod.Client
                 return;
             }
 
+            var model = (uint)API.GetEntityModel(vehicle);
+            if (API.GetVehicleModelNumberOfSeats(model) == 1)
+            {
+                API.TaskLeaveVehicle(player, vehicle, 4096);
+                while (API.IsPedInVehicle(player, vehicle, false))
+                {
+                    await Delay(100);
+                }
+
+                await Spawn(vehicle);
+                return;
+            }
+
             if (Vehicles.GetFreeSeat(vehicle, out int seat, true))
             {
                 var driver = API.GetPedInVehicleSeat(vehicle, -1);
                 API.SetPedIntoVehicle(driver, vehicle, seat);
 
                 await Spawn(vehicle);
+                return;
             }
             else
             {
@@ -71,7 +85,10 @@ namespace PocceMod.Client
             }
             
             API.TaskLeaveVehicle(driver, vehicle, 4096);
-            await Delay(1000);
+            while (API.IsPedInVehicle(driver, vehicle, false))
+            {
+                await Delay(100);
+            }
 
             API.SetPedIntoVehicle(player, vehicle, -1);
         }
