@@ -548,7 +548,7 @@ namespace PocceMod.Client
 
         public static void UpdateAutoHazardLights(int vehicle)
         {
-            var speed = API.GetEntitySpeed(vehicle);
+            var speed = API.GetEntitySpeedVector(vehicle, true).Y;
             var model = (uint)API.GetEntityModel(vehicle);
 
             if (!IsHazardLightApplicable(model))
