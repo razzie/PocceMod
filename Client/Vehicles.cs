@@ -379,7 +379,7 @@ namespace PocceMod.Client
             if (AntiGravity.Contains(vehicle))
                 AntiGravity.Remove(vehicle);
             else
-                AntiGravity.Add(vehicle, 1f);
+                AntiGravity.Add(vehicle, 0.9f);
         }
 
         public static void SetAircraftHorn(int horn)
