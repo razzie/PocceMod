@@ -659,8 +659,7 @@ namespace PocceMod.Client
             if (API.IsControlJustPressed(0, 86) && !API.IsEntityInAir(vehicle) &&
                 !API.IsEntityDead(vehicle) && GetLastState(vehicle, StateFlag.TurboBoost))
             {
-                API.ApplyForceToEntityCenterOfMass(vehicle, 0, 0f, 0f, 1000f, false, false, true, false);
-                API.ApplyForceToEntityCenterOfMass(vehicle, 0, 0f, 1000f, 0f, false, true, true, false);
+                return Effects.AddTurboBoostEffect(vehicle);
             }
 
             return Task.FromResult(0);

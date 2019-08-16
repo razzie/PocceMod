@@ -55,6 +55,7 @@
     <Compile Include="Client\Effect\EMPEffect.cs" />
     <Compile Include="Client\Effect\HornEffect.cs" />
     <Compile Include="Client\Effect\IEffect.cs" />
+    <Compile Include="Client\Effect\TurboBoostEffect.cs" />
     <Compile Include="Client\Effect\WheelFireEffect.cs" />
     <Compile Include="Client\Events.cs" />
     <Compile Include="Client\Menus\AircraftHornMenu.cs" />

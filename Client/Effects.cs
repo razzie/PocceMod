@@ -15,7 +15,7 @@ namespace PocceMod.Client
             Tick += Update;
         }
 
-        public static async Task<bool> Add(IEffect effect, bool unique = false)
+        public static async Task<bool> Add(IEffect effect, bool unique)
         {
             if (unique && _effects.Any(e => e.Key == effect.Key))
                 return false;
@@ -37,6 +37,8 @@ namespace PocceMod.Client
         public static Task<bool> AddEMPEffect(int vehicle) => Add(new EMPEffect(vehicle), true);
 
         public static Task<bool> AddWheelFireEffect(int vehicle) => Add(new WheelFireEffect(vehicle), true);
+
+        public static Task<bool> AddTurboBoostEffect(int vehicle) => Add(new TurboBoostEffect(vehicle), true);
 
         public static Task<bool> AddHornEffect(int vehicle) => Add(new HornEffect(vehicle), true);
 
