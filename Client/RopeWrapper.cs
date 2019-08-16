@@ -138,11 +138,31 @@ namespace PocceMod.Client
             }
             else
             {
+                var length = API.GetRopeLength(_handle);
+
                 // if length is negative, rope is detached
-                if (API.GetRopeLength(_handle) < 0f)
+                if (length < 0f)
                 {
                     GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
                     Attach(pos1, pos2);
+                }
+                else if (length > _length * 4)
+                {
+                    GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
+
+                    if (Entity1 != 0)
+                    {
+                        var dir = pos2 - pos1;
+                        API.DetachEntity(Entity1, false, false);
+                        API.ApplyForceToEntityCenterOfMass(Entity1, 1, dir.X, dir.Y, dir.Z, false, false, true, false);
+                    }
+
+                    if (Entity2 != 0)
+                    {
+                        var dir = pos1 - pos2;
+                        API.DetachEntity(Entity2, false, false);
+                        API.ApplyForceToEntityCenterOfMass(Entity2, 1, dir.X, dir.Y, dir.Z, false, false, true, false);
+                    }
                 }
 
                 if ((Mode & ModeFlag.Grapple) == ModeFlag.Grapple && _length > 1f)
