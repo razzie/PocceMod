@@ -21,6 +21,20 @@ namespace PocceMod.Shared
                 _ropes.Add(rope.Player, new List<Rope> { rope });
         }
 
+        public bool HasRopesAttached(int entity)
+        {
+            foreach (var playerRopes in _ropes.Values)
+            {
+                foreach (var rope in playerRopes.ToArray())
+                {
+                    if (rope.Entity1 == entity || rope.Entity2 == entity)
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
         public void ClearRopes(Player player)
         {
             if (_ropes.TryGetValue(player, out List<Rope> playerRopes))

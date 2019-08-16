@@ -298,9 +298,11 @@ namespace PocceMod.Client
 
                 if (PropUndoKey > 0 && API.IsControlJustPressed(0, PropUndoKey))
                     return ClearLast();
+
+                return Task.FromResult(0);
             }
 
-            return Task.FromResult(0);
+            return Delay(100);
         }
     }
 }

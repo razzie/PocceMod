@@ -199,12 +199,14 @@ namespace PocceMod.Client
         public static void ClearPlayer()
         {
             var player = API.GetPlayerPed(-1);
-            TriggerServerEvent("PocceMod:ClearEntityRopes", API.PedToNet(player));
+            if (_ropes.HasRopesAttached(player))
+                TriggerServerEvent("PocceMod:ClearEntityRopes", API.PedToNet(player));
 
             if (API.IsPedInAnyVehicle(player, false))
             {
                 int vehicle = API.GetVehiclePedIsIn(player, false);
-                TriggerServerEvent("PocceMod:ClearEntityRopes", API.VehToNet(vehicle));
+                if (_ropes.HasRopesAttached(vehicle))
+                    TriggerServerEvent("PocceMod:ClearEntityRopes", API.VehToNet(vehicle));
             }
         }
 
@@ -219,7 +221,6 @@ namespace PocceMod.Client
         {
             var player = Common.GetPlayerPedOrVehicle();
             Common.GetAimCoords(out Vector3 rayBegin, out Vector3 rayEnd, distance);
-            //var ray = API.CastRayPointToPoint(rayBegin.X, rayBegin.Y, rayBegin.Z, rayEnd.X, rayEnd.Y, rayEnd.Z, 1 | 2 | 4 | 8 | 16 | 32, player, 0);
             var ray = API.StartShapeTestRay(rayBegin.X, rayBegin.Y, rayBegin.Z, rayEnd.X, rayEnd.Y, rayEnd.Z, 1 | 2 | 4 | 8 | 16 | 32, player, 0);
 
             target = 0;
@@ -228,7 +229,6 @@ namespace PocceMod.Client
             bool hit = false;
             var coords = Vector3.Zero;
             var normal = Vector3.Zero;
-            //API.GetRaycastResult(ray, ref hit, ref coords, ref normal, ref target);
             API.GetShapeTestResult(ray, ref hit, ref coords, ref normal, ref target);
 
             if (hit)

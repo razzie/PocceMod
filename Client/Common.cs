@@ -97,7 +97,7 @@ namespace PocceMod.Client
             }
         }
 
-        public static async Task<int> WaitForNetEntity(int netEntity, int timeoutSeconds = 10)
+        public static async Task<int> WaitForNetEntity(int netEntity, int timeoutSeconds = 1)
         {
             if (netEntity == 0)
                 return 0;
