@@ -657,7 +657,8 @@ namespace PocceMod.Client
                 }
             }
 
-            if (API.IsControlJustPressed(0, 86) && !API.IsEntityDead(vehicle) && GetLastState(vehicle, StateFlag.TurboBoost))
+            if ((API.IsControlJustPressed(0, 86) || API.IsDisabledControlJustPressed(0, 86)) &&
+                !API.IsEntityDead(vehicle) && GetLastState(vehicle, StateFlag.TurboBoost))
             {
                 TriggerServerEvent("PocceMod:TurboBoost", API.VehToNet(vehicle));
             }
