@@ -26,6 +26,7 @@ namespace PocceMod.Server
             EventHandlers["PocceMod:AntiGravityRemove"] += new Action<Player, int>(AntiGravityRemove);
             EventHandlers["PocceMod:RequestMPSkin"] += new Action<Player, int, int>(RequestMPSkin);
             EventHandlers["PocceMod:SetMPSkin"] += new Action<Player, int, dynamic, int>(SetMPSkin);
+            EventHandlers["PocceMod:TurboBoost"] += new Action<Player, int>(TurboBoost);
         }
 
         private static void Debug(Player source, string text)
@@ -157,6 +158,14 @@ namespace PocceMod.Server
             Debug(source, "SetMPSkin");
 
             Players[requestingPlayer].TriggerEvent("PocceMod:SetMPSkin", ped, skin);
+        }
+
+        private void TurboBoost([FromSource] Player source, int vehicle)
+        {
+            Debug(source, "TurboBoost");
+
+            if (Permission.CanDo(source, Ability.TurboBoost))
+                TriggerClientEvent("PocceMod:TurboBoost", vehicle);
         }
     }
 }

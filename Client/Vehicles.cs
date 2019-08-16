@@ -53,6 +53,7 @@ namespace PocceMod.Client
             EventHandlers["PocceMod:EMP"] += new Func<int, Task>(async vehicle => await EMP(API.NetToVeh(vehicle)));
             EventHandlers["PocceMod:SetIndicator"] += new Action<int, int>((vehicle, state) => SetIndicator(API.NetToVeh(vehicle), state));
             EventHandlers["PocceMod:CompressVehicle"] += new Func<int, Task>(async vehicle => await Compress(API.NetToVeh(vehicle)));
+            EventHandlers["PocceMod:TurboBoost"] += new Func<int, Task>(vehicle => Effects.AddTurboBoostEffect(API.NetToVeh(vehicle)));
             EventHandlers["PocceMod:ToggleHorn"] += new Func<int, bool, Task>(async (vehicle, state) =>
             {
                 if (state)
@@ -659,7 +660,7 @@ namespace PocceMod.Client
             if (API.IsControlJustPressed(0, 86) && !API.IsEntityInAir(vehicle) &&
                 !API.IsEntityDead(vehicle) && GetLastState(vehicle, StateFlag.TurboBoost))
             {
-                return Effects.AddTurboBoostEffect(vehicle);
+                TriggerServerEvent("PocceMod:TurboBoost", API.VehToNet(vehicle));
             }
 
             return Task.FromResult(0);
