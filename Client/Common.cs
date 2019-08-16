@@ -189,7 +189,9 @@ namespace PocceMod.Client
             if (!EnsurePlayerIsInVehicle(out player, out vehicle, notification))
                 return false;
 
-            if (API.GetPedInVehicleSeat(vehicle, -1) != player)
+            var driver = API.GetPedInVehicleSeat(vehicle, -1);
+
+            if (driver != player && !Autopilot.IsOwnedAutopilot(driver))
             {
                 if (notification)
                     Notification("Player is not the driver of this vehicle");

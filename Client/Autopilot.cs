@@ -105,12 +105,12 @@ namespace PocceMod.Client
                 await Activate();
         }
 
-        private static bool IsAutopilot(int driver)
+        public static bool IsAutopilot(int driver)
         {
             return API.DecorGetBool(driver, FlagDecor);
         }
 
-        private static bool IsOwnedAutopilot(int driver)
+        public static bool IsOwnedAutopilot(int driver)
         {
             return IsAutopilot(driver) && API.DecorGetInt(driver, PlayerDecor) == API.PlayerId();
         }
