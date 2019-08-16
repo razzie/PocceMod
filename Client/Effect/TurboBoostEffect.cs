@@ -7,12 +7,19 @@ namespace PocceMod.Client.Effect
 {
     public class TurboBoostEffect : IEffect
     {
+        private enum LaunchMode
+        {
+            Ground,
+            Air
+        }
+
         private static readonly string[] _wheelBoneNames;
 
         private readonly int _vehicle;
+        private readonly LaunchMode _mode;
+        private readonly int[] _wheelBones;
         private readonly float _offset;
         private readonly float _torque;
-        private readonly int[] _wheelBones;
         private int[] _effects;
         private int _step = 0;
         
@@ -24,6 +31,7 @@ namespace PocceMod.Client.Effect
         public TurboBoostEffect(int vehicle)
         {
             _vehicle = vehicle;
+            _mode = API.IsEntityInAir(_vehicle) ? LaunchMode.Air : LaunchMode.Ground;
             _wheelBones = _wheelBoneNames.Select(wheel => API.GetEntityBoneIndexByName(_vehicle, wheel)).Where(bone => bone != -1).ToArray();
 
             var model = (uint)API.GetEntityModel(_vehicle);
@@ -69,13 +77,20 @@ namespace PocceMod.Client.Effect
         {
             ++_step;
 
-            if (_step <= 5)
+            if (_mode == LaunchMode.Ground)
             {
-                API.ApplyForceToEntityCenterOfMass(_vehicle, 0, 0f, _step * 100, 0f, false, true, true, false);
+                if (_step <= 5)
+                {
+                    API.ApplyForceToEntityCenterOfMass(_vehicle, 0, 0f, _step * 100, 0f, false, true, true, false);
+                }
+                else if (_step > 5)
+                {
+                    API.ApplyForceToEntity(_vehicle, 0, 0f, 0f, (10 - _step) * _torque / _offset, 0f, _offset, 0f, -1, true, true, true, false, true);
+                    API.ApplyForceToEntityCenterOfMass(_vehicle, 0, 0f, 400f, 200f, false, true, true, false);
+                }
             }
-            else if (_step > 5)
+            else
             {
-                API.ApplyForceToEntity(_vehicle, 0, 0f, 0f, (10 - _step) * _torque / _offset, 0f, _offset, 0f, -1, true, true, true, false, true);
                 API.ApplyForceToEntityCenterOfMass(_vehicle, 0, 0f, 400f, 200f, false, true, true, false);
             }
         }
