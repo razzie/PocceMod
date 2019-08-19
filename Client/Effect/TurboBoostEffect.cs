@@ -41,6 +41,7 @@ namespace PocceMod.Client.Effect
         private readonly int _vehicle;
         private readonly int[] _wheelBones;
         private readonly float _offset;
+        private readonly bool _blocked;
         private readonly DateTime _created;
         private DateTime _timeout;
         private SteamFX[] _effects;
@@ -69,6 +70,8 @@ namespace PocceMod.Client.Effect
             _offset = max.Y;
             _created = DateTime.Now;
             _timeout = _created + ChargeSec;
+
+            _blocked = _rechargeDB.TryGetValue(_vehicle, out DateTime nextCharge) && _created < nextCharge;
         }
 
         public string Key
@@ -78,16 +81,13 @@ namespace PocceMod.Client.Effect
 
         public bool Expired
         {
-            get { return !API.DoesEntityExist(_vehicle) || API.IsEntityDead(_vehicle) || DateTime.Now > _timeout; }
+            get { return _blocked || !API.DoesEntityExist(_vehicle) || API.IsEntityDead(_vehicle) || DateTime.Now > _timeout; }
         }
 
         public async Task Init()
         {
-            if (_rechargeDB.TryGetValue(_vehicle, out DateTime nextCharge) && DateTime.Now < nextCharge)
-            {
-                _timeout = DateTime.MinValue;
+            if (_blocked)
                 return;
-            }
 
             if (IsMappedToHorn)
                 API.SetHornEnabled(_vehicle, false);
@@ -98,6 +98,9 @@ namespace PocceMod.Client.Effect
 
         public void Update()
         {
+            if (_blocked)
+                return;
+
             if (_angle > MaxAngle)
                 _angle = MaxAngle;
             
@@ -115,16 +118,16 @@ namespace PocceMod.Client.Effect
 
         public void Clear()
         {
-            foreach (var fx in _effects ?? Enumerable.Empty<SteamFX>())
+            if (_blocked)
+                return;
+
+            foreach (var fx in _effects)
                 API.RemoveParticleFx(fx.Handle, false);
 
             if (IsMappedToHorn)
                 API.SetHornEnabled(_vehicle, true);
 
             var now = DateTime.Now;
-            if (_rechargeDB.TryGetValue(_vehicle, out DateTime nextCharge) && nextCharge > now)
-                return;
-
             _rechargeDB[_vehicle] = now + TimeSpan.FromMilliseconds((now - _created).TotalMilliseconds / RechargeRate);
         }
 
