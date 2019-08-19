@@ -320,7 +320,7 @@ namespace PocceMod.Client
             SetState(vehicle, StateFlag.TurboBoost, state);
 
             if (state)
-                Common.Notification("Turbo Boost enabled (default key: X)");
+                Common.Notification("Turbo Boost enabled");
         }
 
         public static void CargobobMagnet()
