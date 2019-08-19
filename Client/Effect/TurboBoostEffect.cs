@@ -1,5 +1,6 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -7,21 +8,33 @@ namespace PocceMod.Client.Effect
 {
     public class TurboBoostEffect : IEffect
     {
-        private enum LaunchMode
+        private class SteamFX
         {
-            Ground,
-            Air
+            public SteamFX(int vehicle, int bone)
+            {
+                var pos = API.GetWorldPositionOfEntityBone(vehicle, bone);
+                Offset = API.GetOffsetFromEntityGivenWorldCoords(vehicle, pos.X, pos.Y, pos.Z);
+
+                API.UseParticleFxAssetNextCall("core");
+                Handle = API.StartParticleFxLoopedOnEntity("ent_amb_steam", vehicle, Offset.X, Offset.Y, Offset.Z, 90f, 0f, 0f, 1f, false, false, false);
+            }
+
+            public int Handle { get; }
+            public Vector3 Offset { get; }
+
+            public float Angle
+            {
+                set { API.SetParticleFxLoopedOffsets(Handle, Offset.X, Offset.Y, Offset.Z, 90f + value, 0f, 0f); }
+            }
         }
 
         private static readonly string[] _wheelBoneNames;
 
         private readonly int _vehicle;
-        private readonly LaunchMode _mode;
         private readonly int[] _wheelBones;
         private readonly float _offset;
-        private readonly float _torque;
-        private int[] _effects;
-        private int _step = 0;
+        private SteamFX[] _effects;
+        private int _angle = 0;
         
         static TurboBoostEffect()
         {
@@ -31,7 +44,6 @@ namespace PocceMod.Client.Effect
         public TurboBoostEffect(int vehicle)
         {
             _vehicle = vehicle;
-            _mode = API.IsEntityInAir(_vehicle) ? LaunchMode.Air : LaunchMode.Ground;
             _wheelBones = _wheelBoneNames.Select(wheel => API.GetEntityBoneIndexByName(_vehicle, wheel)).Where(bone => bone != -1).ToArray();
 
             var model = (uint)API.GetEntityModel(_vehicle);
@@ -40,65 +52,50 @@ namespace PocceMod.Client.Effect
             API.GetModelDimensions(model, ref min, ref max);
 
             _offset = max.Y;
-
-            if (API.IsThisModelACar(model))
-                _torque = 10f;
-            else
-                _torque = 50f;
         }
 
         public string Key
         {
-            get
-            {
-                return "turboboost_" + _vehicle;
-            }
+            get { return GetKeyFrom(_vehicle); }
         }
 
         public bool Expired
         {
-            get { return _step > 10; }
+            get { return !API.DoesEntityExist(_vehicle) || API.IsEntityDead(_vehicle); }
         }
 
         public async Task Init()
         {
             await Common.RequestPtfxAsset("core");
-
-            _effects = _wheelBones.Select(bone =>
-            {
-                var pos = API.GetWorldPositionOfEntityBone(_vehicle, bone);
-                var offset = API.GetOffsetFromEntityGivenWorldCoords(_vehicle, pos.X, pos.Y, pos.Z);
-                API.UseParticleFxAssetNextCall("core");
-                return API.StartParticleFxLoopedOnEntity("ent_amb_steam", _vehicle, offset.X, offset.Y, offset.Z, 150f, 0f, 0f, 1f, false, false, false);
-            }).ToArray();
+            _effects = _wheelBones.Select(bone => new SteamFX(_vehicle, bone)).ToArray();
         }
 
         public void Update()
         {
-            ++_step;
+            if (_angle > 60)
+                _angle = 60;
+            
+            foreach (var fx in _effects)
+                fx.Angle = _angle;
 
-            if (_mode == LaunchMode.Ground)
-            {
-                if (_step <= 5)
-                {
-                    API.ApplyForceToEntityCenterOfMass(_vehicle, 0, 0f, _step * 100, 0f, false, true, true, false);
-                }
-                else if (_step > 5)
-                {
-                    API.ApplyForceToEntity(_vehicle, 0, 0f, 0f, (10 - _step) * _torque / _offset, 0f, _offset, 0f, -1, true, true, true, false, true);
-                    API.ApplyForceToEntityCenterOfMass(_vehicle, 0, 0f, 400f, 200f, false, true, true, false);
-                }
-            }
-            else
-            {
-                API.ApplyForceToEntityCenterOfMass(_vehicle, 0, 0f, 400f, 200f, false, true, true, false);
-            }
+            if (!API.IsEntityInAir(_vehicle))
+                API.ApplyForceToEntity(_vehicle, 0, 0f, 0f, 20f, 0f, _offset, 0f, -1, true, true, true, false, true);
+
+            var angleRad = _angle * (Math.PI / 180f);
+            API.ApplyForceToEntityCenterOfMass(_vehicle, 0, 0f, 400f * (float)Math.Cos(angleRad), 400f * (float)Math.Sin(angleRad), false, true, true, false);
+
+            _angle += 5;
         }
 
         public void Clear()
         {
             foreach (var fx in _effects)
-                API.RemoveParticleFx(fx, false);
+                API.RemoveParticleFx(fx.Handle, false);
+        }
+
+        public static string GetKeyFrom(int vehicle)
+        {
+            return "turboboost_" + vehicle;
         }
     }
 }

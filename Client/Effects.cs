@@ -40,6 +40,8 @@ namespace PocceMod.Client
 
         public static Task<bool> AddTurboBoostEffect(int vehicle) => Add(new TurboBoostEffect(vehicle), true);
 
+        public static void RemoveTurboBoostEffect(int vehicle) => Remove(TurboBoostEffect.GetKeyFrom(vehicle));
+
         public static Task<bool> AddHornEffect(int vehicle) => Add(new HornEffect(vehicle), true);
 
         public static void RemoveHornEffect(int vehicle) => Remove(HornEffect.GetKeyFrom(vehicle));

@@ -43,6 +43,12 @@ namespace PocceMod.Client
         private const string AircraftHornDecor = "POCCE_AIRCRAFT_HORN";
         private const string LightMultiplierDecor = "POCCE_VEHICLE_LIGHT_MULTIPLIER";
         private const string StateFlagsDecor = "POCCE_VEHICLE_STATE_FLAGS";
+        private static readonly int TurboBoostKey;
+
+        static Vehicles()
+        {
+            TurboBoostKey = Config.GetConfigInt("TurboBoostKey");
+        }
 
         public Vehicles()
         {
@@ -53,7 +59,13 @@ namespace PocceMod.Client
             EventHandlers["PocceMod:EMP"] += new Func<int, Task>(async vehicle => await EMP(API.NetToVeh(vehicle)));
             EventHandlers["PocceMod:SetIndicator"] += new Action<int, int>((vehicle, state) => SetIndicator(API.NetToVeh(vehicle), state));
             EventHandlers["PocceMod:CompressVehicle"] += new Func<int, Task>(async vehicle => await Compress(API.NetToVeh(vehicle)));
-            EventHandlers["PocceMod:TurboBoost"] += new Func<int, Task>(vehicle => Effects.AddTurboBoostEffect(API.NetToVeh(vehicle)));
+            EventHandlers["PocceMod:ToggleTurboBoost"] += new Func<int, bool, Task>(async (vehicle, state) =>
+            {
+                if (state)
+                    await Effects.AddTurboBoostEffect(API.NetToVeh(vehicle));
+                else
+                    Effects.RemoveTurboBoostEffect(API.NetToVeh(vehicle));
+            });
             EventHandlers["PocceMod:ToggleHorn"] += new Func<int, bool, Task>(async (vehicle, state) =>
             {
                 if (state)
@@ -308,7 +320,7 @@ namespace PocceMod.Client
             SetState(vehicle, StateFlag.TurboBoost, state);
 
             if (state)
-                Common.Notification("Turbo Boost enabled (use vehicle horn)");
+                Common.Notification("Turbo Boost enabled (default key: X)");
         }
 
         public static void CargobobMagnet()
@@ -626,8 +638,9 @@ namespace PocceMod.Client
         {
             var player = API.GetPlayerPed(-1);
             var vehicle = API.GetVehiclePedIsIn(player, !API.IsPedInAnyVehicle(player, false));
+            var hasOtherDriver = !API.IsVehicleSeatFree(vehicle, -1) && API.GetPedInVehicleSeat(vehicle, -1) != player;
 
-            if (!API.IsVehicleSeatFree(vehicle, -1) && API.GetPedInVehicleSeat(vehicle, -1) != player)
+            if (hasOtherDriver || MainMenu.IsOpen || API.IsEntityDead(vehicle))
                 return Delay(100);
 
             if (API.IsPedInFlyingVehicle(player) && API.DecorExistOn(vehicle, AircraftHornDecor))
@@ -645,7 +658,7 @@ namespace PocceMod.Client
                 }
             }
 
-            if (!MainMenu.IsOpen && API.DecorExistOn(vehicle, LightMultiplierDecor))
+            if (API.DecorExistOn(vehicle, LightMultiplierDecor))
             {
                 if (API.IsControlPressed(0, 172)) // up
                 {
@@ -659,10 +672,12 @@ namespace PocceMod.Client
                 }
             }
 
-            if ((API.IsControlJustPressed(0, 86) || API.IsDisabledControlJustPressed(0, 86)) &&
-                !API.IsEntityDead(vehicle) && GetLastState(vehicle, StateFlag.TurboBoost))
+            if (TurboBoostKey > 0 && GetLastState(vehicle, StateFlag.TurboBoost))
             {
-                TriggerServerEvent("PocceMod:TurboBoost", API.VehToNet(vehicle));
+                if (API.IsControlJustPressed(0, TurboBoostKey))
+                    TriggerServerEvent("PocceMod:ToggleTurboBoost", API.VehToNet(vehicle), true);
+                else if (API.IsControlJustReleased(0, TurboBoostKey))
+                    TriggerServerEvent("PocceMod:ToggleTurboBoost", API.VehToNet(vehicle), false);
             }
 
             return Task.FromResult(0);
