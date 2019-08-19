@@ -27,7 +27,7 @@ namespace PocceMod.Client.Effect
             Density = Config.GetConfigFloat("WheelFireDensity");
             WheelBoneNames = new string[] { "wheel_lr", "wheel_rr", "wheelr" };
 
-            if (Timeout.Milliseconds < 1000)
+            if (Timeout.TotalMilliseconds < 1000)
                 Timeout = TimeSpan.FromMilliseconds(1000);
 
             if (TopSpeed < 10f)

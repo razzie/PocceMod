@@ -34,7 +34,7 @@ namespace PocceMod.Client.Effect
         private static readonly float Power;
         private static readonly TimeSpan ChargeSec;
         private static readonly float RechargeRate;
-        private static readonly int MaxAngle;
+        private static readonly float MaxAngle;
         private static readonly bool IsMappedToHorn;
         private static readonly Dictionary<int, DateTime> _rechargeDB = new Dictionary<int, DateTime>();
 
@@ -43,9 +43,10 @@ namespace PocceMod.Client.Effect
         private readonly float _offset;
         private readonly bool _blocked;
         private readonly DateTime _created;
-        private DateTime _timeout;
+        private readonly DateTime _timeout;
         private SteamFX[] _effects;
-        private int _angle = 0;
+        private float _angle;
+        private readonly float _angleStep;
         
         static TurboBoostEffect()
         {
@@ -53,7 +54,7 @@ namespace PocceMod.Client.Effect
             Power = Config.GetConfigFloat("TurboBoostPower");
             ChargeSec = TimeSpan.FromSeconds(Config.GetConfigFloat("TurboBoostChargeSec"));
             RechargeRate = Config.GetConfigFloat("TurboBoostRechargeRate");
-            MaxAngle = Config.GetConfigInt("TurboBoostMaxAngle");
+            MaxAngle = Config.GetConfigFloat("TurboBoostMaxAngle");
             IsMappedToHorn = Config.GetConfigInt("TurboBoostKey") == 86;
 
             if (Power < 100f)
@@ -79,6 +80,8 @@ namespace PocceMod.Client.Effect
             _offset = max.Y;
             _created = DateTime.Now;
             _timeout = _created + ChargeSec;
+            _angle = 0f;
+            _angleStep = MaxAngle / ((int)ChargeSec.TotalMilliseconds / 200);
 
             _blocked = _rechargeDB.TryGetValue(_vehicle, out DateTime nextCharge) && _created < nextCharge;
         }
@@ -122,7 +125,7 @@ namespace PocceMod.Client.Effect
             var angleRad = _angle * (Math.PI / 180f);
             API.ApplyForceToEntityCenterOfMass(_vehicle, 0, 0f, Power * (float)Math.Cos(angleRad), Power * (float)Math.Sin(angleRad), false, true, true, false);
 
-            _angle += 5;
+            _angle += _angleStep;
         }
 
         public void Clear()
