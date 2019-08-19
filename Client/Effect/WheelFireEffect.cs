@@ -10,10 +10,10 @@ namespace PocceMod.Client.Effect
 {
     public class WheelFireEffect : IEffect
     {
-        private static readonly TimeSpan _timeout;
-        private static readonly float _topSpeed;
-        private static readonly float _density;
-        private static readonly string[] _wheelBoneNames;
+        private static readonly TimeSpan Timeout;
+        private static readonly float TopSpeed;
+        private static readonly float Density;
+        private static readonly string[] WheelBoneNames;
 
         private readonly int _vehicle;
         private readonly int[] _wheelBones;
@@ -22,19 +22,19 @@ namespace PocceMod.Client.Effect
 
         static WheelFireEffect()
         {
-            _timeout = TimeSpan.FromSeconds(Config.GetConfigFloat("WheelFireTimeoutSec"));
-            _topSpeed = Config.GetConfigFloat("WheelFireTopSpeed");
-            _density = Config.GetConfigFloat("WheelFireDensity");
-            _wheelBoneNames = new string[] { "wheel_lr", "wheel_rr", "wheelr" };
+            Timeout = TimeSpan.FromSeconds(Config.GetConfigFloat("WheelFireTimeoutSec"));
+            TopSpeed = Config.GetConfigFloat("WheelFireTopSpeed");
+            Density = Config.GetConfigFloat("WheelFireDensity");
+            WheelBoneNames = new string[] { "wheel_lr", "wheel_rr", "wheelr" };
 
-            if (_topSpeed < 10f)
-                _topSpeed = 10f;
+            if (TopSpeed < 10f)
+                TopSpeed = 10f;
         }
 
         public WheelFireEffect(int vehicle)
         {
             _vehicle = vehicle;
-            _wheelBones = _wheelBoneNames.Select(wheel => API.GetEntityBoneIndexByName(_vehicle, wheel)).Where(bone => bone != -1).ToArray();
+            _wheelBones = WheelBoneNames.Select(wheel => API.GetEntityBoneIndexByName(_vehicle, wheel)).Where(bone => bone != -1).ToArray();
             _fires = new Dictionary<int, DateTime>();
             _lastCoords = WheelCoords;
         }
@@ -60,7 +60,7 @@ namespace PocceMod.Client.Effect
                 var rpm = API.GetVehicleCurrentRpm(_vehicle);
                 var gear = API.GetVehicleCurrentGear(_vehicle);
 
-                if (speed > 0.5f && speed < _topSpeed && rpm > 0.25f && gear > 0)
+                if (speed > 0.5f && speed < TopSpeed && rpm > 0.25f && gear > 0)
                     return true;
 
                 return false;
@@ -98,8 +98,8 @@ namespace PocceMod.Client.Effect
             if (ShouldSpawnFire)
             {
                 var coords = WheelCoords;
-                var steps = (int)((_lastCoords[0] - coords[0]).Length() * _density);
-                var timeout = now + _timeout;
+                var steps = (int)((_lastCoords[0] - coords[0]).Length() * Density);
+                var timeout = now + Timeout;
 
                 for (int step = 0; step < steps; ++step)
                 {
