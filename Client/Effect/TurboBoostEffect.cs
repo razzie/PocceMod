@@ -55,6 +55,15 @@ namespace PocceMod.Client.Effect
             RechargeRate = Config.GetConfigFloat("TurboBoostRechargeRate");
             MaxAngle = Config.GetConfigInt("TurboBoostMaxAngle");
             IsMappedToHorn = Config.GetConfigInt("TurboBoostKey") == 86;
+
+            if (Power < 100f)
+                Power = 100f;
+
+            if (ChargeSec.Milliseconds < 1000)
+                ChargeSec = TimeSpan.FromMilliseconds(1000);
+
+            if (RechargeRate < 0.25f)
+                RechargeRate = 0.25f;
         }
 
         public TurboBoostEffect(int vehicle)
