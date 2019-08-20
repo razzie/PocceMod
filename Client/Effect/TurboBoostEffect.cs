@@ -60,7 +60,7 @@ namespace PocceMod.Client.Effect
             if (Power < 100f)
                 Power = 100f;
 
-            if (ChargeSec.Milliseconds < 1000)
+            if (ChargeSec.TotalMilliseconds < 1000)
                 ChargeSec = TimeSpan.FromMilliseconds(1000);
 
             if (RechargeRate < 0.25f)
