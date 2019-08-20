@@ -74,6 +74,14 @@ namespace PocceMod.Shared
                 return false;
         }
 
+        public static Controls.InputPair GetConfigControl(string item)
+        {
+            if (GetConfigString(item, out string value) && Controls.InputPair.TryParse(value, out Controls.InputPair result))
+                return result;
+            else
+                return null;
+        }
+
         private static string[] GetConfigList(string cfg)
         {
             var original = API.LoadResourceFile(API.GetCurrentResourceName(), "config/" + cfg + ".ini");

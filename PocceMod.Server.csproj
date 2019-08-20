@@ -50,6 +50,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Shared\Ability.cs" />
     <Compile Include="Shared\Config.cs" />
+    <Compile Include="Shared\Controls.cs" />
     <Compile Include="Shared\Permission.cs" />
     <Compile Include="Shared\Rope.cs" />
     <Compile Include="Shared\RopeSet.cs" />
