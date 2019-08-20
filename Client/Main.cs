@@ -182,7 +182,12 @@ namespace PocceMod.Client
         private static void PocceCommand(int source, List<object> args, string raw)
         {
             if (_menu != null)
-                _menu.OpenMenu();
+            {
+                if (args.Count > 0 && args[0] is string && (string)args[0] == "debug")
+                    _menu.DebugMenu.OpenMenu();
+                else
+                    _menu.OpenMenu();
+            }
         }
     }
 }

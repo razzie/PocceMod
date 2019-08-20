@@ -32,7 +32,7 @@ namespace PocceMod.Client
         {
             PropUndoKey = Config.GetConfigInt("PropUndoKey");
             AllowPropEdit = !Config.GetConfigBool("DisablePropEdit");
-            PropEditDistanceFactor = Math.Max(1f, Config.GetConfigInt("PropEditDistanceFactor"));
+            PropEditDistanceFactor = Math.Max(1f, Config.GetConfigFloat("PropEditDistanceFactor"));
         }
 
         public Props()

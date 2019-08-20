@@ -45,6 +45,7 @@ namespace PocceMod.Client.Menus
             MassScenarioMenu = new MassScenarioMenu();
             AircraftHornMenu = new AircraftHornMenu();
             CompanionMenu = new CompanionMenu();
+            DebugMenu = new DebugMenu();
 
             MenuController.AddMenu(this);
             MenuController.AddSubmenu(this, VehicleMenu);
@@ -53,6 +54,7 @@ namespace PocceMod.Client.Menus
             MenuController.AddSubmenu(this, MassScenarioMenu);
             MenuController.AddSubmenu(this, AircraftHornMenu);
             MenuController.AddSubmenu(this, CompanionMenu);
+            MenuController.AddSubmenu(this, DebugMenu);
 
             OnItemSelect += async (_menu, _item, _index) =>
             {
@@ -79,6 +81,7 @@ namespace PocceMod.Client.Menus
         public MassScenarioMenu MassScenarioMenu { get; }
         public AircraftHornMenu AircraftHornMenu { get; }
         public CompanionMenu CompanionMenu { get; }
+        public DebugMenu DebugMenu { get; }
 
         public static bool IsOpen
         {
