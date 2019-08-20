@@ -35,11 +35,8 @@ namespace PocceMod.Client.Menus
             AddConfigItem("TurboBoostRechargeRate", ConfigKind.Float);
             AddConfigItem("TurboBoostMaxAngle", ConfigKind.Float);
             AddConfigItem("IgnorePermissions", ConfigKind.Bool);
-
-            if (Permission.IgnorePermissions)
-                AddAbilities();
-            else
-                Permission.Granted += (player, group) => AddAbilities();
+            
+            AddAbilities();
         }
 
         private string GetConfigItem(string item, ConfigKind kind)
@@ -99,6 +96,7 @@ namespace PocceMod.Client.Menus
                 Label = group.ToString(),
                 Enabled = Permission.CanDo(ability)
             };
+            AddMenuItem(menuItem);
         }
     }
 }
