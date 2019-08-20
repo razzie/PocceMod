@@ -1,6 +1,5 @@
 ﻿using MenuAPI;
 using PocceMod.Shared;
-using System;
 
 namespace PocceMod.Client.Menus
 {
@@ -35,8 +34,16 @@ namespace PocceMod.Client.Menus
             AddConfigItem("TurboBoostRechargeRate", ConfigKind.Float);
             AddConfigItem("TurboBoostMaxAngle", ConfigKind.Float);
             AddConfigItem("IgnorePermissions", ConfigKind.Bool);
-            
-            AddAbilities();
+
+            var permissionsMenu = new DebugPermissionsMenu();
+            var permissionsMenuItem = new MenuItem("Permissions ↕");
+            MenuController.BindMenuItem(this, permissionsMenu, permissionsMenuItem);
+            AddMenuItem(permissionsMenuItem);
+
+            OnMenuClose += (_menu) =>
+            {
+                ParentMenu.CloseMenu();
+            };
         }
 
         private string GetConfigItem(string item, ConfigKind kind)
@@ -77,25 +84,6 @@ namespace PocceMod.Client.Menus
         private void AddConfigItem(string item, ConfigKind kind)
         {
             var menuItem = new MenuItem(item) { Label = GetConfigItem(item, kind) };
-            AddMenuItem(menuItem);
-        }
-
-        private void AddAbilities()
-        {
-            foreach (var ability in (Ability[])Enum.GetValues(typeof(Ability)))
-            {
-                var group = (Permission.Group)Config.GetConfigInt(ability.ToString());
-                AddAbility(ability, group);
-            }
-        }
-
-        private void AddAbility(Ability ability, Permission.Group group)
-        {
-            var menuItem = new MenuItem(ability.ToString())
-            {
-                Label = group.ToString(),
-                Enabled = Permission.CanDo(ability)
-            };
             AddMenuItem(menuItem);
         }
     }
