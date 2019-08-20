@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace PocceMod.Client.Menus
 {
+    [MainMenuInclude]
     public class SkinMenu : SkinSubmenu
     {
         public SkinMenu() : base(ChangeSkin, false)

@@ -38,10 +38,10 @@ namespace PocceMod.Client
 
             #region Vehicle
             if (Permission.CanDo(Ability.SpawnVehicle))
-                _menu.AddMenuListItem("Vehicle", "Spawn from list ↕", _menu.VehicleMenu.OpenMenu);
+                _menu.AddMenuListItem("Vehicle", "Spawn from list ↕", _menu.Submenu<VehicleMenu>().OpenMenu);
 
             if (Permission.CanDo(Ability.SpawnVehicleByName))
-                _menu.AddMenuListItemAsync("Vehicle", "Spawn by name", _menu.VehicleMenu.SpawnByName);
+                _menu.AddMenuListItemAsync("Vehicle", "Spawn by name", _menu.Submenu<VehicleMenu>().SpawnByName);
 
             if (Permission.CanDo(Ability.Autopilot))
                 _menu.AddMenuListItemAsync("Vehicle", "Autopilot (toggle)", Autopilot.Toggle);
@@ -56,11 +56,11 @@ namespace PocceMod.Client
             #region Prop
             if (Permission.CanDo(Ability.SpawnProp))
             {
-                _menu.AddMenuListItem("Prop", "Spawn from list ↕", _menu.PropMenu.OpenMenu);
+                _menu.AddMenuListItem("Prop", "Spawn from list ↕", _menu.Submenu<PropMenu>().OpenMenu);
                 _menu.AddMenuListItem("Prop", "Spawn from list (search)", async () =>
                 {
                     var prop = await Common.GetUserInput("Filter props", "", 30);
-                    _menu.PropMenu.Filter(prop);
+                    _menu.Submenu<PropMenu>().Filter(prop);
                 });
                 _menu.AddMenuListItemAsync("Prop", "Clear last", Props.ClearLast);
                 _menu.AddMenuListItemAsync("Prop", "Clear all", Props.ClearAll);
@@ -96,7 +96,7 @@ namespace PocceMod.Client
 
             if (Permission.CanDo(Ability.SpawnCustomCompanion))
             {
-                _menu.AddMenuListItem("Companion", "Spawn custom ↕", _menu.CompanionMenu.CustomCompanion);
+                _menu.AddMenuListItem("Companion", "Spawn custom ↕", _menu.Submenu<CompanionMenu>().CustomCompanion);
                 _menu.AddMenuListItemAsync("Companion", "Spawn custom by name", CompanionMenu.CustomCompanionByName);
             }
 
@@ -109,7 +109,7 @@ namespace PocceMod.Client
                 _menu.AddMenuListItemAsync("Event", "Pocce party", Events.PoccePartyRandom);
 
             if (Permission.CanDo(Ability.MassScenario))
-                _menu.AddMenuListItem("Event", "Play mass scenario", _menu.MassScenarioMenu.OpenMenu);
+                _menu.AddMenuListItem("Event", "Play mass scenario", _menu.Submenu<MassScenarioMenu>().OpenMenu);
 
             if (Permission.CanDo(Ability.PocceRiot))
                 _menu.AddMenuListItem("Event", "Pocce riot", async () => await Events.PocceRiot(false));
@@ -127,14 +127,14 @@ namespace PocceMod.Client
             #region Skin
             if (Permission.CanDo(Ability.IdentifySkins))
             {
-                _menu.AddMenuListItem("Skin", "Detect nearby skins", _menu.SkinMenu.DetectSkins);
-                _menu.AddMenuListItem("Skin", "Detect player skin", _menu.SkinMenu.DetectPlayerSkin);
+                _menu.AddMenuListItem("Skin", "Detect nearby skins", _menu.Submenu<SkinMenu>().DetectSkins);
+                _menu.AddMenuListItem("Skin", "Detect player skin", _menu.Submenu<SkinMenu>().DetectPlayerSkin);
             }
 
             if (Permission.CanDo(Ability.ChangeSkin))
             {
-                _menu.AddMenuListItem("Skin", "Choose from last detect ↕", _menu.SkinMenu.ShowLastSkins);
-                _menu.AddMenuListItem("Skin", "Choose from all ↕", _menu.SkinMenu.ShowAllSkins);
+                _menu.AddMenuListItem("Skin", "Choose from last detect ↕", _menu.Submenu<SkinMenu>().ShowLastSkins);
+                _menu.AddMenuListItem("Skin", "Choose from all ↕", _menu.Submenu<SkinMenu>().ShowAllSkins);
             }
             #endregion
 
@@ -155,7 +155,7 @@ namespace PocceMod.Client
                 _menu.AddMenuListItem("Upgrade", "Anti-gravity (toggle)", Vehicles.ToggleAntiGravity);
 
             if (Permission.CanDo(Ability.AircraftHorn))
-                _menu.AddMenuListItem("Upgrade", "Aircraft horn ↕", _menu.AircraftHornMenu.OpenMenu);
+                _menu.AddMenuListItem("Upgrade", "Aircraft horn ↕", _menu.Submenu<AircraftHornMenu>().OpenMenu);
 
             if (Permission.CanDo(Ability.TurboBoost))
                 _menu.AddMenuListItem("Upgrade", "Turbo Boost (toggle)", Vehicles.ToggleTurboBoost);
@@ -184,7 +184,7 @@ namespace PocceMod.Client
             if (_menu != null)
             {
                 if (args.Count > 0 && args[0] is string && (string)args[0] == "debug")
-                    _menu.DebugMenu.OpenMenu();
+                    _menu.Submenu<DebugMenu>().OpenMenu();
                 else
                     _menu.OpenMenu();
             }

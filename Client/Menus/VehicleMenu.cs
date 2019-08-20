@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace PocceMod.Client.Menus
 {
+    [MainMenuInclude]
     public class VehicleMenu : Menu
     {
         public VehicleMenu() : base("PocceMod", "select vehicle")

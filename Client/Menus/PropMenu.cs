@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace PocceMod.Client.Menus
 {
+    [MainMenuInclude]
     public class PropMenu : Submenu
     {
         public PropMenu() : base("select prop", Props.Spawn, FilteredPropList(), 10)

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace PocceMod.Client.Menus
 {
+    [MainMenuInclude]
     public class MassScenarioMenu : Submenu
     {
         public MassScenarioMenu() : base("select scenario", PlayMassScenario, Config.ScenarioList)

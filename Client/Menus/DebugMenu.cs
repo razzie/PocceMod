@@ -4,6 +4,7 @@ using System;
 
 namespace PocceMod.Client.Menus
 {
+    [MainMenuInclude]
     public class DebugMenu : Menu
     {
         private enum ConfigKind

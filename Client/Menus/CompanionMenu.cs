@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace PocceMod.Client.Menus
 {
+    [MainMenuInclude]
     public class CompanionMenu : SkinSubmenu
     {
         public CompanionMenu() : base(Companions.Spawn, true)
@@ -26,7 +27,7 @@ namespace PocceMod.Client.Menus
 
         public void CustomCompanion()
         {
-            var source = (ParentMenu as MainMenu)?.SkinMenu?.AllSkins;
+            var source = (ParentMenu as MainMenu)?.Submenu<SkinMenu>()?.AllSkins;
             OpenMenu(source);
         }
 

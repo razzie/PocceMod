@@ -3,6 +3,8 @@ using MenuAPI;
 using PocceMod.Shared;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace PocceMod.Client.Menus
@@ -10,6 +12,7 @@ namespace PocceMod.Client.Menus
     public class MainMenu : Menu
     {
         private static readonly int MenuKey;
+        private readonly Dictionary<Type, Menu> _submenus = new Dictionary<Type, Menu>();
         private readonly Dictionary<int, Func<Task>> _menuItemActions = new Dictionary<int, Func<Task>>();
         private readonly Dictionary<int, List<Func<Task>>> _menuListItemActions = new Dictionary<int, List<Func<Task>>>();
 
@@ -39,22 +42,15 @@ namespace PocceMod.Client.Menus
 
         public MainMenu() : base("PocceMod", "menu")
         {
-            VehicleMenu = new VehicleMenu();
-            PropMenu = new PropMenu();
-            SkinMenu = new SkinMenu();
-            MassScenarioMenu = new MassScenarioMenu();
-            AircraftHornMenu = new AircraftHornMenu();
-            CompanionMenu = new CompanionMenu();
-            DebugMenu = new DebugMenu();
-
             MenuController.AddMenu(this);
-            MenuController.AddSubmenu(this, VehicleMenu);
-            MenuController.AddSubmenu(this, PropMenu);
-            MenuController.AddSubmenu(this, SkinMenu);
-            MenuController.AddSubmenu(this, MassScenarioMenu);
-            MenuController.AddSubmenu(this, AircraftHornMenu);
-            MenuController.AddSubmenu(this, CompanionMenu);
-            MenuController.AddSubmenu(this, DebugMenu);
+
+            var submenus = Assembly.GetExecutingAssembly().GetExportedTypes().Where(type => type.IsDefined(typeof(MainMenuIncludeAttribute), false));
+            foreach (var submenu in submenus)
+            {
+                var instance = (Menu)Activator.CreateInstance(submenu);
+                _submenus.Add(submenu, instance);
+                MenuController.AddSubmenu(this, instance);
+            }
 
             OnItemSelect += async (_menu, _item, _index) =>
             {
@@ -75,17 +71,15 @@ namespace PocceMod.Client.Menus
             };
         }
 
-        public VehicleMenu VehicleMenu { get; }
-        public PropMenu PropMenu { get; }
-        public SkinMenu SkinMenu { get; }
-        public MassScenarioMenu MassScenarioMenu { get; }
-        public AircraftHornMenu AircraftHornMenu { get; }
-        public CompanionMenu CompanionMenu { get; }
-        public DebugMenu DebugMenu { get; }
-
         public static bool IsOpen
         {
             get { return MenuController.IsAnyMenuOpen(); }
+        }
+
+        public T Submenu<T>() where T : Menu
+        {
+            _submenus.TryGetValue(typeof(T), out Menu value);
+            return (T)value;
         }
 
         public void AddMenuItemAsync(string item, Func<Task> onSelect)

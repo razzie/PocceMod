@@ -3,6 +3,7 @@ using PocceMod.Shared;
 
 namespace PocceMod.Client.Menus
 {
+    [MainMenuInclude]
     public class AircraftHornMenu : Menu
     {
         public AircraftHornMenu() : base("PocceMod", "select horn")

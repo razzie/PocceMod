@@ -52,6 +52,7 @@
     <Compile Include="Client\Autopilot.cs" />
     <Compile Include="Client\Common.cs" />
     <Compile Include="Client\Menus\DebugMenu.cs" />
+    <Compile Include="Client\Menus\MainMenuIncludeAttribute.cs" />
     <Compile Include="Shared\Controls.cs" />
     <Compile Include="Client\Effects.cs" />
     <Compile Include="Client\Effect\EMPEffect.cs" />
