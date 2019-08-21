@@ -41,10 +41,10 @@ namespace PocceMod.Client.Menus.Dev
             MenuController.BindMenuItem(this, permissionsMenu, permissionsMenuItem);
             AddMenuItem(permissionsMenuItem);
 
-            OnMenuClose += (_menu) =>
-            {
-                ParentMenu.CloseMenu();
-            };
+            var telemetryMenu = new TelemetryMenu();
+            var telemetryMenuItem = new MenuItem("Telemetry ↕");
+            MenuController.BindMenuItem(this, telemetryMenu, telemetryMenuItem);
+            AddMenuItem(telemetryMenuItem);
         }
 
         private string GetConfigItem(string item, ConfigKind kind)

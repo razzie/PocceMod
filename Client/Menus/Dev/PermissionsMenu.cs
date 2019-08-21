@@ -21,11 +21,6 @@ namespace PocceMod.Client.Menus.Dev
                 var group = (Permission.Group)Config.GetConfigInt(ability.ToString());
                 AddAbility(ability, group);
             }
-
-            OnMenuClose += (_menu) =>
-            {
-                ParentMenu.CloseMenu();
-            };
         }
 
         private void AddAbility(Ability ability, Permission.Group group)
