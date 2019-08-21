@@ -11,8 +11,52 @@ namespace PocceMod.Client
 
     public class Telemetry : BaseScript
     {
+        private class Data
+        {
+            public int Calls { get; private set; }
+            public float Min { get; private set; }
+            public float Max { get; private set; }
+            public float Sum { get; private set; }
+            public float Avg { get { return Sum / Calls; } }
+
+            public Data(TimeSpan time)
+            {
+                Add(time);
+            }
+
+            public void Add(TimeSpan time)
+            {
+                var ms = (float)time.TotalMilliseconds;
+
+                Sum += ms;
+                Calls++;
+
+                if (Calls == 1)
+                {
+                    Min = ms;
+                    Max = ms;
+                }
+                else
+                {
+                    if (ms < Min)
+                        Min = ms;
+
+                    if (ms > Max)
+                        Max = ms;
+                }
+            }
+
+            public void Reset()
+            {
+                Calls = 0;
+                Min = 0;
+                Max = 0;
+                Sum = 0;
+            }
+        }
+
         private static readonly bool Enabled;
-        private static readonly Dictionary<string, List<TimeSpan>> _localData = new Dictionary<string, List<TimeSpan>>();
+        private static readonly Dictionary<string, Data> _localData = new Dictionary<string, Data>();
         private static readonly Dictionary<int, PlayerTelemetry> _playerTelemetries = new Dictionary<int, PlayerTelemetry>();
 
         static Telemetry()
@@ -54,40 +98,10 @@ namespace PocceMod.Client
             if (!Enabled)
                 return;
 
-            if (_localData.TryGetValue(feature, out List<TimeSpan> times))
-                times.Add(timespan);
+            if (_localData.TryGetValue(feature, out Data data))
+                data.Add(timespan);
             else
-                _localData.Add(feature, new List<TimeSpan> { timespan });
-        }
-
-        private static void MinMaxAvgSum(List<TimeSpan> times, out float min, out float max, out float avg, out float sum)
-        {
-            if (times.Count == 0)
-            {
-                min = 0;
-                max = 0;
-                avg = 0;
-                sum = 0;
-                return;
-            }
-
-            min = float.MaxValue;
-            max = float.MinValue;
-            sum = 0;
-            
-            foreach (var time in times)
-            {
-                var ms = (float)time.TotalMilliseconds;
-                sum += ms;
-
-                if (ms < min)
-                    min = ms;
-
-                if (ms > max)
-                    max = ms;
-            }
-
-            avg = sum / times.Count;
+                _localData.Add(feature, new Data(timespan));
         }
 
         private static void ReceiveTelemetry(int sourcePlayer, dynamic data)
@@ -109,18 +123,17 @@ namespace PocceMod.Client
 
             foreach (var pair in _localData)
             {
-                MinMaxAvgSum(pair.Value, out float min, out float max, out float avg, out float sum);
-
+                var data = pair.Value;
                 var values = new string[] {
-                    "calls: " + pair.Value.Count,
-                    "min: " + min + "ms",
-                    "max: " + max + "ms",
-                    "avg: " + avg + "ms",
-                    "sum: " + sum + "ms"
+                    "calls: " + data.Calls,
+                    "min: " + data.Min + "ms",
+                    "max: " + data.Max + "ms",
+                    "avg: " + data.Avg + "ms",
+                    "sum: " + data.Sum + "ms"
                 };
                 result.Add(pair.Key, values);
 
-                pair.Value.Clear();
+                data.Reset();
             }
 
             return result;
