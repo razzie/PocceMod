@@ -3,11 +3,11 @@ using MenuAPI;
 using PocceMod.Shared;
 using System;
 
-namespace PocceMod.Client.Menus
+namespace PocceMod.Client.Menus.Dev
 {
-    public class DebugPermissionsMenu : Menu
+    public class PermissionsMenu : Menu
     {
-        public DebugPermissionsMenu() : base("PocceMod", "permissions")
+        public PermissionsMenu() : base("PocceMod", "permissions")
         {
             AddMenuItem(new MenuItem("PlayerID") { Label = API.PlayerId().ToString() });
 

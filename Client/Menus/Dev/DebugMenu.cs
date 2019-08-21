@@ -1,7 +1,7 @@
 ﻿using MenuAPI;
 using PocceMod.Shared;
 
-namespace PocceMod.Client.Menus
+namespace PocceMod.Client.Menus.Dev
 {
     [MainMenuInclude]
     public class DebugMenu : Menu
@@ -35,7 +35,7 @@ namespace PocceMod.Client.Menus
             AddConfigItem("TurboBoostMaxAngle", ConfigKind.Float);
             AddConfigItem("IgnorePermissions", ConfigKind.Bool);
 
-            var permissionsMenu = new DebugPermissionsMenu();
+            var permissionsMenu = new PermissionsMenu();
             var permissionsMenuItem = new MenuItem("Permissions ↕");
             MenuController.BindMenuItem(this, permissionsMenu, permissionsMenuItem);
             AddMenuItem(permissionsMenuItem);

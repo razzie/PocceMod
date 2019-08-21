@@ -51,8 +51,8 @@
     <Compile Include="Client\AntiGravity.cs" />
     <Compile Include="Client\Autopilot.cs" />
     <Compile Include="Client\Common.cs" />
-    <Compile Include="Client\Menus\DebugMenu.cs" />
-    <Compile Include="Client\Menus\DebugPermissionsMenu.cs" />
+    <Compile Include="Client\Menus\Dev\DebugMenu.cs" />
+    <Compile Include="Client\Menus\Dev\PermissionsMenu.cs" />
     <Compile Include="Client\Menus\MainMenuIncludeAttribute.cs" />
     <Compile Include="Client\Telemetry.cs" />
     <Compile Include="Shared\Controls.cs" />
@@ -137,8 +137,6 @@
   <ItemGroup>
     <Content Include="MenuAPI.dll" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Client\Menus\Debug\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
