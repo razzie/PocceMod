@@ -1,4 +1,5 @@
-﻿using MenuAPI;
+﻿using CitizenFX.Core.Native;
+using MenuAPI;
 using PocceMod.Shared;
 using System;
 
@@ -8,6 +9,13 @@ namespace PocceMod.Client.Menus
     {
         public DebugPermissionsMenu() : base("PocceMod", "permissions")
         {
+            AddMenuItem(new MenuItem("PlayerID") { Label = API.PlayerId().ToString() });
+
+            if (Permission.GetPlayerGroup(out Permission.Group permissionGroup))
+                AddMenuItem(new MenuItem("Permission group") { Label = permissionGroup.ToString() });
+            else
+                AddMenuItem(new MenuItem("Permission group") { Enabled = false });
+
             foreach (var ability in (Ability[])Enum.GetValues(typeof(Ability)))
             {
                 var group = (Permission.Group)Config.GetConfigInt(ability.ToString());

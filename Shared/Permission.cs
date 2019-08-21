@@ -73,6 +73,11 @@ namespace PocceMod.Shared
         {
             return CanDo(Game.Player, ability);
         }
+
+        public static bool GetPlayerGroup(out Group group)
+        {
+            return _playerGroups.TryGetValue(Game.Player, out group);
+        }
 #endif
 
 #if SERVER
