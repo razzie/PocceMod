@@ -60,7 +60,7 @@ namespace PocceMod.Client
                 _localData.Add(feature, new List<TimeSpan> { timespan });
         }
 
-        private static void MinMaxAvgSum(List<TimeSpan> times, out int min, out int max, out int avg, out int sum)
+        private static void MinMaxAvgSum(List<TimeSpan> times, out float min, out float max, out float avg, out float sum)
         {
             if (times.Count == 0)
             {
@@ -71,13 +71,13 @@ namespace PocceMod.Client
                 return;
             }
 
-            min = int.MaxValue;
-            max = int.MinValue;
+            min = float.MaxValue;
+            max = float.MinValue;
             sum = 0;
             
             foreach (var time in times)
             {
-                int ms = (int)time.TotalMilliseconds;
+                var ms = (float)time.TotalMilliseconds;
                 sum += ms;
 
                 if (ms < min)
@@ -109,7 +109,7 @@ namespace PocceMod.Client
 
             foreach (var pair in _localData)
             {
-                MinMaxAvgSum(pair.Value, out int min, out int max, out int avg, out int sum);
+                MinMaxAvgSum(pair.Value, out float min, out float max, out float avg, out float sum);
 
                 var values = new string[] {
                     "calls: " + pair.Value.Count,
