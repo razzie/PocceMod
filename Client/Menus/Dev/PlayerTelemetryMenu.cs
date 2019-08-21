@@ -18,7 +18,7 @@ namespace PocceMod.Client.Menus.Dev
 
                 foreach (var feature in _source)
                 {
-                    var menuListItem = new MenuListItem(feature.Key, feature.Value, 0);
+                    var menuListItem = new MenuListItem(feature.Key, feature.Value, 4);
                     AddMenuItem(menuListItem);
                 }
             };

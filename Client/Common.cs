@@ -53,11 +53,15 @@ namespace PocceMod.Client
             if (!API.IsModelValid(model))
                 return;
 
+            var start = DateTime.Now;
+
             while (!API.HasModelLoaded(model))
             {
                 API.RequestModel(model);
                 await BaseScript.Delay(10);
             }
+
+            Telemetry.AddData("request_model", start);
         }
 
         public static async Task RequestCollision(uint model)
@@ -65,22 +69,29 @@ namespace PocceMod.Client
             if (!API.IsModelValid(model))
                 return;
 
-            var timeout = DateTime.Now + TimeSpan.FromSeconds(0.5);
+            var start = DateTime.Now;
+            var timeout = start + TimeSpan.FromSeconds(0.5);
 
             while (!API.HasCollisionForModelLoaded(model) && DateTime.Now < timeout)
             {
                 API.RequestCollisionForModel(model);
                 await BaseScript.Delay(10);
             }
+
+            Telemetry.AddData("request_collision", start);
         }
 
         public static async Task RequestPtfxAsset(string name)
         {
+            var start = DateTime.Now;
+
             while (!API.HasNamedPtfxAssetLoaded(name))
             {
                 API.RequestNamedPtfxAsset(name);
                 await BaseScript.Delay(10);
             }
+
+            Telemetry.AddData("request_ptfx_asset", start);
         }
 
         public static async Task NetworkRequestControl(int entity, int timeoutSeconds = 1)
@@ -88,13 +99,16 @@ namespace PocceMod.Client
             if (!API.DoesEntityExist(entity))
                 return;
 
-            var timeout = DateTime.Now + TimeSpan.FromSeconds(timeoutSeconds);
+            var start = DateTime.Now;
+            var timeout = start + TimeSpan.FromSeconds(timeoutSeconds);
 
             while (!API.NetworkHasControlOfEntity(entity) && DateTime.Now < timeout)
             {
                 API.NetworkRequestControlOfEntity(entity);
                 await BaseScript.Delay(100);
             }
+
+            Telemetry.AddData("network_request_control", start);
         }
 
         public static async Task<int> WaitForNetEntity(int netEntity, int timeoutSeconds = 1)
@@ -102,7 +116,8 @@ namespace PocceMod.Client
             if (netEntity == 0)
                 return 0;
 
-            var timeout = DateTime.Now + TimeSpan.FromSeconds(timeoutSeconds);
+            var start = DateTime.Now;
+            var timeout = start + TimeSpan.FromSeconds(timeoutSeconds);
             var entity = API.NetToEnt(netEntity);
 
             while (!API.DoesEntityExist(entity) && DateTime.Now < timeout)
@@ -110,6 +125,8 @@ namespace PocceMod.Client
                 await BaseScript.Delay(100);
                 entity = API.NetToEnt(netEntity);
             }
+
+            Telemetry.AddData("network_wait_for_entity", start);
 
             return entity;
         }

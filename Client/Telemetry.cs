@@ -1,4 +1,5 @@
 ﻿using CitizenFX.Core;
+using PocceMod.Shared;
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
@@ -11,14 +12,21 @@ namespace PocceMod.Client
 
     public class Telemetry : BaseScript
     {
+        private static readonly bool Enabled;
         private static readonly Dictionary<string, List<TimeSpan>> _localData = new Dictionary<string, List<TimeSpan>>();
         private static readonly Dictionary<int, PlayerTelemetry> _playerTelemetries = new Dictionary<int, PlayerTelemetry>();
+
+        static Telemetry()
+        {
+            Enabled = Config.GetConfigBool("EnableTelemetry");
+        }
 
         public Telemetry()
         {
             EventHandlers["PocceMod:Telemetry"] += new Action<int, dynamic>(ReceiveTelemetry);
 
-            Tick += Update;
+            if (Enabled)
+                Tick += Wrap("telemetry", Update);
         }
 
         public static IEnumerable<KeyValuePair<int, PlayerTelemetry>> Entries
@@ -37,29 +45,33 @@ namespace PocceMod.Client
             };
         }
 
-        private static void AddData(string feature, DateTime start) => AddData(feature, DateTime.Now - start);
+        public static void AddData(string feature, DateTime start) => AddData(feature, DateTime.Now - start);
 
         public static void AddData(string feature, TimeSpan timespan)
         {
+            if (!Enabled)
+                return;
+
             if (_localData.TryGetValue(feature, out List<TimeSpan> times))
                 times.Add(timespan);
             else
                 _localData.Add(feature, new List<TimeSpan> { timespan });
         }
 
-        private static void MinMaxAvg(List<TimeSpan> times, out int min, out int max, out int avg)
+        private static void MinMaxAvgSum(List<TimeSpan> times, out int min, out int max, out int avg, out int sum)
         {
             if (times.Count == 0)
             {
                 min = 0;
                 max = 0;
                 avg = 0;
+                sum = 0;
                 return;
             }
 
             min = int.MaxValue;
             max = int.MinValue;
-            int sum = 0;
+            sum = 0;
             
             foreach (var time in times)
             {
@@ -68,7 +80,8 @@ namespace PocceMod.Client
 
                 if (ms < min)
                     min = ms;
-                else if (ms > max)
+
+                if (ms > max)
                     max = ms;
             }
 
@@ -94,9 +107,15 @@ namespace PocceMod.Client
 
             foreach (var pair in _localData)
             {
-                MinMaxAvg(pair.Value, out int min, out int max, out int avg);
+                MinMaxAvgSum(pair.Value, out int min, out int max, out int avg, out int sum);
 
-                var values = new string[] { "calls: " + pair.Value.Count, "min: " + min, "max: " + max, "avg: " + avg };
+                var values = new string[] {
+                    "calls: " + pair.Value.Count,
+                    "min: " + min + "ms",
+                    "max: " + max + "ms",
+                    "avg: " + avg + "ms",
+                    "sum: " + sum + "ms"
+                };
                 result.Add(pair.Key, values);
 
                 pair.Value.Clear();
