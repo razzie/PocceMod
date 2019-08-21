@@ -17,7 +17,7 @@ namespace PocceMod.Client
             API.DecorRegister(FlagDecor, 2);
             API.DecorRegister(PlayerDecor, 3);
 
-            Tick += Update;
+            Tick += Telemetry.Wrap("companions", Update);
         }
 
         private static bool IsCompanion(int ped)

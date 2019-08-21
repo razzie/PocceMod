@@ -35,6 +35,7 @@
         TurboBoost,
         Balloons,
         IdentifySkins,
-        ChangeSkin
+        ChangeSkin,
+        ReceiveTelemetry
     }
 }

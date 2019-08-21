@@ -20,7 +20,7 @@ namespace PocceMod.Client
             API.DecorRegister(PlayerDecor, 3);
             API.DecorRegister(WaypointHashDecor, 3);
             
-            Tick += Update;
+            Tick += Telemetry.Wrap("autopilot", Update);
         }
 
         public static async Task Activate()

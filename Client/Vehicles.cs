@@ -75,10 +75,10 @@ namespace PocceMod.Client
             });
 
             if (!Config.GetConfigBool("DisableAutoHazardLights"))
-                Tick += UpdateAutoHazardLights;
+                Tick += Telemetry.Wrap("auto_hazard_lights", UpdateAutoHazardLights);
 
-            Tick += UpdateEffects;
-            Tick += UpdateControls;
+            Tick += Telemetry.Wrap("vehicle_effects", UpdateEffects);
+            Tick += Telemetry.Wrap("vehicle_controls", UpdateControls);
         }
 
         public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 3600f)

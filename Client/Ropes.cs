@@ -36,12 +36,12 @@ namespace PocceMod.Client
 
             API.AddTextEntryByHash(0x6FCC4E8A, "Pocce Ropegun"); // WT_POCCE_ROPEGUN
 
-            Tick += UpdateRopegun;
-            Tick += UpdateRopes;
+            Tick += Telemetry.Wrap("ropegun", UpdateRopegun);
+            Tick += Telemetry.Wrap("ropes", UpdateRopes);
 
             if (RopeClearKey > 0)
             {
-                Tick += UpdateRopeClear;
+                Tick += Telemetry.Wrap("clear_ropes", UpdateRopeClear);
             }
         }
 

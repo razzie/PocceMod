@@ -16,7 +16,7 @@ namespace PocceMod.Client
             EventHandlers["PocceMod:AntiGravityAdd"] += new Action<int, float>(async (entity, force) => _entities.Add(await Common.WaitForNetEntity(entity), force * 0.8f));
             EventHandlers["PocceMod:AntiGravityRemove"] += new Action<int>(async entity => _entities.Remove(await Common.WaitForNetEntity(entity)));
 
-            Tick += Update;
+            Tick += Telemetry.Wrap("anti-gravity", Update);
         }
 
         public static void Add(int entity, float force)

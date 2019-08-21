@@ -39,7 +39,7 @@ namespace PocceMod.Client
         {
             API.DecorRegister(PropDecor, 2);
             
-            Tick += Update;
+            Tick += Telemetry.Wrap("props", Update);
         }
 
         public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 3600f)

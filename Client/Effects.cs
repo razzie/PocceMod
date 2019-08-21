@@ -12,7 +12,7 @@ namespace PocceMod.Client
 
         public Effects()
         {
-            Tick += Update;
+            Tick += Telemetry.Wrap("effects", Update);
         }
 
         public static async Task<bool> Add(IEffect effect, bool unique)

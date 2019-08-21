@@ -16,7 +16,7 @@ namespace PocceMod.Client
         {
             API.DecorRegister(SpeakerRadioDecor, 3);
 
-            Tick += Update;
+            Tick += Telemetry.Wrap("speakers", UpdateSpeakers);
         }
 
         public static async Task PocceParty(float radius, int speakers, int peds, int balloons, int booze)
@@ -143,7 +143,7 @@ namespace PocceMod.Client
             }
         }
 
-        private static Task Update()
+        private static Task UpdateSpeakers()
         {
             foreach (var speaker in _speakers.ToArray())
             {

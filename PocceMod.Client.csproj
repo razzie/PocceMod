@@ -54,6 +54,7 @@
     <Compile Include="Client\Menus\DebugMenu.cs" />
     <Compile Include="Client\Menus\DebugPermissionsMenu.cs" />
     <Compile Include="Client\Menus\MainMenuIncludeAttribute.cs" />
+    <Compile Include="Client\Telemetry.cs" />
     <Compile Include="Shared\Controls.cs" />
     <Compile Include="Client\Effects.cs" />
     <Compile Include="Client\Effect\EMPEffect.cs" />
@@ -136,6 +137,8 @@
   <ItemGroup>
     <Content Include="MenuAPI.dll" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Client\Menus\Debug\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

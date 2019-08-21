@@ -30,7 +30,7 @@ namespace PocceMod.Client
             EventHandlers["PocceMod:RequestMPSkin"] += new Action<int, int>(RequestMPSkin);
             EventHandlers["PocceMod:SetMPSkin"] += new Action<int, byte[]>(SetMPSkin);
 
-            Tick += Update;
+            Tick += Telemetry.Wrap("peds", Update);
         }
 
         public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 1600f, int originEntity = -1)
