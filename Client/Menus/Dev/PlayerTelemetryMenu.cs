@@ -1,10 +1,9 @@
 ﻿using MenuAPI;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace PocceMod.Client.Menus.Dev
 {
-    using PlayerTelemetry = Dictionary<string, List<int>>;
+    using PlayerTelemetry = Dictionary<string, List<string>>;
 
     public class PlayerTelemetryMenu : Menu
     {
@@ -19,7 +18,7 @@ namespace PocceMod.Client.Menus.Dev
 
                 foreach (var feature in _source)
                 {
-                    var menuListItem = new MenuListItem(feature.Key, feature.Value.Select(data => data.ToString()).ToList(), 0);
+                    var menuListItem = new MenuListItem(feature.Key, feature.Value, 0);
                     AddMenuItem(menuListItem);
                 }
             };

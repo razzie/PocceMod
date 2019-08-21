@@ -1,20 +1,22 @@
 ﻿using CitizenFX.Core;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace PocceMod.Client
 {
-    using PlayerTelemetry = Dictionary<string, List<int>>;
+    using PlayerTelemetry = Dictionary<string, List<string>>;
 
     public class Telemetry : BaseScript
     {
         private static readonly Dictionary<string, List<TimeSpan>> _localData = new Dictionary<string, List<TimeSpan>>();
-        private static readonly Dictionary<int, PlayerTelemetry> _playerTelemetries = new Dictionary<int, Dictionary<string, List<int>>>();
+        private static readonly Dictionary<int, PlayerTelemetry> _playerTelemetries = new Dictionary<int, PlayerTelemetry>();
 
         public Telemetry()
         {
-            EventHandlers["PocceMod:Telemetry"] += new Action<int, PlayerTelemetry>(ReceiveTelemetry);
+            EventHandlers["PocceMod:Telemetry"] += new Action<int, dynamic>(ReceiveTelemetry);
 
             Tick += Update;
         }
@@ -71,19 +73,29 @@ namespace PocceMod.Client
             avg = sum / times.Count;
         }
 
-        private static void ReceiveTelemetry(int sourcePlayer, PlayerTelemetry data)
+        private static void ReceiveTelemetry(int sourcePlayer, dynamic data)
         {
-            _playerTelemetries[sourcePlayer] = data;
+            var playerTelemetry = new PlayerTelemetry();
+
+            foreach (KeyValuePair<string, dynamic> pair in data)
+            {
+                List<object> values = pair.Value;
+                playerTelemetry.Add(pair.Key, values.Cast<string>().ToList());
+            }
+
+            _playerTelemetries[sourcePlayer] = playerTelemetry;
         }
 
-        private static PlayerTelemetry ComposeAndClear()
+        private static dynamic ComposeAndClear()
         {
-            var result = new Dictionary<string, List<int>>();
+            IDictionary<string, object> result = new ExpandoObject();
 
             foreach (var pair in _localData)
             {
                 MinMaxAvg(pair.Value, out int min, out int max, out int avg);
-                result.Add(pair.Key, new List<int> { pair.Value.Count, min, max, avg });
+
+                var values = new string[] { "calls: " + pair.Value.Count, "min: " + min, "max: " + max, "avg: " + avg };
+                result.Add(pair.Key, values);
 
                 pair.Value.Clear();
             }

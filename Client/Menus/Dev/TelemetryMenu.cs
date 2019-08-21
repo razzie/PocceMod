@@ -1,10 +1,7 @@
 ﻿using MenuAPI;
-using System.Collections.Generic;
 
 namespace PocceMod.Client.Menus.Dev
 {
-    using PlayerTelemetry = Dictionary<string, List<int>>;
-
     public class TelemetryMenu : Menu
     {
         public TelemetryMenu() : base("PocceMod", "telemetry menu")
@@ -14,7 +11,7 @@ namespace PocceMod.Client.Menus.Dev
 
             OnItemSelect += (_menu, _item, _index) =>
             {
-                submenu.OpenMenu(_item.ItemData as PlayerTelemetry);
+                submenu.OpenMenu(_item.ItemData);
             };
 
             OnMenuOpen += (_menu) =>
