@@ -28,7 +28,8 @@ namespace PocceMod.Client
             Cruising = 8,
             EMP = 16,
             BackToTheFuture = 32,
-            TurboBoost = 64
+            TurboBoost = 64,
+            AntiGravity = 128,
         }
 
         public enum Light
@@ -391,10 +392,8 @@ namespace PocceMod.Client
             if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
                 return;
 
-            if (AntiGravity.Contains(vehicle))
-                AntiGravity.Remove(vehicle);
-            else
-                AntiGravity.Add(vehicle, 0.9f);
+            var state = GetLastState(vehicle, StateFlag.AntiGravity);
+            SetState(vehicle, StateFlag.AntiGravity, !state);
         }
 
         public static void SetAircraftHorn(int horn)
@@ -631,6 +630,14 @@ namespace PocceMod.Client
             foreach (var vehicle in vehicles.Where(vehicle => GetLastState(vehicle, StateFlag.BackToTheFuture)))
             {
                 await Effects.AddWheelFireEffect(vehicle);
+            }
+
+            foreach (var vehicle in vehicles)
+            {
+                if (GetLastState(vehicle, StateFlag.AntiGravity))
+                    AntiGravity.Add(vehicle, 0.9f);
+                else
+                    AntiGravity.Remove(vehicle);
             }
         }
 

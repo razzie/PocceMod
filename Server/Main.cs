@@ -21,8 +21,6 @@ namespace PocceMod.Server
             EventHandlers["PocceMod:ClearLastRope"] += new Action<Player>(ClearLastRope);
             EventHandlers["PocceMod:ClearEntityRopes"] += new Action<Player, int>(ClearEntityRopes);
             EventHandlers["PocceMod:RequestRopes"] += new Action<Player>(RequestRopes);
-            EventHandlers["PocceMod:AntiGravityAdd"] += new Action<Player, int, float>(AntiGravityAdd);
-            EventHandlers["PocceMod:AntiGravityRemove"] += new Action<Player, int>(AntiGravityRemove);
             EventHandlers["PocceMod:RequestMPSkin"] += new Action<Player, int, int>(RequestMPSkin);
             EventHandlers["PocceMod:SetMPSkin"] += new Action<Player, int, dynamic, int>(SetMPSkin);
             EventHandlers["PocceMod:ToggleTurboBoost"] += new Action<Player, int, bool>(ToggleTurboBoost);
@@ -120,22 +118,6 @@ namespace PocceMod.Server
             {
                 rope.Player.TriggerEvent("PocceMod:AddRope", rope.Player.Handle, rope.Entity1, rope.Entity2, rope.Offset1, rope.Offset2, rope.Mode);
             }
-        }
-
-        private void AntiGravityAdd([FromSource] Player source, int entity, float force)
-        {
-            Debug(source, "AntiGravityAdd");
-
-            if (Permission.CanDo(source, Ability.AntiGravity) || Permission.CanDo(source, Ability.Balloons))
-                TriggerClientEvent("PocceMod:AntiGravityAdd", entity, force);
-        }
-
-        private void AntiGravityRemove([FromSource] Player source, int entity)
-        {
-            Debug(source, "AntiGravityRemove");
-
-            if (Permission.CanDo(source, Ability.AntiGravity) || Permission.CanDo(source, Ability.Balloons))
-                TriggerClientEvent("PocceMod:AntiGravityRemove", entity);
         }
 
         private void RequestMPSkin([FromSource] Player source, int ped, int ownerPlayer)
