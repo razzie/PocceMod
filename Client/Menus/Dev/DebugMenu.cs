@@ -1,4 +1,5 @@
-﻿using MenuAPI;
+﻿using CitizenFX.Core.Native;
+using MenuAPI;
 using PocceMod.Shared;
 
 namespace PocceMod.Client.Menus.Dev
@@ -17,6 +18,11 @@ namespace PocceMod.Client.Menus.Dev
 
         public DebugMenu() : base("PocceMod", "debug menu")
         {
+            AddMenuItem(new MenuItem("PlayerID") { Label = API.PlayerId().ToString() });
+
+            var permissionGroupItem = new MenuItem("Permission group") { Enabled = false };
+            AddMenuItem(permissionGroupItem);
+
             AddConfigItem("MenuKey", ConfigKind.Control);
             AddConfigItem("MenuRightAlign", ConfigKind.Bool);
             AddConfigItem("RopegunWindKey", ConfigKind.Control);
@@ -45,6 +51,15 @@ namespace PocceMod.Client.Menus.Dev
             var telemetryMenuItem = new MenuItem("Telemetry ↕");
             MenuController.BindMenuItem(this, telemetryMenu, telemetryMenuItem);
             AddMenuItem(telemetryMenuItem);
+
+            OnMenuOpen += (_menu) =>
+            {
+                if (!permissionGroupItem.Enabled && Permission.GetPlayerGroup(out Permission.Group permissionGroup))
+                {
+                    permissionGroupItem.Label = permissionGroup.ToString();
+                    permissionGroupItem.Enabled = true;
+                }
+            };
         }
 
         private string GetConfigItem(string item, ConfigKind kind)
