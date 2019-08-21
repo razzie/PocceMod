@@ -175,7 +175,7 @@ namespace PocceMod.Server
 
             foreach (var player in Players)
             {
-                if (Permission.CanDo(player, Ability.ReceiveTelemetry))
+                if (player == source || Permission.CanDo(player, Ability.ReceiveTelemetry))
                     player.TriggerEvent("PocceMod:Telemetry", source.Handle, data);
             }
         }
