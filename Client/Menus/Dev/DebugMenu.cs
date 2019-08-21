@@ -40,6 +40,7 @@ namespace PocceMod.Client.Menus.Dev
             AddConfigItem("TurboBoostRechargeRate", ConfigKind.Float);
             AddConfigItem("TurboBoostMinAngle", ConfigKind.Float);
             AddConfigItem("TurboBoostMaxAngle", ConfigKind.Float);
+            AddConfigItem("EnableTelemetry", ConfigKind.Bool);
             AddConfigItem("IgnorePermissions", ConfigKind.Bool);
 
             var permissionsMenu = new PermissionsMenu();
