@@ -34,6 +34,7 @@ namespace PocceMod.Client.Effect
         private static readonly float Power;
         private static readonly TimeSpan ChargeSec;
         private static readonly float RechargeRate;
+        private static readonly float MinAngle;
         private static readonly float MaxAngle;
         private static readonly bool IsMappedToHorn;
         private static readonly Dictionary<int, DateTime> _rechargeDB = new Dictionary<int, DateTime>();
@@ -54,6 +55,7 @@ namespace PocceMod.Client.Effect
             Power = Config.GetConfigFloat("TurboBoostPower");
             ChargeSec = TimeSpan.FromSeconds(Config.GetConfigFloat("TurboBoostChargeSec"));
             RechargeRate = Config.GetConfigFloat("TurboBoostRechargeRate");
+            MinAngle = Config.GetConfigFloat("TurboBoostMinAngle");
             MaxAngle = Config.GetConfigFloat("TurboBoostMaxAngle");
             IsMappedToHorn = Config.GetConfigInt("TurboBoostKey") == 86;
 
@@ -80,8 +82,8 @@ namespace PocceMod.Client.Effect
             _offset = max.Y;
             _created = DateTime.Now;
             _timeout = _created + ChargeSec;
-            _angle = 0f;
-            _angleStep = MaxAngle / ((int)ChargeSec.TotalMilliseconds / 200);
+            _angle = MinAngle;
+            _angleStep = (MaxAngle - MinAngle) / ((int)ChargeSec.TotalMilliseconds / 200);
 
             _blocked = _rechargeDB.TryGetValue(_vehicle, out DateTime nextCharge) && _created < nextCharge;
         }
