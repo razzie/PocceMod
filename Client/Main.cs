@@ -177,6 +177,9 @@ namespace PocceMod.Client
             
             if (Permission.CanDo(Ability.Balloons))
                 _menu.AddMenuListItemAsync("Extra", "Balloons", ExtraMenu.Balloons);
+
+            if (Permission.CanDo(Ability.FreezePosition))
+                _menu.AddMenuListItem("Extra", "Freeze position (toggle)", ExtraMenu.FreezePosition);
             #endregion
         }
 

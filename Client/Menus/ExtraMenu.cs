@@ -7,7 +7,13 @@ namespace PocceMod.Client.Menus
 {
     public static class ExtraMenu
     {
+        private const string FreezePosDecor = "POCCE_FREEZE_POSITION";
         private static bool _crazyOceanWaves = false;
+
+        static ExtraMenu()
+        {
+            API.DecorRegister(FreezePosDecor, 2);
+        }
 
         public static void ToggleCrazyOceanWaves()
         {
@@ -72,6 +78,15 @@ namespace PocceMod.Client.Menus
             var balloon = await Props.SpawnBalloons(coords);
             Ropes.Attach(player, balloon, Vector3.Zero, Vector3.Zero);
             API.SetEntityAsNoLongerNeeded(ref balloon);
+        }
+
+        public static void FreezePosition()
+        {
+            var entity = Common.GetPlayerPedOrVehicle();
+            var state = API.DecorGetBool(entity, FreezePosDecor);
+
+            API.FreezeEntityPosition(entity, !state);
+            API.DecorSetBool(entity, FreezePosDecor, !state);
         }
     }
 }

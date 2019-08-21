@@ -34,6 +34,7 @@
         AntiGravity,
         TurboBoost,
         Balloons,
+        FreezePosition,
         IdentifySkins,
         ChangeSkin,
         ReceiveTelemetry
