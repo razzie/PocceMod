@@ -17,7 +17,6 @@ namespace PocceMod.Client
         private static readonly int RopeClearKey;
         private static readonly RopeSet _ropes = new RopeSet();
         private static readonly RopegunState _ropegunState = new RopegunState();
-        private static readonly List<RopeWrapper> _ropeCleanupList = new List<RopeWrapper>();
 
         static Ropes()
         {
@@ -85,9 +84,6 @@ namespace PocceMod.Client
 
         private static async Task AddRope(int player, int entity1, int entity2, Vector3 offset1, Vector3 offset2, int mode)
         {
-            if (entity1 == entity2 && entity1 > 0)
-                return;
-
             if (RootObject == 0)
             {
                 var model = (uint)API.GetHashKey("prop_devin_rope_01");
@@ -108,13 +104,16 @@ namespace PocceMod.Client
                 entity2 = API.NetToEnt(entity2);
 
             if (!API.DoesEntityExist(entity1) || !API.DoesEntityExist(entity2))
+            {
+                _ropes.AddRope(new Shared.Rope(new Player(player), entity1, entity2, offset1, offset2, (ModeFlag)mode));
                 return;
+            }
 
             var rope = new RopeWrapper(new Player(player), entity1, entity2, offset1, offset2, (ModeFlag)mode);
             _ropes.AddRope(rope);
 
             if (entity1 == RootObject && entity2 == RootObject)
-                _ropeCleanupList.Add(rope);
+                rope.Timeout = DateTime.Now + TimeSpan.FromMinutes(1);
 
             if (!API.RopeAreTexturesLoaded())
                 API.RopeLoadTextures();
@@ -319,16 +318,6 @@ namespace PocceMod.Client
             foreach (var rope in _ropes.GetRopes())
             {
                 rope.Update();
-            }
-
-            var createdBefore = DateTime.Now - TimeSpan.FromMinutes(1);
-            foreach (var rope in _ropeCleanupList.ToArray())
-            {
-                if (rope.Created < createdBefore)
-                {
-                    rope.Clear();
-                    _ropeCleanupList.Remove(rope);
-                }
             }
         }
 

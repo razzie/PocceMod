@@ -25,7 +25,7 @@ namespace PocceMod.Shared
         {
             foreach (var playerRopes in _ropes.Values)
             {
-                foreach (var rope in playerRopes.ToArray())
+                foreach (var rope in playerRopes)
                 {
                     if (rope.Entity1 == entity || rope.Entity2 == entity)
                         return true;
