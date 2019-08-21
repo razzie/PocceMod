@@ -674,9 +674,9 @@ namespace PocceMod.Client
 
             if (TurboBoostKey > 0 && GetLastState(vehicle, StateFlag.TurboBoost))
             {
-                if (API.IsControlJustPressed(0, TurboBoostKey))
+                if (API.IsControlJustPressed(0, TurboBoostKey) || API.IsDisabledControlJustPressed(0, TurboBoostKey))
                     TriggerServerEvent("PocceMod:ToggleTurboBoost", API.VehToNet(vehicle), true);
-                else if (API.IsControlJustReleased(0, TurboBoostKey))
+                else if (API.IsControlJustReleased(0, TurboBoostKey) || API.IsDisabledControlJustReleased(0, TurboBoostKey))
                     TriggerServerEvent("PocceMod:ToggleTurboBoost", API.VehToNet(vehicle), false);
             }
 
