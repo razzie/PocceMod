@@ -12,6 +12,7 @@ namespace PocceMod.Client.Menus.Dev
             OnItemSelect += (_menu, _item, _index) =>
             {
                 submenu.OpenMenu(_item.ItemData);
+                CloseMenu();
             };
 
             OnMenuOpen += (_menu) =>

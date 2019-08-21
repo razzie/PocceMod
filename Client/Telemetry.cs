@@ -2,7 +2,6 @@
 using PocceMod.Shared;
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -36,6 +35,9 @@ namespace PocceMod.Client
 
         public static Func<Task> Wrap(string feature, Func<Task> func)
         {
+            if (!Enabled)
+                return func;
+
             return () =>
             {
                 var start = DateTime.Now;
@@ -101,9 +103,9 @@ namespace PocceMod.Client
             _playerTelemetries[sourcePlayer] = playerTelemetry;
         }
 
-        private static dynamic ComposeAndClear()
+        private static IDictionary<string, object> ComposeAndClear()
         {
-            IDictionary<string, object> result = new ExpandoObject();
+            IDictionary<string, object> result = new Dictionary<string, object>();
 
             foreach (var pair in _localData)
             {
