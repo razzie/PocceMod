@@ -31,7 +31,9 @@ namespace PocceMod.Client
             return () =>
             {
                 var start = DateTime.Now;
-                return func().ContinueWith(_ => AddData(feature, start));
+                var result = func();
+                AddData(feature, start);
+                return result;
             };
         }
 
