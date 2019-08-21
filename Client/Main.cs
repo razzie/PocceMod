@@ -25,11 +25,6 @@ namespace PocceMod.Client
                     _menu.OpenMenu();
             });
 
-            EventHandlers["PocceMod:Burn"] += new Action<int>(async entity =>
-            {
-                API.StartEntityFire(await Common.WaitForNetEntity(entity));
-            });
-
             API.RegisterCommand("pocce", new Action<int, List<object>, string>(PocceCommand), false);
         }
 

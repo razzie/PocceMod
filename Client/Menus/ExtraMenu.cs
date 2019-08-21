@@ -65,7 +65,7 @@ namespace PocceMod.Client.Menus
         public static async Task SpawnTrashPed()
         {
             var ped = await Peds.Spawn(Config.TrashPedList);
-            BaseScript.TriggerServerEvent("PocceMod:Burn", API.PedToNet(ped));
+            Peds.Burn(ped);
             API.SetPedAsNoLongerNeeded(ref ped);
         }
 

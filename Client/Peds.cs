@@ -23,10 +23,13 @@ namespace PocceMod.Client
         }
 
         public const Filter DefaultFilters = Filter.LocalPlayer | Filter.Dead;
+        private const string BurnDecor = "POCCE_BURN";
         private static readonly List<int> _knownPeds = new List<int>();
 
         public Peds()
         {
+            API.DecorRegister(BurnDecor, 2);
+
             EventHandlers["PocceMod:RequestMPSkin"] += new Action<int, int>(RequestMPSkin);
             EventHandlers["PocceMod:SetMPSkin"] += new Action<int, byte[]>(SetMPSkin);
 
@@ -164,6 +167,11 @@ namespace PocceMod.Client
             }
         }
 
+        public static void Burn(int ped)
+        {
+            API.DecorSetBool(ped, BurnDecor, true);
+        }
+
         private static void RequestMPSkin(int ped, int requestingPlayer)
         {
             var skin = new MultiplayerSkin(API.NetToPed(ped));
@@ -197,6 +205,9 @@ namespace PocceMod.Client
                     var owner = API.NetworkGetEntityOwner(ped);
                     TriggerServerEvent("PocceMod:RequestMPSkin", API.PedToNet(ped), API.GetPlayerServerId(owner));
                 }
+
+                if (API.DecorGetBool(ped, BurnDecor) && !API.IsEntityOnFire(ped))
+                    API.StartEntityFire(ped);
             }
 
             _knownPeds.AddRange(peds);

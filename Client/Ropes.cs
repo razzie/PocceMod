@@ -30,7 +30,7 @@ namespace PocceMod.Client
             EventHandlers["PocceMod:AddRope"] += new Func<int, int, int, Vector3, Vector3, int, Task>(AddRope);
             EventHandlers["PocceMod:ClearRopes"] += new Action<int>(ClearRopes);
             EventHandlers["PocceMod:ClearLastRope"] += new Action<int>(ClearLastRope);
-            EventHandlers["PocceMod:ClearEntityRopes"] += new Func<int, Task>(ClearEntityRopes);
+            EventHandlers["PocceMod:ClearEntityRopes"] += new Action<int>(ClearEntityRopes);
 
             TriggerServerEvent("PocceMod:RequestRopes");
 
@@ -97,14 +97,15 @@ namespace PocceMod.Client
                 API.FreezeEntityPosition(RootObject, true);
             }
 
-            entity1 = await Common.WaitForNetEntity(entity1);
-            entity2 = await Common.WaitForNetEntity(entity2);
-
             if (entity1 == 0)
                 entity1 = RootObject;
+            else
+                entity1 = API.NetToEnt(entity1);
 
             if (entity2 == 0)
                 entity2 = RootObject;
+            else
+                entity2 = API.NetToEnt(entity2);
 
             if (!API.DoesEntityExist(entity1) || !API.DoesEntityExist(entity2))
                 return;
@@ -129,9 +130,9 @@ namespace PocceMod.Client
             _ropes.ClearLastRope(new Player(player));
         }
 
-        private static async Task ClearEntityRopes(int entity)
+        private static void ClearEntityRopes(int entity)
         {
-            _ropes.ClearEntityRopes(await Common.WaitForNetEntity(entity));
+            _ropes.ClearEntityRopes(API.NetToEnt(entity));
         }
 
         public static void PlayerAttach(int entity, Vector3 offset, ModeFlag mode = ModeFlag.Normal)

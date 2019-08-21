@@ -12,7 +12,6 @@ namespace PocceMod.Server
         public Main()
         {
             EventHandlers["playerDropped"] += new Action<Player, string>(PlayerDropped);
-            EventHandlers["PocceMod:Burn"] += new Action<Player, int>(Burn);
             EventHandlers["PocceMod:EMP"] += new Action<Player, int>(EMP);
             EventHandlers["PocceMod:CompressVehicle"] += new Action<Player, int>(CompressVehicle);
             EventHandlers["PocceMod:SetIndicator"] += new Action<Player, int, int>(SetIndicator);
@@ -43,14 +42,6 @@ namespace PocceMod.Server
             Debug(source, "PlayerDropped");
 
             ClearRopes(source);
-        }
-
-        private void Burn([FromSource] Player source, int entity)
-        {
-            Debug(source, "Burn");
-
-            if (Permission.CanDo(source, Ability.SpawnTrashPed))
-                TriggerClientEvent("PocceMod:Burn", entity);
         }
 
         private void EMP([FromSource] Player source, int vehicle)

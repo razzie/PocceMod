@@ -111,26 +111,6 @@ namespace PocceMod.Client
             Telemetry.AddData("network_request_control", start);
         }
 
-        public static async Task<int> WaitForNetEntity(int netEntity, int timeoutSeconds = 1)
-        {
-            if (netEntity == 0)
-                return 0;
-
-            var start = DateTime.Now;
-            var timeout = start + TimeSpan.FromSeconds(timeoutSeconds);
-            var entity = API.NetToEnt(netEntity);
-
-            while (!API.DoesEntityExist(entity) && DateTime.Now < timeout)
-            {
-                await BaseScript.Delay(100);
-                entity = API.NetToEnt(netEntity);
-            }
-
-            Telemetry.AddData("network_wait_for_entity", start);
-
-            return entity;
-        }
-
         public static int GetPlayerPedOrVehicle()
         {
             var player = API.GetPlayerPed(-1);
