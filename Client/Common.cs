@@ -8,6 +8,11 @@ namespace PocceMod.Client
 {
     public static class Common
     {
+        public static int PlayerID
+        {
+            get { return API.GetPlayerServerId(API.PlayerId()); }
+        }
+
         public static void Notification(string message, bool blink = false, bool saveToBrief = false)
         {
             API.SetNotificationTextEntry("CELL_EMAIL_BCON");

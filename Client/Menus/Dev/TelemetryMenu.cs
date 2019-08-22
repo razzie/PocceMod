@@ -1,4 +1,5 @@
-﻿using MenuAPI;
+﻿using CitizenFX.Core.Native;
+using MenuAPI;
 
 namespace PocceMod.Client.Menus.Dev
 {
@@ -19,7 +20,9 @@ namespace PocceMod.Client.Menus.Dev
             {
                 foreach (var playerTelemetry in Telemetry.Entries)
                 {
-                    var menuItem = new MenuItem("player#" + playerTelemetry.Key) { ItemData = playerTelemetry.Value };
+                    var player = playerTelemetry.Key;
+                    var playerName = API.GetPlayerName(API.GetPlayerFromServerId(player));
+                    var menuItem = new MenuItem(string.Format("{0} (#{1})", playerName, player)) { ItemData = playerTelemetry.Value };
                     AddMenuItem(menuItem);
                 }
             };
