@@ -24,12 +24,12 @@ namespace PocceMod.Shared
             Mode = mode;
         }
 
-        public Player Player { get; private set; }
-        public int Entity1 { get; private set; }
-        public int Entity2 { get; private set; }
-        public Vector3 Offset1 { get; private set; }
-        public Vector3 Offset2 { get; private set; }
-        public ModeFlag Mode { get; private set; }
+        public Player Player { get; }
+        public int Entity1 { get; protected set; }
+        public int Entity2 { get; protected set; }
+        public Vector3 Offset1 { get; protected set; }
+        public Vector3 Offset2 { get; protected set; }
+        public ModeFlag Mode { get; protected set; }
         
         public virtual void Update()
         {

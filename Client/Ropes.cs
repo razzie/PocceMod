@@ -11,7 +11,6 @@ namespace PocceMod.Client
 {
     public class Ropes : BaseScript
     {
-        internal static int RootObject { get; private set; }
         private const uint Ropegun = 0x44AE7910; // WEAPON_POCCE_ROPEGUN
         private static readonly int RopegunWindKey;
         private static readonly int RopeClearKey;
@@ -84,36 +83,8 @@ namespace PocceMod.Client
 
         private static async Task AddRope(int player, int entity1, int entity2, Vector3 offset1, Vector3 offset2, int mode)
         {
-            if (RootObject == 0)
-            {
-                var model = (uint)API.GetHashKey("prop_devin_rope_01");
-                await Common.RequestModel(model);
-                RootObject = API.CreateObject((int)model, 0f, 0f, 0f, false, false, false);
-                API.SetModelAsNoLongerNeeded(model);
-                API.FreezeEntityPosition(RootObject, true);
-            }
-
-            if (entity1 == 0)
-                entity1 = RootObject;
-            else
-                entity1 = API.NetToEnt(entity1);
-
-            if (entity2 == 0)
-                entity2 = RootObject;
-            else
-                entity2 = API.NetToEnt(entity2);
-
-            if (!API.DoesEntityExist(entity1) || !API.DoesEntityExist(entity2))
-            {
-                _ropes.AddRope(new Shared.Rope(new Player(player), entity1, entity2, offset1, offset2, (ModeFlag)mode));
-                return;
-            }
-
-            var rope = new RopeWrapper(new Player(player), entity1, entity2, offset1, offset2, (ModeFlag)mode);
+            var rope = await RopeWrapper.Create(player, entity1, entity2, offset1, offset2, (ModeFlag)mode);
             _ropes.AddRope(rope);
-
-            if (entity1 == RootObject && entity2 == RootObject)
-                rope.Timeout = DateTime.Now + TimeSpan.FromMinutes(1);
 
             if (!API.RopeAreTexturesLoaded())
                 API.RopeLoadTextures();

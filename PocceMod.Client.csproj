@@ -56,6 +56,7 @@
     <Compile Include="Client\Menus\Dev\PlayerTelemetryMenu.cs" />
     <Compile Include="Client\Menus\Dev\TelemetryMenu.cs" />
     <Compile Include="Client\Menus\MainMenuIncludeAttribute.cs" />
+    <Compile Include="Client\RopeWrapperDelayed.cs" />
     <Compile Include="Client\Telemetry.cs" />
     <Compile Include="Shared\Controls.cs" />
     <Compile Include="Client\Effects.cs" />
