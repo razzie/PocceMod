@@ -24,18 +24,15 @@ namespace PocceMod.Client
 
             var entity1 = (netEntity1 == 0) ? RootObject : API.NetToEnt(netEntity1);
             var entity2 = (netEntity2 == 0) ? RootObject : API.NetToEnt(netEntity2);
-
-            if (!API.DoesEntityExist(entity1) || !API.DoesEntityExist(entity2))
-            {
-                return new RopeWrapperDelayed(player, netEntity1, netEntity2, entity1, entity2, offset1, offset2, mode);
-            }
-
-            var rope = new RopeWrapper(player, entity1, entity2, offset1, offset2, mode);
+            DateTime? timeout = null;
 
             if (entity1 == RootObject && entity2 == RootObject)
-                rope.Timeout = DateTime.Now + TimeSpan.FromMinutes(1);
+                timeout = DateTime.Now + TimeSpan.FromMinutes(1);
 
-            return rope;
+            if (!API.DoesEntityExist(entity1) || !API.DoesEntityExist(entity2))
+                return new RopeWrapperDelayed(player, netEntity1, netEntity2, entity1, entity2, offset1, offset2, mode) { Timeout = timeout };
+            else
+                return new RopeWrapper(player, entity1, entity2, offset1, offset2, mode) { Timeout = timeout };
         }
 
         internal RopeWrapper(int player, int entity1, int entity2, Vector3 offset1, Vector3 offset2, ModeFlag mode) : base(new Player(player), entity1, entity2, offset1, offset2, mode)

@@ -10,7 +10,7 @@ namespace PocceMod.Client
         private readonly int _netEntity2;
         private bool _tryResolve1;
         private bool _tryResolve2;
-        private DateTime _retry;
+        private DateTime? _retry;
         private RopeWrapper _rope;
 
         public RopeWrapperDelayed(int player, int netEntity1, int netEntity2, int entity1, int entity2, Vector3 offset1, Vector3 offset2, ModeFlag mode) : base(new Player(player), entity1, entity2, offset1, offset2, mode)
@@ -23,6 +23,8 @@ namespace PocceMod.Client
 
             Retry();
         }
+
+        public DateTime? Timeout { get; set; } = null;
 
         private void Retry()
         {
@@ -37,7 +39,7 @@ namespace PocceMod.Client
                 return;
             }
 
-            if (DateTime.Now > _retry)
+            if (_retry != null && DateTime.Now > _retry)
             {
                 if (_tryResolve1)
                 {
@@ -66,6 +68,12 @@ namespace PocceMod.Client
                 }
 
                 _rope = new RopeWrapper(Player.Handle, Entity1, Entity2, Offset1, Offset2, Mode);
+                _rope.Timeout = Timeout;
+            }
+            
+            if (Timeout != null && Timeout < DateTime.Now)
+            {
+                _retry = null;
             }
         }
 
