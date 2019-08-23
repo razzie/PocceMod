@@ -18,7 +18,7 @@ namespace PocceMod.Client.Effect
                 Offset = API.GetOffsetFromEntityGivenWorldCoords(vehicle, pos.X, pos.Y, pos.Z);
 
                 API.UseParticleFxAssetNextCall("core");
-                Handle = API.StartParticleFxLoopedOnEntity("ent_amb_steam", vehicle, Offset.X, Offset.Y, Offset.Z, 90f, 0f, 0f, 1f, false, false, false);
+                Handle = API.StartParticleFxLoopedOnEntity("ent_amb_steam", vehicle, Offset.X, Offset.Y, Offset.Z, 90f + MinAngle, 0f, 0f, 1f, false, false, false);
             }
 
             public int Handle { get; }
