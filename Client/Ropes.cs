@@ -16,6 +16,7 @@ namespace PocceMod.Client
         private static readonly int RopeClearKey;
         private static readonly RopeSet _ropes = new RopeSet();
         private static readonly RopegunState _ropegunState = new RopegunState();
+        internal static int _rootObject;
 
         static Ropes()
         {
@@ -81,10 +82,28 @@ namespace PocceMod.Client
             return false;
         }
 
-        private static async Task AddRope(int player, int entity1, int entity2, Vector3 offset1, Vector3 offset2, int mode)
+        private static async Task AddRope(int player, int netEntity1, int netEntity2, Vector3 offset1, Vector3 offset2, int mode)
         {
-            var rope = await RopeWrapper.Create(player, entity1, entity2, offset1, offset2, (ModeFlag)mode);
-            _ropes.AddRope(rope);
+            if (_rootObject == 0)
+            {
+                var model = (uint)API.GetHashKey("prop_devin_rope_01");
+                await Common.RequestModel(model);
+                _rootObject = API.CreateObject((int)model, 0f, 0f, 0f, false, false, false);
+                API.SetModelAsNoLongerNeeded(model);
+                API.FreezeEntityPosition(_rootObject, true);
+            }
+
+            var entity1 = (netEntity1 == 0) ? _rootObject : API.NetToEnt(netEntity1);
+            var entity2 = (netEntity2 == 0) ? _rootObject : API.NetToEnt(netEntity2);
+            DateTime? timeout = null;
+
+            if (entity1 == _rootObject && entity2 == _rootObject)
+                timeout = DateTime.Now + TimeSpan.FromMinutes(1);
+
+            if (!API.DoesEntityExist(entity1) || !API.DoesEntityExist(entity2))
+                _ropes.AddRope(new RopeWrapperDelayed(player, netEntity1, netEntity2, entity1, entity2, offset1, offset2, (ModeFlag)mode) { Timeout = timeout });
+            else
+                _ropes.AddRope(new RopeWrapper(player, entity1, entity2, offset1, offset2, (ModeFlag)mode) { Timeout = timeout });
 
             if (!API.RopeAreTexturesLoaded())
                 API.RopeLoadTextures();

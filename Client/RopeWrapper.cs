@@ -1,41 +1,15 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
 using System;
-using System.Threading.Tasks;
 
 namespace PocceMod.Client
 {
     internal class RopeWrapper : Shared.Rope
     {
-        internal static int RootObject { get; private set; }
         private int _handle;
         private float _length;
 
-        public static async Task<Shared.Rope> Create(int player, int netEntity1, int netEntity2, Vector3 offset1, Vector3 offset2, ModeFlag mode)
-        {
-            if (RootObject == 0)
-            {
-                var model = (uint)API.GetHashKey("prop_devin_rope_01");
-                await Common.RequestModel(model);
-                RootObject = API.CreateObject((int)model, 0f, 0f, 0f, false, false, false);
-                API.SetModelAsNoLongerNeeded(model);
-                API.FreezeEntityPosition(RootObject, true);
-            }
-
-            var entity1 = (netEntity1 == 0) ? RootObject : API.NetToEnt(netEntity1);
-            var entity2 = (netEntity2 == 0) ? RootObject : API.NetToEnt(netEntity2);
-            DateTime? timeout = null;
-
-            if (entity1 == RootObject && entity2 == RootObject)
-                timeout = DateTime.Now + TimeSpan.FromMinutes(1);
-
-            if (!API.DoesEntityExist(entity1) || !API.DoesEntityExist(entity2))
-                return new RopeWrapperDelayed(player, netEntity1, netEntity2, entity1, entity2, offset1, offset2, mode) { Timeout = timeout };
-            else
-                return new RopeWrapper(player, entity1, entity2, offset1, offset2, mode) { Timeout = timeout };
-        }
-
-        internal RopeWrapper(int player, int entity1, int entity2, Vector3 offset1, Vector3 offset2, ModeFlag mode) : base(new Player(player), entity1, entity2, offset1, offset2, mode)
+        public RopeWrapper(int player, int entity1, int entity2, Vector3 offset1, Vector3 offset2, ModeFlag mode) : base(new Player(player), entity1, entity2, offset1, offset2, mode)
         {
             GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
             _length = (pos1 - pos2).Length();
