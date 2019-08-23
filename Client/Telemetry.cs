@@ -126,10 +126,10 @@ namespace PocceMod.Client
                 var data = pair.Value;
                 var values = new string[] {
                     "calls: " + data.Calls,
-                    "min: " + data.Min + "ms",
-                    "max: " + data.Max + "ms",
-                    "avg: " + data.Avg + "ms",
-                    "sum: " + data.Sum + "ms"
+                    "min: " + Math.Round(data.Min, 2) + "ms",
+                    "max: " + Math.Round(data.Max, 2) + "ms",
+                    "avg: " + Math.Round(data.Avg, 2) + "ms",
+                    "sum: " + Math.Round(data.Sum, 2) + "ms"
                 };
                 result.Add(pair.Key, values);
 
