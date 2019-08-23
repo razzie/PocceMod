@@ -1,4 +1,5 @@
-﻿using MenuAPI;
+﻿using CitizenFX.Core.Native;
+using MenuAPI;
 using PocceMod.Shared;
 
 namespace PocceMod.Client.Menus.Dev
@@ -17,6 +18,9 @@ namespace PocceMod.Client.Menus.Dev
 
         public DebugMenu() : base("PocceMod", "debug menu")
         {
+            var playerIDItem = new MenuItem("Player ID");
+            AddMenuItem(playerIDItem);
+
             var serverIDItem = new MenuItem("Player server ID");
             AddMenuItem(serverIDItem);
 
@@ -55,6 +59,7 @@ namespace PocceMod.Client.Menus.Dev
 
             OnMenuOpen += (_menu) =>
             {
+                playerIDItem.Label = API.PlayerId().ToString();
                 serverIDItem.Label = Common.PlayerID.ToString();
 
                 if (!permissionGroupItem.Enabled && Permission.GetPlayerGroup(out Permission.Group permissionGroup))
