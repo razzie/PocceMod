@@ -72,8 +72,7 @@ namespace PocceMod.Client
                 return;
             }
 
-            if ((Entity1 != 0 && !API.DoesEntityExist(Entity1)) ||
-                (Entity2 != 0 && !API.DoesEntityExist(Entity2)))
+            if (!API.DoesEntityExist(Entity1) || !API.DoesEntityExist(Entity2))
             {
                 Clear();
                 return;
