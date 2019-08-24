@@ -52,7 +52,7 @@ namespace PocceMod.Client.Effect
 
         public bool Expired
         {
-            get { return !API.DoesEntityExist(_vehicle) || !Vehicles.GetLastState(_vehicle, Vehicles.StateFlag.BackToTheFuture); }
+            get { return !API.DoesEntityExist(_vehicle) || !Vehicles.IsFeatureEnabled(_vehicle, Vehicles.FeatureFlag.BackToTheFuture); }
         }
 
         private bool ShouldSpawnFire

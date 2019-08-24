@@ -24,8 +24,8 @@ namespace PocceMod.Client.Menus
                 return;
             }
 
-            var state = !Vehicles.GetLastState(vehicle, Vehicles.StateFlag.BackToTheFuture);
-            Vehicles.SetState(vehicle, Vehicles.StateFlag.BackToTheFuture, state);
+            var state = !Vehicles.IsFeatureEnabled(vehicle, Vehicles.FeatureFlag.BackToTheFuture);
+            Vehicles.SetFeatureEnabled(vehicle, Vehicles.FeatureFlag.BackToTheFuture, state);
 
             if (state)
             {
@@ -40,8 +40,8 @@ namespace PocceMod.Client.Menus
             if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
                 return;
 
-            var state = !Vehicles.GetLastState(vehicle, Vehicles.StateFlag.TurboBoost);
-            Vehicles.SetState(vehicle, Vehicles.StateFlag.TurboBoost, state);
+            var state = !Vehicles.IsFeatureEnabled(vehicle, Vehicles.FeatureFlag.TurboBoost);
+            Vehicles.SetFeatureEnabled(vehicle, Vehicles.FeatureFlag.TurboBoost, state);
 
             if (state)
                 Common.Notification("Turbo Boost enabled");
@@ -91,8 +91,8 @@ namespace PocceMod.Client.Menus
             if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
                 return;
 
-            var state = Vehicles.GetLastState(vehicle, Vehicles.StateFlag.AntiGravity);
-            Vehicles.SetState(vehicle, Vehicles.StateFlag.AntiGravity, !state);
+            var state = Vehicles.IsFeatureEnabled(vehicle, Vehicles.FeatureFlag.AntiGravity);
+            Vehicles.SetFeatureEnabled(vehicle, Vehicles.FeatureFlag.AntiGravity, !state);
         }
     }
 }

@@ -20,16 +20,21 @@ namespace PocceMod.Client
         }
 
         [Flags]
-        public enum StateFlag
+        private enum StateFlag
         {
             HazardLight = 1,
             TiresIntact = 2,
             EngineIntact = 4,
             Cruising = 8,
-            EMP = 16,
-            BackToTheFuture = 32,
-            TurboBoost = 64,
-            AntiGravity = 128,
+            EMP = 16
+        }
+
+        [Flags]
+        public enum FeatureFlag
+        {
+            BackToTheFuture = 1,
+            TurboBoost = 2,
+            AntiGravity = 4
         }
 
         public enum Light
@@ -44,6 +49,7 @@ namespace PocceMod.Client
         private const string AircraftHornDecor = "POCCE_AIRCRAFT_HORN";
         private const string LightMultiplierDecor = "POCCE_VEHICLE_LIGHT_MULTIPLIER";
         private const string StateFlagsDecor = "POCCE_VEHICLE_STATE_FLAGS";
+        private const string FeatureFlagsDecor = "POCCE_VEHICLE_FEATURE_FLAGS";
         private static readonly int TurboBoostKey;
 
         static Vehicles()
@@ -56,6 +62,7 @@ namespace PocceMod.Client
             API.DecorRegister(AircraftHornDecor, 3);
             API.DecorRegister(LightMultiplierDecor, 1);
             API.DecorRegister(StateFlagsDecor, 3);
+            API.DecorRegister(FeatureFlagsDecor, 3);
 
             EventHandlers["PocceMod:EMP"] += new Func<int, Task>(NetEMP);
             EventHandlers["PocceMod:SetIndicator"] += new Action<int, int>(NetSetIndicator);
@@ -440,13 +447,31 @@ namespace PocceMod.Client
                 Effects.RemoveTurboBoostEffect(vehicle);
         }
 
-        public static bool GetLastState(int vehicle, StateFlag flag)
+        public static bool IsFeatureEnabled(int vehicle, FeatureFlag flag)
+        {
+            var state = (FeatureFlag)API.DecorGetInt(vehicle, FeatureFlagsDecor);
+            return (state & flag) == flag;
+        }
+
+        public static void SetFeatureEnabled(int vehicle, FeatureFlag flag, bool value)
+        {
+            var state = (FeatureFlag)API.DecorGetInt(vehicle, FeatureFlagsDecor);
+
+            if (value)
+                state |= flag;
+            else
+                state &= ~flag;
+
+            API.DecorSetInt(vehicle, FeatureFlagsDecor, (int)state);
+        }
+
+        private static bool GetLastState(int vehicle, StateFlag flag)
         {
             var state = (StateFlag)API.DecorGetInt(vehicle, StateFlagsDecor);
             return (state & flag) == flag;
         }
 
-        public static void SetState(int vehicle, StateFlag flag, bool value)
+        private static void SetState(int vehicle, StateFlag flag, bool value)
         {
             var state = (StateFlag)API.DecorGetInt(vehicle, StateFlagsDecor);
 
@@ -558,17 +583,21 @@ namespace PocceMod.Client
 
             foreach (var vehicle in vehicles.Where(vehicle => GetLastState(vehicle, StateFlag.EMP)))
             {
-                await Effects.AddEMPEffect(vehicle);
+                var engineHealth = API.GetVehicleEngineHealth(vehicle);
+                if (engineHealth > 100f)
+                    SetState(vehicle, StateFlag.EMP, false);
+                else
+                    await Effects.AddEMPEffect(vehicle);
             }
 
-            foreach (var vehicle in vehicles.Where(vehicle => GetLastState(vehicle, StateFlag.BackToTheFuture)))
+            foreach (var vehicle in vehicles.Where(vehicle => IsFeatureEnabled(vehicle, FeatureFlag.BackToTheFuture)))
             {
                 await Effects.AddWheelFireEffect(vehicle);
             }
 
             foreach (var vehicle in vehicles)
             {
-                if (GetLastState(vehicle, StateFlag.AntiGravity))
+                if (IsFeatureEnabled(vehicle, FeatureFlag.AntiGravity))
                     AntiGravity.Add(vehicle, 0.7f);
                 else
                     AntiGravity.Remove(vehicle);
@@ -614,7 +643,7 @@ namespace PocceMod.Client
                 }
             }
 
-            if (TurboBoostKey > 0 && GetLastState(vehicle, StateFlag.TurboBoost))
+            if (TurboBoostKey > 0 && IsFeatureEnabled(vehicle, FeatureFlag.TurboBoost))
             {
                 if (API.IsControlJustPressed(0, TurboBoostKey) || API.IsDisabledControlJustPressed(0, TurboBoostKey))
                     TriggerServerEvent("PocceMod:ToggleTurboBoost", API.VehToNet(vehicle), true);

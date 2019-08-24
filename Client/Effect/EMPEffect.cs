@@ -38,7 +38,6 @@ namespace PocceMod.Client.Effect
 
         public void Clear()
         {
-            Vehicles.SetState(_vehicle, Vehicles.StateFlag.EMP, false);
             API.StopParticleFxLooped(_effect, false);
             API.RemoveParticleFx(_effect, false);
         }
