@@ -222,6 +222,9 @@ namespace PocceMod.Client
                 }
             }
 
+            if (API.IsBigVehicle(vehicle))
+                API.SetEntityLodDist(vehicle, 0xFFFF);
+
             API.SetModelAsNoLongerNeeded(hash);
             return vehicle;
         }
