@@ -132,25 +132,25 @@ namespace PocceMod.Client
 
             #region Upgrade
             if (Permission.CanDo(Ability.BackToTheFuture))
-                _menu.AddMenuListItem("Upgrade", "Back to the Future (toggle)", Vehicles.ToggleBackToTheFuture);
+                _menu.AddMenuListItem("Upgrade", "Back to the Future (toggle)", UpgradeMenu.ToggleBackToTheFuture);
 
             if (Permission.CanDo(Ability.UltrabrightHeadlight))
-                _menu.AddMenuListItem("Upgrade", "Ultrabright headlight (toggle)", Vehicles.ToggleUltrabrightHeadlight);
+                _menu.AddMenuListItem("Upgrade", "Ultrabright headlight (toggle)", UpgradeMenu.ToggleUltrabrightHeadlight);
 
             if (Permission.CanDo(Ability.CargobobMagnet))
-                _menu.AddMenuListItem("Upgrade", "Cargobob magnet", Vehicles.CargobobMagnet);
+                _menu.AddMenuListItem("Upgrade", "Cargobob magnet", UpgradeMenu.CargobobMagnet);
 
             if (Permission.CanDo(Ability.CompressVehicle))
-                _menu.AddMenuListItem("Upgrade", "Compress vehicle", Vehicles.CompressVehicle);
+                _menu.AddMenuListItem("Upgrade", "Compress vehicle", UpgradeMenu.CompressVehicle);
 
             if (Permission.CanDo(Ability.AntiGravity))
-                _menu.AddMenuListItem("Upgrade", "Anti-gravity (toggle)", Vehicles.ToggleAntiGravity);
+                _menu.AddMenuListItem("Upgrade", "Anti-gravity (toggle)", UpgradeMenu.ToggleAntiGravity);
 
             if (Permission.CanDo(Ability.AircraftHorn))
                 _menu.AddMenuListItem("Upgrade", "Aircraft horn ↕", _menu.Submenu<AircraftHornMenu>().OpenMenu);
 
             if (Permission.CanDo(Ability.TurboBoost))
-                _menu.AddMenuListItem("Upgrade", "Turbo Boost (toggle)", Vehicles.ToggleTurboBoost);
+                _menu.AddMenuListItem("Upgrade", "Turbo Boost (toggle)", UpgradeMenu.ToggleTurboBoost);
             #endregion
 
             #region Extra

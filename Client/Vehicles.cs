@@ -268,94 +268,8 @@ namespace PocceMod.Client
             return EMP(API.NetToVeh(netVehicle));
         }
 
-        public static void ToggleUltrabrightHeadlight()
+        public static void Compress(int vehicle)
         {
-            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
-                return;
-
-            if (!API.DecorExistOn(vehicle, LightMultiplierDecor))
-            {
-                API.DecorSetFloat(vehicle, LightMultiplierDecor, 1f);
-                Common.Notification("Use arrow up/down keys to change brightness");
-            }
-            else
-            {
-                API.DecorRemove(vehicle, LightMultiplierDecor);
-                API.SetVehicleLightMultiplier(vehicle, 1f);
-            }
-        }
-
-        public static void ToggleBackToTheFuture()
-        {
-            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
-                return;
-
-            var model = (uint)API.GetEntityModel(vehicle);
-            if (!API.IsThisModelACar(model) && !API.IsThisModelABike(model) && !API.IsThisModelAQuadbike(model))
-            {
-                Common.Notification("Only cars, bikes and quadbikes are supported");
-                return;
-            }
-
-            var state = !GetLastState(vehicle, StateFlag.BackToTheFuture);
-            SetState(vehicle, StateFlag.BackToTheFuture, state);
-
-            if (state)
-            {
-                Common.Notification("Back to the Future!");
-                API.SetVehicleTyresCanBurst(vehicle, false);
-                API.SetDisableVehiclePetrolTankFires(vehicle, true);
-            }
-        }
-
-        public static void ToggleTurboBoost()
-        {
-            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
-                return;
-
-            var state = !GetLastState(vehicle, StateFlag.TurboBoost);
-            SetState(vehicle, StateFlag.TurboBoost, state);
-
-            if (state)
-                Common.Notification("Turbo Boost enabled");
-        }
-
-        public static void CargobobMagnet()
-        {
-            var player = API.GetPlayerPed(-1);
-            if (API.IsPedInAnyHeli(player))
-            {
-                var heli = API.GetVehiclePedIsIn(player, false);
-                var pilot = API.GetPedInVehicleSeat(heli, -1);
-
-                if (pilot != player && !Autopilot.IsOwnedAutopilot(pilot))
-                {
-                    Common.Notification("Player is not the pilot of this heli");
-                    return;
-                }
-
-                if (API.IsCargobobMagnetActive(heli))
-                {
-                    API.SetCargobobPickupMagnetActive(heli, false);
-                    API.RetractCargobobHook(heli);
-                }
-                else
-                {
-                    API.EnableCargobobHook(heli, 1);
-                    API.SetCargobobPickupMagnetActive(heli, true);
-                }
-            }
-            else
-            {
-                Common.Notification("Player is not in a heli");
-            }
-        }
-        
-        public static void CompressVehicle()
-        {
-            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
-                return;
-
             TriggerServerEvent("PocceMod:CompressVehicle", API.VehToNet(vehicle));
         }
 
@@ -389,15 +303,6 @@ namespace PocceMod.Client
             }
         }
 
-        public static void ToggleAntiGravity()
-        {
-            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
-                return;
-
-            var state = GetLastState(vehicle, StateFlag.AntiGravity);
-            SetState(vehicle, StateFlag.AntiGravity, !state);
-        }
-
         public static void SetAircraftHorn(int horn)
         {
             var player = API.GetPlayerPed(-1);
@@ -422,6 +327,20 @@ namespace PocceMod.Client
         {
             var horn = API.DecorGetInt(aircraft, AircraftHornDecor);
             return (horn < Config.HornList.Length) ? Config.HornList[horn] : "SIRENS_AIRHORN";
+        }
+
+        public static void ToggleLightMultiplier(int vehicle)
+        {
+            if (!API.DecorExistOn(vehicle, LightMultiplierDecor))
+            {
+                API.DecorSetFloat(vehicle, LightMultiplierDecor, 1f);
+                Common.Notification("Use arrow up/down keys to change brightness");
+            }
+            else
+            {
+                API.DecorRemove(vehicle, LightMultiplierDecor);
+                API.SetVehicleLightMultiplier(vehicle, 1f);
+            }
         }
 
         private static float GetLightMultiplier(int vehicle)
