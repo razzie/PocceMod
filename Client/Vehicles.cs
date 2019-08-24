@@ -34,7 +34,8 @@ namespace PocceMod.Client
         {
             BackToTheFuture = 1,
             TurboBoost = 2,
-            AntiGravity = 4
+            AntiGravity = 4,
+            RemoteControl = 8
         }
 
         public enum Light
@@ -604,6 +605,15 @@ namespace PocceMod.Client
             }
         }
 
+        private static bool IsAnyRemoteControlPressed()
+        {
+            return
+                API.IsControlPressed(0, 172) ||
+                API.IsControlPressed(0, 173) ||
+                API.IsControlPressed(0, 174) ||
+                API.IsControlPressed(0, 175);
+        }
+
         private static Task UpdateControls()
         {
             var player = API.GetPlayerPed(-1);
@@ -616,9 +626,6 @@ namespace PocceMod.Client
 
             if (API.IsPedInFlyingVehicle(player) && API.DecorExistOn(vehicle, AircraftHornDecor))
             {
-                if (API.GetPedInVehicleSeat(vehicle, -1) != player || API.IsEntityDead(vehicle) || !API.DecorExistOn(vehicle, AircraftHornDecor))
-                    return Delay(1000);
-
                 if (API.IsControlJustPressed(0, 86)) // INPUT_VEH_HORN
                 {
                     TriggerServerEvent("PocceMod:ToggleHorn", API.VehToNet(vehicle), true);
@@ -649,6 +656,69 @@ namespace PocceMod.Client
                     TriggerServerEvent("PocceMod:ToggleTurboBoost", API.VehToNet(vehicle), true);
                 else if (API.IsControlJustReleased(0, TurboBoostKey) || API.IsDisabledControlJustReleased(0, TurboBoostKey))
                     TriggerServerEvent("PocceMod:ToggleTurboBoost", API.VehToNet(vehicle), false);
+            }
+
+            if (driver != player && IsFeatureEnabled(vehicle, FeatureFlag.RemoteControl) && IsAnyRemoteControlPressed())
+            {
+                if (API.IsVehicleSeatFree(vehicle, -1))
+                    return Autopilot.Spawn(vehicle);
+
+                var model = (uint)API.GetEntityModel(vehicle);
+                if (API.IsThisModelAPlane(model) || API.IsThisModelAHeli(model))
+                {
+                    var force = 1f;
+                    if (API.IsControlPressed(0, 172)) // up
+                    {
+                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force, 0f, 1f, 0f, -1, true, true, true, false, false);
+                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force, 0f, -1f, 0f, -1, true, true, true, false, false);
+                    }
+                    else if (API.IsControlPressed(0, 173)) // down
+                    {
+                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force, 0f, 1f, 0f, -1, true, true, true, false, false);
+                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force, 0f, -1f, 0f, -1, true, true, true, false, false);
+                    }
+
+                    if (API.IsControlPressed(0, 174)) // left
+                    {
+                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force, 1f, 0f, 0f, -1, true, true, true, false, false);
+                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force, -1f, 0f, 0f, -1, true, true, true, false, false);
+                    }
+                    else if (API.IsControlPressed(0, 175)) // right
+                    {
+                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force, 1f, 0f, 0f, -1, true, true, true, false, false);
+                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force, -1f, 0f, 0f, -1, true, true, true, false, false);
+                    }
+
+                    return Delay(33);
+                }
+                else // non-aircraft
+                {
+                    if (API.IsControlPressed(0, 172)) // up
+                    {
+                        API.TaskVehicleTempAction(driver, vehicle, 9, 1);
+
+                        if (API.IsControlPressed(0, 174)) // left
+                            API.TaskVehicleTempAction(driver, vehicle, 7, 1);
+                        else if (API.IsControlPressed(0, 175)) // right
+                            API.TaskVehicleTempAction(driver, vehicle, 8, 1);
+                    }
+                    else if (API.IsControlPressed(0, 173)) // down
+                    {
+                        API.TaskVehicleTempAction(driver, vehicle, 22, 1);
+
+                        if (API.IsControlPressed(0, 174)) // left
+                            API.TaskVehicleTempAction(driver, vehicle, 13, 1);
+                        else if (API.IsControlPressed(0, 175)) // right
+                            API.TaskVehicleTempAction(driver, vehicle, 14, 1);
+                    }
+                    else
+                    {
+                        if (API.IsControlPressed(0, 174)) // left
+                            API.TaskVehicleTempAction(driver, vehicle, 4, 1);
+                        else if (API.IsControlPressed(0, 175)) // right
+                            API.TaskVehicleTempAction(driver, vehicle, 5, 1);
+                    }
+                }
             }
 
             return Task.FromResult(0);

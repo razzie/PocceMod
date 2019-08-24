@@ -115,7 +115,7 @@ namespace PocceMod.Client
             return IsAutopilot(driver) && API.DecorGetInt(driver, PlayerDecor) == API.PlayerId();
         }
 
-        private static async Task Spawn(int vehicle)
+        public static async Task Spawn(int vehicle)
         {
             await Common.RequestModel(Model);
             var playerID = API.PlayerId();

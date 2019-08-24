@@ -33,6 +33,7 @@
         CompressVehicle,
         AntiGravity,
         TurboBoost,
+        RemoteControl,
         Balloons,
         FreezePosition,
         IdentifySkins,

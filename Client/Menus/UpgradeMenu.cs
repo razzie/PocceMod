@@ -93,6 +93,21 @@ namespace PocceMod.Client.Menus
 
             var state = Vehicles.IsFeatureEnabled(vehicle, Vehicles.FeatureFlag.AntiGravity);
             Vehicles.SetFeatureEnabled(vehicle, Vehicles.FeatureFlag.AntiGravity, !state);
+
+            if (!state)
+                Common.Notification("Anti-gravity enabled");
+        }
+
+        public static void ToggleRemoteControl()
+        {
+            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
+                return;
+
+            var state = Vehicles.IsFeatureEnabled(vehicle, Vehicles.FeatureFlag.RemoteControl);
+            Vehicles.SetFeatureEnabled(vehicle, Vehicles.FeatureFlag.RemoteControl, !state);
+
+            if (!state)
+                Common.Notification("Remote control enabled (use arrow keys)");
         }
     }
 }
