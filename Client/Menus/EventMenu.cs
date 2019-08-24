@@ -4,9 +4,9 @@ using PocceMod.Shared;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace PocceMod.Client
+namespace PocceMod.Client.Menus
 {
-    public static class Events
+    public static class EventMenu
     {
         public static async Task PocceParty(float radius, int speakers, int peds, int balloons, int booze)
         {
@@ -49,7 +49,7 @@ namespace PocceMod.Client
             }
         }
 
-        public static Task PoccePartyRandom()
+        public static Task PocceParty()
         {
             float radius = API.GetRandomFloatInRange(5f, 10f);
             int speakers = API.GetRandomIntInRange(2, 7);
@@ -59,7 +59,7 @@ namespace PocceMod.Client
             return PocceParty(radius, speakers, peds, balloons, booze);
         }
 
-        public static async Task PocceRiot(bool useWeapons)
+        private static async Task PocceRiot(bool useWeapons)
         {
             var peds = new List<int>();
             var weapons = useWeapons ? Config.WeaponList : null;
@@ -94,7 +94,17 @@ namespace PocceMod.Client
             }
         }
 
-        public static async Task PedRiot(bool useWeapons)
+        public static Task PocceRiot()
+        {
+            return PocceRiot(false);
+        }
+
+        public static Task PocceRiotArmed()
+        {
+            return PocceRiot(true);
+        }
+
+        private static async Task PedRiot(bool useWeapons)
         {
             int i = 0;
             var peds = Peds.Get(Peds.Filter.Dead | Peds.Filter.Players | (useWeapons ? Peds.Filter.Animals : Peds.Filter.None)); // do not include animals when using weapons
@@ -109,9 +119,13 @@ namespace PocceMod.Client
                 {
                     var vehicle = API.GetVehiclePedIsIn(ped, false);
                     API.TaskLeaveVehicle(ped, vehicle, 1);
+
+                    while (API.IsPedInVehicle(ped, vehicle, false))
+                    {
+                        await BaseScript.Delay(100);
+                    }
                 }
 
-                await BaseScript.Delay(1000); // let them get out of vehicles
                 API.ClearPedTasks(ped);
 
                 await Peds.Arm(ped, weapons);
@@ -129,6 +143,16 @@ namespace PocceMod.Client
 
                 ++i;
             }
+        }
+
+        public static Task PedRiot()
+        {
+            return PedRiot(false);
+        }
+
+        public static Task PedRiotArmed()
+        {
+            return PedRiot(true);
         }
 
         private static readonly string[] SpeakerList = new string[]
