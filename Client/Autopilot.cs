@@ -249,6 +249,18 @@ namespace PocceMod.Client
                         API.TaskPlaneLand(ped, vehicle, pos.X, pos.Y, pos.Z, pos.X, pos.Y, pos.Z);
                         API.DecorSetInt(ped, WaypointHashDecor, 0);
                     }
+
+                    var height = Common.GetEntityHeightAboveGround(vehicle);
+                    if (height > 10f)
+                    {
+                        if (API.GetVehicleLandingGear(vehicle) == 0)
+                            API.SetVehicleLandingGear(vehicle, 1);
+                    }
+                    else
+                    {
+                        if (API.GetVehicleLandingGear(vehicle) == 4)
+                            API.SetVehicleLandingGear(vehicle, 2);
+                    }
                 }
 
                 if (IsOwnedAutopilot(ped))

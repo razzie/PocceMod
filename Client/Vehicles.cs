@@ -213,7 +213,7 @@ namespace PocceMod.Client
             API.SetPedIntoVehicle(player, vehicle, -1);
             API.SetVehicleNumberPlateText(vehicle, "POCCE");
 
-            if (API.GetEntityHeightAboveGround(vehicle) > 10f && autoLaunchAircraft)
+            if (Common.GetEntityHeightAboveGround(vehicle) > 10f && autoLaunchAircraft)
             {
                 if (API.IsThisModelAHeli(hash))
                 {

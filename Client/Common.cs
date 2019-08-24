@@ -161,6 +161,13 @@ namespace PocceMod.Client
             return maxZ - minZ;
         }
 
+        public static float GetEntityHeightAboveGround(int entity)
+        {
+            var coords = API.GetEntityCoords(entity, false);
+            var height = API.GetEntityHeightAboveGround(entity);
+            return Math.Min(coords.Z, height);
+        }
+
         public static Vector3 GetEntityTopCoords(int entity)
         {
             var coords = API.GetEntityCoords(entity, API.IsEntityAPed(entity));
