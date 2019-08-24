@@ -12,10 +12,12 @@ namespace PocceMod.Client
     public class Props : BaseScript
     {
         private const string PropDecor = "POCCE_PROP";
+        private const string SpeakerRadioDecor = "POCCE_SPEAKER_RADIO_DECOR";
         private static readonly int PropUndoKey;
         private static readonly bool AllowPropEdit;
         private static readonly float PropEditDistanceFactor;
         private static readonly List<int> _props = new List<int>();
+        private static readonly List<int> _speakers = new List<int>();
         private static bool _firstSpawn = true;
 
         [Flags]
@@ -38,8 +40,10 @@ namespace PocceMod.Client
         public Props()
         {
             API.DecorRegister(PropDecor, 2);
-            
-            Tick += Telemetry.Wrap("props", Update);
+            API.DecorRegister(SpeakerRadioDecor, 3);
+
+            Tick += Telemetry.Wrap("props", UpdateProps);
+            Tick += Telemetry.Wrap("speakers", UpdateSpeakers);
         }
 
         public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 3600f)
@@ -192,6 +196,11 @@ namespace PocceMod.Client
             return root;
         }
 
+        public static void SetSpeaker(int prop, int station)
+        {
+            API.DecorSetInt(prop, SpeakerRadioDecor, station);
+        }
+
         private static async Task Clear(int prop)
         {
             if (API.DoesEntityExist(prop))
@@ -230,7 +239,7 @@ namespace PocceMod.Client
                 API.IsControlPressed(0, 175);
         }
 
-        private static Task Update()
+        private static Task UpdateProps()
         {
             if (MainMenu.IsOpen || !IsAnyPropControlPressed())
                 return Task.FromResult(0);
@@ -301,6 +310,31 @@ namespace PocceMod.Client
             }
 
             return Task.FromResult(0);
+        }
+
+        private static Task UpdateSpeakers()
+        {
+            foreach (var speaker in _speakers.ToArray())
+            {
+                if (!API.DoesEntityExist(speaker))
+                    _speakers.Remove(speaker);
+            }
+
+            var newSpeakers = Props.Get().Where(prop => API.DecorExistOn(prop, SpeakerRadioDecor) && !_speakers.Contains(prop));
+            foreach (var speaker in newSpeakers)
+            {
+                var station = API.DecorGetInt(speaker, SpeakerRadioDecor);
+                //API.N_0x651d3228960d08af("SE_Script_Placed_Prop_Emitter_Boombox", prop);
+                Function.Call((Hash)0x651d3228960d08af, "SE_Script_Placed_Prop_Emitter_Boombox", speaker);
+                API.SetEmitterRadioStation("SE_Script_Placed_Prop_Emitter_Boombox", API.GetRadioStationName(station));
+                API.SetStaticEmitterEnabled("SE_Script_Placed_Prop_Emitter_Boombox", true);
+                _speakers.Add(speaker);
+
+                var tmp_prop = speaker;
+                API.SetEntityAsNoLongerNeeded(ref tmp_prop);
+            }
+
+            return Delay(1000);
         }
     }
 }
