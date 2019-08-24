@@ -45,7 +45,7 @@ namespace PocceMod.Client.Menus
                 if (_source == null)
                     return;
 
-                foreach (var items in _source.Elements)
+                foreach (var items in _source.Skins)
                 {
                     if (items.Value.Count > 0)
                     {

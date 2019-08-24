@@ -114,7 +114,7 @@ namespace PocceMod.Server
         {
             Debug(source, "RequestRopes");
 
-            foreach (var rope in _ropes.GetRopes())
+            foreach (var rope in _ropes.Ropes)
             {
                 rope.Player.TriggerEvent("PocceMod:AddRope", rope.Player.Handle, rope.Entity1, rope.Entity2, rope.Offset1, rope.Offset2, rope.Mode);
             }

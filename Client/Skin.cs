@@ -8,6 +8,7 @@ namespace PocceMod.Client
     {
         private const int ComponentCount = 21;
         private static readonly Dictionary<uint, string> _lookupTable = new Dictionary<uint, string>();
+
         private readonly int[] _drawables;
         private readonly int[] _textures;
         private readonly int[] _palettes;

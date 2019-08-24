@@ -19,11 +19,7 @@ namespace PocceMod.Client
             else
                 Permission.Granted += (player, group) => SetupMenu();
 
-            EventHandlers["PocceMod:OpenMenu"] += new Action(() =>
-            {
-                if (_menu != null)
-                    _menu.OpenMenu();
-            });
+            EventHandlers["PocceMod:OpenMenu"] += new Action(() => _menu?.OpenMenu());
 
             API.RegisterCommand("pocce", new Action<int, List<object>, string>(PocceCommand), false);
         }

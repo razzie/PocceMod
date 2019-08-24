@@ -14,10 +14,10 @@ namespace PocceMod.Client
         private class Data
         {
             public int Calls { get; private set; }
-            public float Min { get; private set; }
-            public float Max { get; private set; }
-            public float Sum { get; private set; }
-            public float Avg { get { return Sum / Calls; } }
+            public double Min { get; private set; }
+            public double Max { get; private set; }
+            public double Sum { get; private set; }
+            public double Avg { get { return Sum / Calls; } }
 
             public Data(TimeSpan time)
             {
@@ -26,7 +26,7 @@ namespace PocceMod.Client
 
             public void Add(TimeSpan time)
             {
-                var ms = (float)time.TotalMilliseconds;
+                var ms = time.TotalMilliseconds;
 
                 Sum += ms;
                 Calls++;
@@ -72,7 +72,7 @@ namespace PocceMod.Client
                 Tick += Wrap("telemetry", Update);
         }
 
-        public static IEnumerable<KeyValuePair<int, PlayerTelemetry>> Entries
+        public static IEnumerable<KeyValuePair<int, PlayerTelemetry>> PlayerData
         {
             get { return _playerTelemetries; }
         }

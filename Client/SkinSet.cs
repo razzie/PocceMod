@@ -6,7 +6,7 @@ namespace PocceMod.Client
     {
         private readonly Dictionary<string, List<Skin>> _skins = new Dictionary<string, List<Skin>>();
 
-        public IEnumerable<KeyValuePair<string, List<Skin>>> Elements
+        public IEnumerable<KeyValuePair<string, List<Skin>>> Skins
         {
             get { return _skins; }
         }

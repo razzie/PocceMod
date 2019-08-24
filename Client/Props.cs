@@ -22,7 +22,7 @@ namespace PocceMod.Client
         public enum Filter
         {
             None = 0,
-            NonPocceMod = 1, // props that weren't placed by players
+            NonPocceMod = 1,
             NonNetwork = 2
         }
 
@@ -179,7 +179,7 @@ namespace PocceMod.Client
                 var offset = new Vector3(API.GetRandomFloatInRange(-0.25f, 0.25f), API.GetRandomFloatInRange(-0.25f, 0.25f), API.GetRandomFloatInRange(0f, 0.75f));
                 var ball = await SpawnAtCoords(model, coords + offset, Vector3.Zero, false);
                 Ropes.Attach(root, ball, Vector3.Zero, Vector3.Zero);
-                AntiGravity.Add(ball, 1.5f);
+                AntiGravity.Add(ball, 1.2f);
                 balls.Add(ball);
             }
 
@@ -233,7 +233,7 @@ namespace PocceMod.Client
         private static Task Update()
         {
             if (MainMenu.IsOpen || !IsAnyPropControlPressed())
-                return Delay(100);
+                return Task.FromResult(0);
 
             var prop = _props.LastOrDefault(p => API.DecorGetBool(p, PropDecor));
             if (prop == 0)

@@ -18,7 +18,7 @@ namespace PocceMod.Client.Menus.Dev
 
             OnMenuOpen += (_menu) =>
             {
-                foreach (var playerTelemetry in Telemetry.Entries)
+                foreach (var playerTelemetry in Telemetry.PlayerData)
                 {
                     var player = playerTelemetry.Key;
                     var playerName = API.GetPlayerName(API.GetPlayerFromServerId(player));

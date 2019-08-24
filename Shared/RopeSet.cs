@@ -8,9 +8,9 @@ namespace PocceMod.Shared
     {
         private readonly Dictionary<Player, List<Rope>> _ropes = new Dictionary<Player, List<Rope>>();
 
-        public Rope[] GetRopes() // too bad iterator blocks cannot be used in async methods
+        public Rope[] Ropes
         {
-            return _ropes.Values.SelectMany(ropes => ropes).ToArray();
+            get { return _ropes.Values.SelectMany(ropes => ropes).ToArray(); }
         }
 
         public void AddRope(Rope rope)

@@ -30,19 +30,19 @@ namespace PocceMod.Client
         {
             API.DecorRegister(BurnDecor, 2);
 
-            EventHandlers["PocceMod:RequestMPSkin"] += new Action<int, int>(RequestMPSkin);
-            EventHandlers["PocceMod:SetMPSkin"] += new Action<int, byte[]>(SetMPSkin);
+            EventHandlers["PocceMod:RequestMPSkin"] += new Action<int, int>(NetRequestMPSkin);
+            EventHandlers["PocceMod:SetMPSkin"] += new Action<int, byte[]>(NetSetMPSkin);
 
             Tick += Telemetry.Wrap("peds", Update);
         }
 
-        public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 1600f, int originEntity = -1)
+        public static List<int> Get(Filter exclude = DefaultFilters, float rangeSquared = 1600f)
         {
             var peds = new List<int>();
             int ped = 0;
             int handle = API.FindFirstPed(ref ped);
             var player = API.GetPlayerPed(-1);
-            var coords = API.GetEntityCoords((originEntity != -1) ? originEntity : player, false);
+            var coords = API.GetEntityCoords(player, false);
             var vehicle = API.GetVehiclePedIsIn(player, false);
 
             if (!API.IsPedInAnyVehicle(player, false))
@@ -172,17 +172,16 @@ namespace PocceMod.Client
             API.DecorSetBool(ped, BurnDecor, true);
         }
 
-        private static void RequestMPSkin(int ped, int requestingPlayer)
+        private static void NetRequestMPSkin(int netPed, int requestingPlayer)
         {
-            var skin = new MultiplayerSkin(API.NetToPed(ped));
-            TriggerServerEvent("PocceMod:SetMPSkin", ped, skin.Serialize(), requestingPlayer);
-
+            var skin = new MultiplayerSkin(API.NetToPed(netPed));
+            TriggerServerEvent("PocceMod:SetMPSkin", netPed, skin.Serialize(), requestingPlayer);
         }
 
-        private static void SetMPSkin(int ped, dynamic data)
+        private static void NetSetMPSkin(int netPed, dynamic data)
         {
             var skin = MultiplayerSkin.Deserialize(data);
-            skin.Restore(API.NetToPed(ped));
+            skin.Restore(API.NetToPed(netPed));
         }
 
         private static Task Update()

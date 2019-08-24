@@ -160,6 +160,7 @@ namespace PocceMod.Client
                 {
                     API.TaskCombatPed(companion, target, 0, 16);
                 }
+
                 return true;
             }
 
@@ -177,6 +178,7 @@ namespace PocceMod.Client
                     {
                         API.TaskCombatPed(companion, ped, 0, 16);
                     }
+
                     return true;
                 }
             }

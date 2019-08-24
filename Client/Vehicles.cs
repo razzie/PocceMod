@@ -57,23 +57,11 @@ namespace PocceMod.Client
             API.DecorRegister(LightMultiplierDecor, 1);
             API.DecorRegister(StateFlagsDecor, 3);
 
-            EventHandlers["PocceMod:EMP"] += new Func<int, Task>(async vehicle => await EMP(API.NetToVeh(vehicle)));
-            EventHandlers["PocceMod:SetIndicator"] += new Action<int, int>((vehicle, state) => SetIndicator(API.NetToVeh(vehicle), state));
-            EventHandlers["PocceMod:CompressVehicle"] += new Func<int, Task>(async vehicle => await Compress(API.NetToVeh(vehicle)));
-            EventHandlers["PocceMod:ToggleTurboBoost"] += new Func<int, bool, Task>(async (vehicle, state) =>
-            {
-                if (state)
-                    await Effects.AddTurboBoostEffect(API.NetToVeh(vehicle));
-                else
-                    Effects.RemoveTurboBoostEffect(API.NetToVeh(vehicle));
-            });
-            EventHandlers["PocceMod:ToggleHorn"] += new Func<int, bool, Task>(async (vehicle, state) =>
-            {
-                if (state)
-                    await Effects.AddHornEffect(API.NetToVeh(vehicle));
-                else
-                    Effects.RemoveHornEffect(API.NetToVeh(vehicle));
-            });
+            EventHandlers["PocceMod:EMP"] += new Func<int, Task>(NetEMP);
+            EventHandlers["PocceMod:SetIndicator"] += new Action<int, int>(NetSetIndicator);
+            EventHandlers["PocceMod:CompressVehicle"] += new Func<int, Task>(NetCompress);
+            EventHandlers["PocceMod:ToggleTurboBoost"] += new Func<int, bool, Task>(NetToggleTurboBoost);
+            EventHandlers["PocceMod:ToggleHorn"] += new Func<int, bool, Task>(NetToggleHorn);
 
             if (!Config.GetConfigBool("DisableAutoHazardLights"))
                 Tick += Telemetry.Wrap("auto_hazard_lights", UpdateAutoHazardLights);
@@ -272,6 +260,11 @@ namespace PocceMod.Client
             SetState(vehicle, StateFlag.EMP, true);
         }
 
+        private static Task NetEMP(int netVehicle)
+        {
+            return EMP(API.NetToVeh(netVehicle));
+        }
+
         public static void ToggleUltrabrightHeadlight()
         {
             if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
@@ -330,7 +323,9 @@ namespace PocceMod.Client
             if (API.IsPedInAnyHeli(player))
             {
                 var heli = API.GetVehiclePedIsIn(player, false);
-                if (API.GetPedInVehicleSeat(heli, -1) != player)
+                var pilot = API.GetPedInVehicleSeat(heli, -1);
+
+                if (pilot != player && !Autopilot.IsOwnedAutopilot(pilot))
                 {
                     Common.Notification("Player is not the pilot of this heli");
                     return;
@@ -361,8 +356,12 @@ namespace PocceMod.Client
             TriggerServerEvent("PocceMod:CompressVehicle", API.VehToNet(vehicle));
         }
 
-        private static async Task Compress(int vehicle)
+        private static async Task NetCompress(int netVehicle)
         {
+            var vehicle = API.NetToVeh(netVehicle);
+            if (!API.DoesEntityExist(vehicle))
+                return;
+
             var model = (uint)API.GetEntityModel(vehicle);
             var min = Vector3.Zero;
             var max = Vector3.Zero;
@@ -411,7 +410,7 @@ namespace PocceMod.Client
             SetAircraftHorn(vehicle, horn);
         }
 
-        private static void SetAircraftHorn(int aircraft, int horn)
+        public static void SetAircraftHorn(int aircraft, int horn)
         {
             API.DecorSetInt(aircraft, AircraftHornDecor, horn);
         }
@@ -480,8 +479,12 @@ namespace PocceMod.Client
             }
         }
 
-        private static void SetIndicator(int vehicle, int state)
+        private static void NetSetIndicator(int netVehicle, int state)
         {
+            var vehicle = API.NetToVeh(netVehicle);
+            if (!API.DoesEntityExist(vehicle))
+                return;
+
             switch (state)
             {
                 case 0:
@@ -504,6 +507,30 @@ namespace PocceMod.Client
                     API.SetVehicleIndicatorLights(vehicle, 1, true);
                     break;
             }
+        }
+
+        private static async Task NetToggleHorn(int netVehicle, bool state)
+        {
+            var vehicle = API.NetToVeh(netVehicle);
+            if (!API.DoesEntityExist(vehicle))
+                return;
+
+            if (state)
+                await Effects.AddHornEffect(API.NetToVeh(vehicle));
+            else
+                Effects.RemoveHornEffect(API.NetToVeh(vehicle));
+        }
+
+        private static async Task NetToggleTurboBoost(int netVehicle, bool state)
+        {
+            var vehicle = API.NetToVeh(netVehicle);
+            if (!API.DoesEntityExist(vehicle))
+                return;
+
+            if (state)
+                await Effects.AddTurboBoostEffect(vehicle);
+            else
+                Effects.RemoveTurboBoostEffect(vehicle);
         }
 
         public static bool GetLastState(int vehicle, StateFlag flag)
@@ -635,7 +662,7 @@ namespace PocceMod.Client
             foreach (var vehicle in vehicles)
             {
                 if (GetLastState(vehicle, StateFlag.AntiGravity))
-                    AntiGravity.Add(vehicle, 0.9f);
+                    AntiGravity.Add(vehicle, 0.7f);
                 else
                     AntiGravity.Remove(vehicle);
             }

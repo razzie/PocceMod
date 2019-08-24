@@ -17,12 +17,7 @@ namespace PocceMod.Client
 
         public static void Add(int entity, float force)
         {
-            _entities[entity] = force * 0.8f;
-        }
-
-        public static bool Contains(int entity)
-        {
-            return _entities.ContainsKey(entity);
+            _entities[entity] = force;
         }
 
         public static void Remove(int entity)

@@ -23,7 +23,6 @@ namespace PocceMod.Client
             API.DrawNotification(blink, saveToBrief);
         }
 
-        // I'm really sorry for stealing this
         // source: https://github.com/TomGrobbe/vMenu/blob/master/vMenu/CommonFunctions.cs
         public static async Task<string> GetUserInput(string windowTitle, string defaultText, int maxInputLength)
         {
@@ -122,12 +121,12 @@ namespace PocceMod.Client
             return API.IsPedInAnyVehicle(player, false) ? API.GetVehiclePedIsIn(player, false) : player;
         }
 
-        public static bool GetClosestEntity(IEnumerable<int> entities, out int closest, int originEntity = -1)
+        public static bool GetClosestEntity(IEnumerable<int> entities, out int closest)
         {
             closest = -1;
             bool found = false;
             float minDist = float.MaxValue;
-            var coords = API.GetEntityCoords((originEntity != -1) ? originEntity : API.GetPlayerPed(-1), false);
+            var coords = API.GetEntityCoords(API.GetPlayerPed(-1), false);
 
             foreach (var entity in entities)
             {
@@ -204,13 +203,6 @@ namespace PocceMod.Client
             return true;
         }
 
-        public static bool IsEntityInRangeSquared(int entity, float rangeSquared)
-        {
-            var playerPos = API.GetEntityCoords(API.GetPlayerPed(-1), true);
-            var entityPos = API.GetEntityCoords(entity, false);
-            return playerPos.DistanceToSquared(entityPos) <= rangeSquared;
-        }
-
         public static bool GetWaypoint(out Vector3 wp, bool adjust = true)
         {
             wp = Vector3.Zero;
@@ -277,12 +269,6 @@ namespace PocceMod.Client
                 Y = (float)Math.Cos(radiansZ) * num,
                 Z = (float)Math.Sin(radiansX)
             };
-        }
-
-        public static float GetHeading(Vector3 src, Vector3 dest)
-        {
-            var heading = (float)Math.Atan2(dest.Y - src.Y, dest.X - src.X);
-            return MathUtil.RadiansToDegrees(heading);
         }
 
         public static Vector3 GetRandomSpawnCoordsInRange(Vector3 center, float minRange, float maxRange, out float heading)

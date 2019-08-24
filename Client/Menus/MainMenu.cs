@@ -21,7 +21,7 @@ namespace PocceMod.Client.Menus
             MenuKey = Config.GetConfigInt("MenuKey");
             if (MenuKey == 0)
             {
-                Common.Notification("No PocceMod menu key configured");
+                Common.Notification("No PocceMod menu key configured", true, true);
                 MenuKey = -1;
             }
 
@@ -35,7 +35,7 @@ namespace PocceMod.Client.Menus
             }
             catch (AspectRatioException)
             {
-                Common.Notification("Unsupported aspect ratio! PocceMod menu is force left aligned");
+                Common.Notification("Unsupported aspect ratio! PocceMod menu is force left aligned", true, true);
                 MenuController.MenuAlignment = MenuController.MenuAlignmentOption.Left;
             }
         }

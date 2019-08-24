@@ -16,7 +16,7 @@ namespace PocceMod.Client
         private static readonly int RopeClearKey;
         private static readonly RopeSet _ropes = new RopeSet();
         private static readonly RopegunState _ropegunState = new RopegunState();
-        internal static int _rootObject;
+        private static int _rootObject;
 
         static Ropes()
         {
@@ -26,10 +26,10 @@ namespace PocceMod.Client
 
         public Ropes()
         {
-            EventHandlers["PocceMod:AddRope"] += new Func<int, int, int, Vector3, Vector3, int, Task>(AddRope);
-            EventHandlers["PocceMod:ClearRopes"] += new Action<int>(ClearRopes);
-            EventHandlers["PocceMod:ClearLastRope"] += new Action<int>(ClearLastRope);
-            EventHandlers["PocceMod:ClearEntityRopes"] += new Action<int>(ClearEntityRopes);
+            EventHandlers["PocceMod:AddRope"] += new Func<int, int, int, Vector3, Vector3, int, Task>(NetAddRope);
+            EventHandlers["PocceMod:ClearRopes"] += new Action<int>(NetClearAll);
+            EventHandlers["PocceMod:ClearLastRope"] += new Action<int>(NetClearLast);
+            EventHandlers["PocceMod:ClearEntityRopes"] += new Action<int>(NetClearEntity);
 
             TriggerServerEvent("PocceMod:RequestRopes");
 
@@ -82,7 +82,7 @@ namespace PocceMod.Client
             return false;
         }
 
-        private static async Task AddRope(int player, int netEntity1, int netEntity2, Vector3 offset1, Vector3 offset2, int mode)
+        private static async Task NetAddRope(int player, int netEntity1, int netEntity2, Vector3 offset1, Vector3 offset2, int mode)
         {
             if (_rootObject == 0)
             {
@@ -109,19 +109,19 @@ namespace PocceMod.Client
                 API.RopeLoadTextures();
         }
 
-        private static void ClearRopes(int player)
+        private static void NetClearAll(int player)
         {
             _ropes.ClearRopes(new Player(player));
         }
 
-        private static void ClearLastRope(int player)
+        private static void NetClearLast(int player)
         {
             _ropes.ClearLastRope(new Player(player));
         }
 
-        private static void ClearEntityRopes(int entity)
+        private static void NetClearEntity(int netEntity)
         {
-            _ropes.ClearEntityRopes(API.NetToEnt(entity));
+            _ropes.ClearEntityRopes(API.NetToEnt(netEntity));
         }
 
         public static void PlayerAttach(int entity, Vector3 offset, ModeFlag mode = ModeFlag.Normal)
@@ -305,7 +305,7 @@ namespace PocceMod.Client
         {
             await Delay(10);
 
-            foreach (var rope in _ropes.GetRopes())
+            foreach (var rope in _ropes.Ropes)
             {
                 rope.Update();
             }
