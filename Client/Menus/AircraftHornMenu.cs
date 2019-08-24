@@ -1,4 +1,5 @@
-﻿using MenuAPI;
+﻿using CitizenFX.Core.Native;
+using MenuAPI;
 using PocceMod.Shared;
 
 namespace PocceMod.Client.Menus
@@ -17,9 +18,24 @@ namespace PocceMod.Client.Menus
 
             OnItemSelect += (_menu, _item, _index) =>
             {
-                Vehicles.SetAircraftHorn(_index);
+                SetAircraftHorn(_index);
                 CloseMenu();
             };
+        }
+
+        public static void SetAircraftHorn(int horn)
+        {
+            var player = API.GetPlayerPed(-1);
+            if (!API.IsPedInFlyingVehicle(player))
+            {
+                Common.Notification("Player is not in a flying vehicle");
+                return;
+            }
+
+            if (!Common.EnsurePlayerIsVehicleDriver(out player, out int vehicle))
+                return;
+
+            Vehicles.SetAircraftHorn(vehicle, horn);
         }
     }
 }

@@ -303,21 +303,6 @@ namespace PocceMod.Client
             }
         }
 
-        public static void SetAircraftHorn(int horn)
-        {
-            var player = API.GetPlayerPed(-1);
-            if (!API.IsPedInFlyingVehicle(player))
-            {
-                Common.Notification("Player is not in a flying vehicle");
-                return;
-            }
-
-            if (!Common.EnsurePlayerIsVehicleDriver(out player, out int vehicle))
-                return;
-
-            SetAircraftHorn(vehicle, horn);
-        }
-
         public static void SetAircraftHorn(int aircraft, int horn)
         {
             API.DecorSetInt(aircraft, AircraftHornDecor, horn);
