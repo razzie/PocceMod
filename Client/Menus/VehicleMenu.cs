@@ -11,6 +11,13 @@ namespace PocceMod.Client.Menus
     [MainMenuInclude]
     public class VehicleMenu : Menu
     {
+        private static readonly bool AutoDespawn;
+
+        static VehicleMenu()
+        {
+            AutoDespawn = Config.GetConfigBool("AutoDespawnVehicles");
+        }
+
         public VehicleMenu() : base("PocceMod", "select vehicle")
         {
             foreach (var vehicle in Config.VehicleList)
@@ -27,9 +34,12 @@ namespace PocceMod.Client.Menus
 
             OnListItemSelect += async (_menu, _listItem, _listIndex, _itemIndex) =>
             {
-                var vehicle = _listItem.ListItems[_listIndex];
-                await Vehicles.Spawn(vehicle);
+                var model = _listItem.ListItems[_listIndex];
+                var vehicle = await Vehicles.Spawn(model);
                 CloseMenu();
+
+                if (AutoDespawn)
+                    API.SetVehicleAsNoLongerNeeded(ref vehicle);
             };
         }
 
@@ -66,7 +76,10 @@ namespace PocceMod.Client.Menus
                 return;
 
             AddVehicle(model);
-            await Vehicles.Spawn(model);
+            var vehicle = await Vehicles.Spawn(model);
+
+            if (AutoDespawn)
+                API.SetVehicleAsNoLongerNeeded(ref vehicle);
         }
 
         public static void TeleportToClosestVehicle(bool forcePassenger = false)
