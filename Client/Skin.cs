@@ -1,6 +1,7 @@
 ﻿using CitizenFX.Core.Native;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace PocceMod.Client
 {
@@ -103,6 +104,35 @@ namespace PocceMod.Client
                 return name;
             else
                 return string.Format("0x{0:X8}", model);
+        }
+
+        public static async Task ChangePlayerSkin(uint model, Skin skin)
+        {
+            var player = API.GetPlayerPed(-1);
+            if (API.IsPedInAnyVehicle(player, false))
+            {
+                Common.Notification("Skin change is not allowed in vehicles");
+                return;
+            }
+
+            var loadout = Weapons.Get(player);
+
+            await Common.RequestModel(model);
+            API.SetPlayerModel(API.PlayerId(), model);
+            player = API.GetPlayerPed(-1); // new ped was created for the player
+
+            API.ClearAllPedProps(player);
+            API.ClearPedDecorations(player);
+            API.ClearPedFacialDecorations(player);
+
+            if (skin != null)
+                skin.Restore(player);
+            else
+                API.SetPedRandomComponentVariation(player, false);
+
+            API.SetModelAsNoLongerNeeded(model);
+
+            Weapons.Give(player, loadout);
         }
 
         private static readonly string[] Models = new string[]

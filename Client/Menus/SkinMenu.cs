@@ -1,13 +1,12 @@
 ﻿using CitizenFX.Core.Native;
 using PocceMod.Shared;
-using System.Threading.Tasks;
 
 namespace PocceMod.Client.Menus
 {
     [MainMenuInclude]
     public class SkinMenu : SkinSubmenu
     {
-        public SkinMenu() : base(ChangeSkin, false)
+        public SkinMenu() : base(Skin.ChangePlayerSkin, false)
         {
             foreach (var pocce in Config.PocceList)
             {
@@ -71,35 +70,6 @@ namespace PocceMod.Client.Menus
             {
                 Common.Notification("model: " + skin.Name);
             }
-        }
-
-        private static async Task ChangeSkin(uint model, Skin skin)
-        {
-            var player = API.GetPlayerPed(-1);
-            if (API.IsPedInAnyVehicle(player, false))
-            {
-                Common.Notification("Skin change is not allowed in vehicles");
-                return;
-            }
-
-            var loadout = Weapons.Get(player);
-
-            await Common.RequestModel(model);
-            API.SetPlayerModel(API.PlayerId(), model);
-            player = API.GetPlayerPed(-1); // new ped was created for the player
-            
-            API.ClearAllPedProps(player);
-            API.ClearPedDecorations(player);
-            API.ClearPedFacialDecorations(player);
-
-            if (skin != null)
-                skin.Restore(player);
-            else
-                API.SetPedRandomComponentVariation(player, false);
-
-            API.SetModelAsNoLongerNeeded(model);
-
-            Weapons.Give(player, loadout);
         }
     }
 }
