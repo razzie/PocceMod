@@ -686,13 +686,13 @@ namespace PocceMod.Client
 
                     if (API.IsControlPressed(0, 174)) // left
                     {
-                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force, max.X, 0f, 0f, -1, true, true, true, false, false);
-                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force, min.X, 0f, 0f, -1, true, true, true, false, false);
+                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force / 2, max.X, 0f, 0f, -1, true, true, true, false, false);
+                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force / 2, min.X, 0f, 0f, -1, true, true, true, false, false);
                     }
                     else if (API.IsControlPressed(0, 175)) // right
                     {
-                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force, max.X, 0f, 0f, -1, true, true, true, false, false);
-                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force, min.X, 0f, 0f, -1, true, true, true, false, false);
+                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force / 2, max.X, 0f, 0f, -1, true, true, true, false, false);
+                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force / 2, min.X, 0f, 0f, -1, true, true, true, false, false);
                     }
 
                     return Delay(33);
