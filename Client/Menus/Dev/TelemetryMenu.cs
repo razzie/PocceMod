@@ -12,16 +12,16 @@ namespace PocceMod.Client.Menus.Dev
             var submenu = new PlayerTelemetryMenu();
             MenuController.AddSubmenu(this, submenu);
             
-            OnItemSelect += (_menu, _item, _index) =>
+            OnItemSelect += (menu, item, index) =>
             {
-                submenu.OpenMenu(_item.ItemData);
+                submenu.OpenMenu(item.ItemData);
             };
 
-            OnListItemSelect += (_menu, _listItem, _listIndex, _itemIndex) =>
+            OnListItemSelect += (menu, listItem, listIndex, itemIndex) =>
             {
                 int timeoutSec = 0;
 
-                switch (_listIndex)
+                switch (listIndex)
                 {
                     case 0:
                         timeoutSec = 10;

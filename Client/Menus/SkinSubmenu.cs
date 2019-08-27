@@ -12,9 +12,9 @@ namespace PocceMod.Client.Menus
 
         public SkinSubmenu(Func<uint, Skin, Task> onSelect, bool closeOnSelect) : base("PocceMod", "select skin")
         {
-            OnItemSelect += async (_menu, _item, _index) =>
+            OnItemSelect += async (menu, item, index) =>
             {
-                var model = _item.Text;
+                var model = item.Text;
                 uint hash;
                 if (model.StartsWith("0x"))
                     hash = uint.Parse(model.Substring(2), System.Globalization.NumberStyles.HexNumber);
@@ -27,12 +27,12 @@ namespace PocceMod.Client.Menus
                     CloseMenu();
             };
 
-            OnListItemSelect += async (_menu, _listItem, _listIndex, _itemIndex) =>
+            OnListItemSelect += async (menu, listItem, listIndex, itemIndex) =>
             {
-                var skins = _listItem.ItemData as List<Skin>;
-                if (skins != null && skins.Count > _listIndex)
+                var skins = listItem.ItemData as List<Skin>;
+                if (skins != null && skins.Count > listIndex)
                 {
-                    var skin = skins[_listIndex];
+                    var skin = skins[listIndex];
                     await onSelect(skin.Model, skin);
                 }
 
@@ -40,7 +40,7 @@ namespace PocceMod.Client.Menus
                     CloseMenu();
             };
 
-            OnMenuOpen += (_menu) =>
+            OnMenuOpen += (menu) =>
             {
                 if (_source == null)
                     return;
@@ -67,7 +67,7 @@ namespace PocceMod.Client.Menus
                 }
             };
 
-            OnMenuClose += (_menu) =>
+            OnMenuClose += (menu) =>
             {
                 ClearMenuItems();
                 _source = null;

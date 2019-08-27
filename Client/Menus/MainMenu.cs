@@ -52,20 +52,20 @@ namespace PocceMod.Client.Menus
                 MenuController.AddSubmenu(this, instance);
             }
 
-            OnItemSelect += async (_menu, _item, _index) =>
+            OnItemSelect += async (menu, item, index) =>
             {
-                if (_menuItemActions.TryGetValue(_index, out Func<Task> action))
+                if (_menuItemActions.TryGetValue(index, out Func<Task> action))
                 {
                     await action();
                     CloseMenu();
                 }
             };
 
-            OnListItemSelect += async (_menu, _listItem, _listIndex, _itemIndex) =>
+            OnListItemSelect += async (menu, listItem, listIndex, itemIndex) =>
             {
-                if (_menuListItemActions.TryGetValue(_itemIndex, out List<Func<Task>> actions))
+                if (_menuListItemActions.TryGetValue(itemIndex, out List<Func<Task>> actions))
                 {
-                    await actions[_listIndex]();
+                    await actions[listIndex]();
                     CloseMenu();
                 }
             };

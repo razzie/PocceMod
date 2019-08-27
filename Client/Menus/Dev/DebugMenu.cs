@@ -57,7 +57,7 @@ namespace PocceMod.Client.Menus.Dev
             MenuController.BindMenuItem(this, telemetryMenu, telemetryMenuItem);
             AddMenuItem(telemetryMenuItem);
 
-            OnMenuOpen += (_menu) =>
+            OnMenuOpen += (menu) =>
             {
                 playerIDItem.Label = API.PlayerId().ToString();
                 serverIDItem.Label = Common.PlayerID.ToString();

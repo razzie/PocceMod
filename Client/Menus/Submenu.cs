@@ -9,21 +9,20 @@ namespace PocceMod.Client.Menus
     {
         public Submenu(string title, Func<string, Task> onSelect, IEnumerable<string> items, int groupByLetters = 0) : base("PocceMod", title)
         {
-            OnItemSelect += async (_menu, _item, _index) =>
+            OnItemSelect += async (menu, item, index) =>
             {
-                var item = _item.Text;
+                await onSelect(item.Text);
+                CloseMenu();
+            };
+
+            OnListItemSelect += async (menu, listItem, listIndex, itemIndex) =>
+            {
+                var item = listItem.ListItems[listIndex];
                 await onSelect(item);
                 CloseMenu();
             };
 
-            OnListItemSelect += async (_menu, _listItem, _listIndex, _itemIndex) =>
-            {
-                var item = _listItem.ListItems[_listIndex];
-                await onSelect(item);
-                CloseMenu();
-            };
-
-            OnMenuClose += (_menu) =>
+            OnMenuClose += (menu) =>
             {
                 var item = GetCurrentMenuItem();
                 ResetFilter();

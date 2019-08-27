@@ -16,9 +16,9 @@ namespace PocceMod.Client.Menus
                 AddMenuItem(menuItem);
             }
 
-            OnItemSelect += (_menu, _item, _index) =>
+            OnItemSelect += (menu, item, index) =>
             {
-                SetAircraftHorn(_index);
+                SetAircraftHorn(index);
                 CloseMenu();
             };
         }

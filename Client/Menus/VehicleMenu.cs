@@ -32,9 +32,9 @@ namespace PocceMod.Client.Menus
                 AddVehicle(vehicle);
             }
 
-            OnListItemSelect += async (_menu, _listItem, _listIndex, _itemIndex) =>
+            OnListItemSelect += async (menu, listItem, listIndex, itemIndex) =>
             {
-                var model = _listItem.ListItems[_listIndex];
+                var model = listItem.ListItems[listIndex];
                 var vehicle = await Vehicles.Spawn(model);
                 CloseMenu();
 

@@ -8,7 +8,7 @@ namespace PocceMod.Client.Menus.Dev
 
         public PlayerTelemetryMenu() : base("PocceMod", "player telemetry")
         {
-            OnMenuOpen += (_menu) =>
+            OnMenuOpen += (menu) =>
             {
                 if (_source == null)
                     return;
@@ -21,7 +21,7 @@ namespace PocceMod.Client.Menus.Dev
                 }
             };
 
-            OnMenuClose += (_menu) =>
+            OnMenuClose += (menu) =>
             {
                 ClearMenuItems();
             };
