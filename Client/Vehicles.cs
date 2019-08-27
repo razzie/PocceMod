@@ -664,29 +664,35 @@ namespace PocceMod.Client
                     return Autopilot.Spawn(vehicle);
 
                 var model = (uint)API.GetEntityModel(vehicle);
-                if (API.IsThisModelAPlane(model) || API.IsThisModelAHeli(model))
+                var isPlane = API.IsThisModelAPlane(model);
+
+                if (isPlane || API.IsThisModelAHeli(model))
                 {
-                    var force = 1f;
+                    var min = Vector3.Zero;
+                    var max = Vector3.Zero;
+                    API.GetModelDimensions(model, ref min, ref max);
+
+                    var force = isPlane ? 1f : 0.1f;
                     if (API.IsControlPressed(0, 172)) // up
                     {
-                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force, 0f, 1f, 0f, -1, true, true, true, false, false);
-                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force, 0f, -1f, 0f, -1, true, true, true, false, false);
+                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force, 0f, max.Y, 0f, -1, true, true, true, false, false);
+                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force, 0f, min.Y, 0f, -1, true, true, true, false, false);
                     }
                     else if (API.IsControlPressed(0, 173)) // down
                     {
-                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force, 0f, 1f, 0f, -1, true, true, true, false, false);
-                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force, 0f, -1f, 0f, -1, true, true, true, false, false);
+                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force, 0f, max.Y, 0f, -1, true, true, true, false, false);
+                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force, 0f, min.Y, 0f, -1, true, true, true, false, false);
                     }
 
                     if (API.IsControlPressed(0, 174)) // left
                     {
-                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force, 1f, 0f, 0f, -1, true, true, true, false, false);
-                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force, -1f, 0f, 0f, -1, true, true, true, false, false);
+                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force, max.X, 0f, 0f, -1, true, true, true, false, false);
+                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force, min.X, 0f, 0f, -1, true, true, true, false, false);
                     }
                     else if (API.IsControlPressed(0, 175)) // right
                     {
-                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force, 1f, 0f, 0f, -1, true, true, true, false, false);
-                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force, -1f, 0f, 0f, -1, true, true, true, false, false);
+                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force, max.X, 0f, 0f, -1, true, true, true, false, false);
+                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force, min.X, 0f, 0f, -1, true, true, true, false, false);
                     }
 
                     return Delay(33);
