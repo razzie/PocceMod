@@ -624,7 +624,7 @@ namespace PocceMod.Client
             if (hasOtherDriver || MainMenu.IsOpen || API.IsEntityDead(vehicle))
                 return Delay(100);
 
-            if (API.IsPedInFlyingVehicle(player) && API.DecorExistOn(vehicle, AircraftHornDecor))
+            if (API.DecorExistOn(vehicle, AircraftHornDecor))
             {
                 if (API.IsControlJustPressed(0, 86)) // INPUT_VEH_HORN
                 {

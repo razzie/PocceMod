@@ -26,6 +26,7 @@ namespace PocceMod.Client.Effect
         public Task Init()
         {
             _sound = API.GetSoundId();
+            API.SetHornEnabled(_vehicle, false);
             API.PlaySoundFromEntity(_sound, Vehicles.GetAircraftHorn(_vehicle), _vehicle, null, false, 0);
             return Task.FromResult(0);
         }
@@ -38,6 +39,7 @@ namespace PocceMod.Client.Effect
         {
             API.StopSound(_sound);
             API.ReleaseSoundId(_sound);
+            API.SetHornEnabled(_vehicle, true);
         }
 
         public static string GetKeyFrom(int vehicle)
