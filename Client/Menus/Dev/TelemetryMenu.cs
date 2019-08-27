@@ -1,5 +1,7 @@
 ﻿using CitizenFX.Core.Native;
 using MenuAPI;
+using PocceMod.Shared;
+using System.Collections.Generic;
 
 namespace PocceMod.Client.Menus.Dev
 {
@@ -9,28 +11,67 @@ namespace PocceMod.Client.Menus.Dev
         {
             var submenu = new PlayerTelemetryMenu();
             MenuController.AddSubmenu(this, submenu);
-
+            
             OnItemSelect += (_menu, _item, _index) =>
             {
                 submenu.OpenMenu(_item.ItemData);
-                CloseMenu();
             };
 
-            OnMenuOpen += (_menu) =>
+            OnListItemSelect += (_menu, _listItem, _listIndex, _itemIndex) =>
             {
-                foreach (var playerTelemetry in Telemetry.PlayerData)
+                int timeoutSec = 0;
+
+                switch (_listIndex)
                 {
-                    var player = playerTelemetry.Key;
-                    var playerName = API.GetPlayerName(API.GetPlayerFromServerId(player));
-                    var menuItem = new MenuItem(string.Format("{0} (#{1})", playerName, player)) { ItemData = playerTelemetry.Value };
-                    AddMenuItem(menuItem);
+                    case 0:
+                        timeoutSec = 10;
+                        break;
+
+                    case 1:
+                        timeoutSec = 30;
+                        break;
+
+                    case 2:
+                        timeoutSec = 60;
+                        break;
+
+                    case 3:
+                        timeoutSec = 120;
+                        break;
+
+                    case 4:
+                        Clear();
+                        return;
+
+                    default:
+                        return;
                 }
+
+                Common.Notification(string.Format("Starting {0} second measurement for all players", timeoutSec));
+                Telemetry.Request(timeoutSec);
             };
 
-            OnMenuClose += (_menu) =>
+            Clear();
+
+            Telemetry.TelemetryReceived += AddTelemetry;
+        }
+
+        public void AddTelemetry(int sourcePlayer, Telemetry.Measurement measurement)
+        {
+            var playerName = API.GetPlayerName(API.GetPlayerFromServerId(sourcePlayer));
+            var menuItem = new MenuItem(string.Format("{0} (player#{1})", playerName, sourcePlayer)) { ItemData = measurement };
+            AddMenuItem(menuItem);
+        }
+
+        public void Clear()
+        {
+            ClearMenuItems();
+
+            var startMeasurementItem = new MenuListItem("Start measurement for all", new List<string> { "10sec", "30sec", "1min", "2min", "Clear" }, 0)
             {
-                ClearMenuItems();
+                Enabled = Permission.CanDo(Ability.ReceiveTelemetry)
             };
+            AddMenuItem(startMeasurementItem);
         }
     }
 }

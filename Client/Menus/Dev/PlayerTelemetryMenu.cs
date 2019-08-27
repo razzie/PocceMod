@@ -1,13 +1,10 @@
 ﻿using MenuAPI;
-using System.Collections.Generic;
 
 namespace PocceMod.Client.Menus.Dev
 {
-    using PlayerTelemetry = Dictionary<string, List<string>>;
-
     public class PlayerTelemetryMenu : Menu
     {
-        private PlayerTelemetry _source;
+        private Telemetry.Measurement _source;
 
         public PlayerTelemetryMenu() : base("PocceMod", "player telemetry")
         {
@@ -16,10 +13,11 @@ namespace PocceMod.Client.Menus.Dev
                 if (_source == null)
                     return;
 
-                foreach (var feature in _source)
+                AddData("Total", _source.Total);
+
+                foreach (var feature in _source.FeatureData)
                 {
-                    var menuListItem = new MenuListItem(feature.Key, feature.Value, 4);
-                    AddMenuItem(menuListItem);
+                    AddData(feature.Key, feature.Value);
                 }
             };
 
@@ -29,10 +27,16 @@ namespace PocceMod.Client.Menus.Dev
             };
         }
 
-        public void OpenMenu(PlayerTelemetry source)
+        public void OpenMenu(Telemetry.Measurement source)
         {
             _source = source;
             OpenMenu();
+        }
+
+        private void AddData(string feature, Telemetry.Data data)
+        {
+            var menuListItem = new MenuListItem(feature, data.Items, 4);
+            AddMenuItem(menuListItem);
         }
     }
 }

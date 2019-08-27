@@ -24,7 +24,8 @@ namespace PocceMod.Server
             EventHandlers["PocceMod:RequestMPSkin"] += new Action<Player, int, int>(RequestMPSkin);
             EventHandlers["PocceMod:SetMPSkin"] += new Action<Player, int, dynamic, int>(SetMPSkin);
             EventHandlers["PocceMod:ToggleTurboBoost"] += new Action<Player, int, bool>(ToggleTurboBoost);
-            EventHandlers["PocceMod:Telemetry"] += new Action<Player, dynamic>(Telemetry);
+            EventHandlers["PocceMod:RequestTelemetry"] += new Action<Player, int>(RequestTelemetry);
+            EventHandlers["PocceMod:Telemetry"] += new Action<Player, int, dynamic>(Telemetry);
         }
 
         private static void Debug(Player source, string text)
@@ -142,15 +143,24 @@ namespace PocceMod.Server
                 TriggerClientEvent("PocceMod:ToggleTurboBoost", vehicle, state);
         }
 
-        private void Telemetry([FromSource] Player source, dynamic data)
+        private void RequestTelemetry([FromSource] Player source, int timeoutSec)
+        {
+            Debug(source, "RequestTelemetry");
+
+            if (Permission.CanDo(source, Ability.ReceiveTelemetry))
+            {
+                foreach (var player in Players)
+                {
+                    player.TriggerEvent("PocceMod:RequestTelemetry", source.Handle, timeoutSec);
+                }
+            }
+        }
+
+        private void Telemetry([FromSource] Player source, int targetPlayer, dynamic data)
         {
             Debug(source, "Telemetry");
 
-            foreach (var player in Players)
-            {
-                if (player == source || Permission.CanDo(player, Ability.ReceiveTelemetry))
-                    player.TriggerEvent("PocceMod:Telemetry", source.Handle, data);
-            }
+            Players[targetPlayer].TriggerEvent("PocceMod:Telemetry", source.Handle, data);
         }
     }
 }

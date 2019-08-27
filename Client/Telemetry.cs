@@ -2,62 +2,19 @@
 using PocceMod.Shared;
 using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace PocceMod.Client
 {
-    using PlayerTelemetry = Dictionary<string, List<string>>;
-
     public class Telemetry : BaseScript
     {
-        private class Data
-        {
-            public int Calls { get; private set; }
-            public double Min { get; private set; }
-            public double Max { get; private set; }
-            public double Sum { get; private set; }
-            public double Avg { get { return Sum / Calls; } }
-
-            public Data(TimeSpan time)
-            {
-                Add(time);
-            }
-
-            public void Add(TimeSpan time)
-            {
-                var ms = time.TotalMilliseconds;
-
-                Sum += ms;
-                Calls++;
-
-                if (Calls == 1)
-                {
-                    Min = ms;
-                    Max = ms;
-                }
-                else
-                {
-                    if (ms < Min)
-                        Min = ms;
-
-                    if (ms > Max)
-                        Max = ms;
-                }
-            }
-
-            public void Reset()
-            {
-                Calls = 0;
-                Min = 0;
-                Max = 0;
-                Sum = 0;
-            }
-        }
-
         private static readonly bool Enabled;
-        private static readonly Dictionary<string, Data> _localData = new Dictionary<string, Data>();
-        private static readonly Dictionary<int, PlayerTelemetry> _playerTelemetries = new Dictionary<int, PlayerTelemetry>();
+        private static readonly List<Measurement> _measurements = new List<Measurement>();
+
+        public delegate void TelemetryReceivedDelegate(int sourcePlayer, Measurement measurement);
+        public static event TelemetryReceivedDelegate TelemetryReceived;
 
         static Telemetry()
         {
@@ -66,15 +23,11 @@ namespace PocceMod.Client
 
         public Telemetry()
         {
-            EventHandlers["PocceMod:Telemetry"] += new Action<int, dynamic>(ReceiveTelemetry);
+            EventHandlers["PocceMod:RequestTelemetry"] += new Action<int, int>(NetRequestTelemetry);
+            EventHandlers["PocceMod:Telemetry"] += new Action<int, dynamic>(NetTelemetry);
 
             if (Enabled)
                 Tick += Wrap("telemetry", Update);
-        }
-
-        public static IEnumerable<KeyValuePair<int, PlayerTelemetry>> PlayerData
-        {
-            get { return _playerTelemetries; }
         }
 
         public static Func<Task> Wrap(string feature, Func<Task> func)
@@ -98,52 +51,166 @@ namespace PocceMod.Client
             if (!Enabled)
                 return;
 
-            if (_localData.TryGetValue(feature, out Data data))
-                data.Add(timespan);
-            else
-                _localData.Add(feature, new Data(timespan));
+            foreach (var measurement in _measurements)
+            {
+                measurement.AddData(feature, timespan);
+            }
         }
 
-        private static void ReceiveTelemetry(int sourcePlayer, dynamic data)
+        public static void Request(int timeoutSec)
         {
-            var playerTelemetry = new PlayerTelemetry();
+            TriggerServerEvent("PocceMod:RequestTelemetry", timeoutSec);
+        }
 
-            foreach (KeyValuePair<string, dynamic> pair in data)
+        private static void NetRequestTelemetry(int requestingPlayer, int timeoutSec)
+        {
+            _measurements.Add(new Measurement(requestingPlayer, timeoutSec));
+        }
+
+        private static void NetTelemetry(int sourcePlayer, dynamic data)
+        {
+            var measurement = Measurement.Deserialize(data);
+            TelemetryReceived?.Invoke(sourcePlayer, measurement);
+        }
+
+        private static Task Update()
+        {
+            foreach (var measurement in _measurements.ToArray())
             {
-                List<object> values = pair.Value;
-                playerTelemetry.Add(pair.Key, values.Cast<string>().ToList());
+                if (measurement.Timeout < DateTime.Now)
+                {
+                    TriggerServerEvent("PocceMod:Telemetry", measurement.RequestingPlayer, measurement.Serialize());
+                    _measurements.Remove(measurement);
+                }
             }
 
-            _playerTelemetries[sourcePlayer] = playerTelemetry;
+            return Delay(100);
         }
 
-        private static IDictionary<string, object> ComposeAndClear()
+        public class Data
         {
-            IDictionary<string, object> result = new Dictionary<string, object>();
+            public string Name { get; }
+            public int Calls { get; private set; }
+            public double Min { get; private set; }
+            public double Max { get; private set; }
+            public double Sum { get; private set; }
+            public double Avg { get { return Sum / Calls; } }
 
-            foreach (var pair in _localData)
+            public Data(string name)
             {
-                var data = pair.Value;
-                var values = new string[] {
-                    "calls: " + data.Calls,
-                    "min: " + Math.Round(data.Min, 2) + "ms",
-                    "max: " + Math.Round(data.Max, 2) + "ms",
-                    "avg: " + Math.Round(data.Avg, 2) + "ms",
-                    "sum: " + Math.Round(data.Sum, 2) + "ms"
+                Name = name;
+            }
+
+            public Data(string name, TimeSpan time)
+            {
+                Name = name;
+                Add(time);
+            }
+
+            public void Add(TimeSpan time)
+            {
+                var ms = time.TotalMilliseconds;
+
+                Sum += ms;
+                Calls++;
+
+                if (Calls == 1)
+                {
+                    Min = ms;
+                    Max = ms;
+                }
+                else
+                {
+                    if (ms < Min)
+                        Min = ms;
+                    else if (ms > Max)
+                        Max = ms;
+                }
+            }
+
+            public List<string> Items
+            {
+                get
+                {
+                    return new List<string> {
+                        "calls: " + Calls,
+                        "min: " + Math.Round(Min, 2) + "ms",
+                        "max: " + Math.Round(Max, 2) + "ms",
+                        "avg: " + Math.Round(Avg, 2) + "ms",
+                        "sum: " + Math.Round(Sum, 2) + "ms"
+                    };
+                }
+            }
+
+            public dynamic Serialize()
+            {
+                dynamic result = new ExpandoObject();
+                result.Name = Name;
+                result.Calls = Calls;
+                result.Min = Min;
+                result.Max = Max;
+                result.Sum = Sum;
+                return result;
+            }
+
+            public static Data Deserialize(dynamic data)
+            {
+                return new Data(data.Name)
+                {
+                    Calls = data.Calls,
+                    Min = data.Min,
+                    Max = data.Max,
+                    Sum = data.Sum
                 };
-                result.Add(pair.Key, values);
-
-                data.Reset();
             }
-
-            return result;
         }
 
-        private static async Task Update()
+        public class Measurement
         {
-            await Delay(60000); // once per minute
+            public Data Total { get; }
+            public Dictionary<string, Data> FeatureData { get; }
+            public DateTime Timeout { get; }
+            public int RequestingPlayer { get; }
 
-            TriggerServerEvent("PocceMod:Telemetry", ComposeAndClear());
+            private Measurement(Data total, IEnumerable<Data> featureData)
+            {
+                Total = total;
+                FeatureData = featureData.ToDictionary(data => data.Name, data => data);
+            }
+
+            public Measurement(int requestingPlayer, int timeoutSec)
+            {
+                Total = new Data("Total");
+                FeatureData = new Dictionary<string, Data>();
+                RequestingPlayer = requestingPlayer;
+                Timeout = DateTime.Now + TimeSpan.FromSeconds(timeoutSec);
+            }
+
+            public void AddData(string feature, DateTime start) => AddData(feature, DateTime.Now - start);
+
+            public void AddData(string feature, TimeSpan timespan)
+            {
+                Total.Add(timespan);
+
+                if (FeatureData.TryGetValue(feature, out Data data))
+                    data.Add(timespan);
+                else
+                    FeatureData.Add(feature, new Data(feature, timespan));
+            }
+
+            public dynamic Serialize()
+            {
+                dynamic result = new ExpandoObject();
+                result.Total = Total.Serialize();
+                result.FeatureData = FeatureData.Values.Select(data => data.Serialize());
+                return result;
+            }
+
+            public static Measurement Deserialize(dynamic data)
+            {
+                List<dynamic> featureData = data.FeatureData;
+                return new Measurement(Data.Deserialize(data.Total), featureData.Select<dynamic, Data>(x => Data.Deserialize(x)));
+            }
         }
     }
 }
