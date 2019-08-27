@@ -431,9 +431,9 @@ namespace PocceMod.Client
                 return;
 
             if (state)
-                await Effects.AddHornEffect(API.NetToVeh(vehicle));
+                await Effects.AddHornEffect(vehicle);
             else
-                Effects.RemoveHornEffect(API.NetToVeh(vehicle));
+                Effects.RemoveHornEffect(vehicle);
         }
 
         private static async Task NetToggleTurboBoost(int netVehicle, bool state)
