@@ -7,7 +7,8 @@ The menu toggle key is F5 by default, but can be configured.
 
 ![menu](https://github.com/razzie/PocceMod/blob/master/screenshots/menu.jpeg) 
 
-###### Features
+
+## Features
 * Vehicle
     - Spawn from list
     - Spawn by name
@@ -65,7 +66,20 @@ The menu toggle key is F5 by default, but can be configured.
 * Hidden debug menu (use */pocce debug* command)
 
 
-###### Screenshots
+## Download
+Source code and zipped releases: [here](https://github.com/razzie/PocceMod/releases)
+
+
+## Setup
+* Extract the zip archive and copy *poccemod* folder under your FiveM server's *resources* folder.
+* Add "ensure poccemod" to your *server.cfg*
+* Optionally: set up permissions by adding something similar to *server.cfg* or *permissions.cfg* (if you have it):
+*add_principal identifier.steam:**your_steam_hex_id** group.admin*
+*add_principal identifier.steam:**your_steam_hex_id** group.moderator*
+If you have vMenu set up, you probably have this already.
+
+
+## Screenshots
 ![screenshot#1](https://github.com/razzie/PocceMod/blob/master/screenshots/01.jpeg) 
 ![screenshot#2](https://github.com/razzie/PocceMod/blob/master/screenshots/02.jpeg) 
 ![screenshot#3](https://github.com/razzie/PocceMod/blob/master/screenshots/03.jpeg) 
@@ -90,17 +104,3 @@ The menu toggle key is F5 by default, but can be configured.
 ![screenshot#22](https://github.com/razzie/PocceMod/blob/master/screenshots/22.jpeg) 
 ![screenshot#23](https://github.com/razzie/PocceMod/blob/master/screenshots/23.jpeg) 
 ![screenshot#24](https://github.com/razzie/PocceMod/blob/master/screenshots/24.jpeg) 
-
-
-###### Download
-Source code and zipped releases: [here](https://github.com/razzie/PocceMod/releases)
-
-
-###### Setup
-* Extract the zip archive and copy *poccemod* folder under your FiveM server's *resources* folder.
-* Add "ensure poccemod" to your *server.cfg*
-* Optionally: set up permissions by adding something similar to *server.cfg* or *permissions.cfg* (if you have it):
-*add_principal identifier.steam:**your_steam_hex_id** group.admin*
-*add_principal identifier.steam:**your_steam_hex_id** group.moderator*
-If you have vMenu set up, you probably have this already.
-
