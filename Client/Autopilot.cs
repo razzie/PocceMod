@@ -134,6 +134,16 @@ namespace PocceMod.Client
             Wander(ped, vehicle);
         }
 
+        private static bool HasWaypoint(int driver)
+        {
+            return API.DecorGetInt(driver, WaypointHashDecor) > 0;
+        }
+
+        private static bool HasWaypoint(int driver, Vector3 wp)
+        {
+            return API.DecorGetInt(driver, WaypointHashDecor) == wp.GetHashCode();
+        }
+
         private static float GetHeading(int vehicle, Vector3 wp)
         {
             var coords = API.GetEntityCoords(vehicle, false);
@@ -141,7 +151,7 @@ namespace PocceMod.Client
             return MathUtil.RadiansToDegrees(heading);
         }
 
-        private static void GotoWaypoint(int driver, int vehicle, Vector3 wp)
+        public static void GotoWaypoint(int driver, int vehicle, Vector3 wp)
         {
             var vehicleModel = (uint)API.GetEntityModel(vehicle);
             if (API.IsThisModelAPlane(vehicleModel))
@@ -159,9 +169,11 @@ namespace PocceMod.Client
                 var speed = API.GetVehicleModelMaxSpeed(vehicleModel);
                 API.TaskVehicleDriveToCoordLongrange(driver, vehicle, wp.X, wp.Y, wp.Z, speed, DrivingStyle, 5f);
             }
+
+            API.DecorSetInt(driver, WaypointHashDecor, wp.GetHashCode());
         }
 
-        private static void Wander(int driver, int vehicle)
+        public static void Wander(int driver, int vehicle)
         {
             var vehicleModel = (uint)API.GetEntityModel(vehicle);
             if (API.IsThisModelAPlane(vehicleModel))
@@ -181,6 +193,8 @@ namespace PocceMod.Client
                 var speed = API.GetVehicleModelMaxSpeed(vehicleModel);
                 API.TaskVehicleDriveWander(driver, vehicle, speed, DrivingStyle);
             }
+
+            API.DecorSetInt(driver, WaypointHashDecor, 0);
         }
 
         private static void UpdateOwnedAutopilot(int vehicle, int driver)
@@ -188,18 +202,16 @@ namespace PocceMod.Client
             if (!API.AnyPassengersRappeling(vehicle) && Common.GetWaypoint(out Vector3 wp, false))
             {
                 // waypoint hasn't changed
-                if (API.DecorGetInt(driver, WaypointHashDecor) == wp.GetHashCode())
+                if (HasWaypoint(driver, wp))
                     return;
 
-                API.DecorSetInt(driver, WaypointHashDecor, wp.GetHashCode());
                 GotoWaypoint(driver, vehicle, wp);
                 return;
             }
 
             // waypoint was removed
-            if (API.DecorGetInt(driver, WaypointHashDecor) > 0)
+            if (HasWaypoint(driver))
             {
-                API.DecorSetInt(driver, WaypointHashDecor, 0);
                 Wander(driver, vehicle);
             }
         }
@@ -240,7 +252,8 @@ namespace PocceMod.Client
                 }
                 else if (API.IsThisModelAPlane(vehicleModel))
                 {
-                    if (!API.IsEntityInAir(vehicle))
+                    if (!API.IsEntityInAir(vehicle) &&
+                        (!Vehicles.IsFeatureEnabled(vehicle, Vehicles.FeatureFlag.RemoteControl) || API.GetEntityRotation(vehicle, 2).X > 30f))
                     {
                         API.ApplyForceToEntity(vehicle, 0, 0f, 0f, 200f, 0f, 1f, 0f, -1, true, true, true, false, false);
                         API.ApplyForceToEntityCenterOfMass(vehicle, 0, 0f, 200f, 0f, false, true, true, false);
@@ -250,8 +263,7 @@ namespace PocceMod.Client
                         API.DecorSetInt(ped, WaypointHashDecor, 0);
                     }
 
-                    var height = Common.GetEntityHeightAboveGround(vehicle);
-                    if (height > 10f)
+                    if (Common.GetEntityHeightAboveGround(vehicle) > 10f)
                     {
                         if (API.GetVehicleLandingGear(vehicle) == 0)
                             API.SetVehicleLandingGear(vehicle, 1);
