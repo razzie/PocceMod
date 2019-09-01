@@ -263,7 +263,7 @@ namespace PocceMod.Client
                         API.DecorSetInt(ped, WaypointHashDecor, 0);
                     }
 
-                    if (Common.GetEntityHeightAboveGround(vehicle) > 10f)
+                    if (Common.GetEntityHeightAboveGround(vehicle) > 10f && API.GetEntitySpeedVector(vehicle, true).Y > 10f)
                     {
                         if (API.GetVehicleLandingGear(vehicle) == 0)
                             API.SetVehicleLandingGear(vehicle, 1);
