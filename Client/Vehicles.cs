@@ -105,7 +105,7 @@ namespace PocceMod.Client
                 if (HasFilter(Filter.WithDriver) && !API.IsVehicleSeatFree(vehicle, -1))
                     continue;
 
-                if (coords.DistanceToSquared(pos) > rangeSquared)
+                if (rangeSquared > 0f && coords.DistanceToSquared(pos) > rangeSquared)
                     continue;
 
                 vehicles.Add(vehicle);
@@ -620,7 +620,7 @@ namespace PocceMod.Client
             var vehicle = API.GetVehiclePedIsIn(player, !API.IsPedInAnyVehicle(player, false));
             if (API.IsEntityDead(vehicle))
             {
-                if (Common.GetClosestEntity(Autopilot.Get(true).Select(tup => tup.Item2).Where(v => !API.IsEntityDead(v)), out vehicle))
+                if (Common.GetClosestEntity(Autopilot.Get(true, -1).Select(tup => tup.Item2).Where(v => !API.IsEntityDead(v)), out vehicle))
                     API.SetPlayersLastVehicle(vehicle);
                 else
                     return Delay(100);

@@ -74,7 +74,7 @@ namespace PocceMod.Client
                 if (API.IsEntityAPed(prop) || API.IsEntityAVehicle(prop))
                     continue;
 
-                if (coords.DistanceToSquared(pos) > rangeSquared)
+                if (rangeSquared > 0f && coords.DistanceToSquared(pos) > rangeSquared)
                     continue;
 
                 props.Add(prop);

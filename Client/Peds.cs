@@ -86,7 +86,7 @@ namespace PocceMod.Client
                 if (HasFilter(Filter.CurrentVehiclePassengers) && API.GetVehiclePedIsIn(ped, false) == vehicle)
                     continue;
 
-                if (coords.DistanceToSquared(pos) > rangeSquared)
+                if (rangeSquared > 0f && coords.DistanceToSquared(pos) > rangeSquared)
                     continue;
 
                 peds.Add(ped);
