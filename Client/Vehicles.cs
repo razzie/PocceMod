@@ -618,6 +618,14 @@ namespace PocceMod.Client
         {
             var player = API.GetPlayerPed(-1);
             var vehicle = API.GetVehiclePedIsIn(player, !API.IsPedInAnyVehicle(player, false));
+            if (API.IsEntityDead(vehicle))
+            {
+                if (Common.GetClosestEntity(Autopilot.Get(true).Select(tup => tup.Item2).Where(v => !API.IsEntityDead(v)), out vehicle))
+                    API.SetPlayersLastVehicle(vehicle);
+                else
+                    return Delay(100);
+            }
+
             var driver = API.GetPedInVehicleSeat(vehicle, -1);
             var isAutopilot = Autopilot.IsOwnedAutopilot(driver);
             var hasOtherDriver = !API.IsVehicleSeatFree(vehicle, -1) && driver != player && !isAutopilot;

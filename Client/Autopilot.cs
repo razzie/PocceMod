@@ -1,6 +1,7 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -134,6 +135,16 @@ namespace PocceMod.Client
             Wander(ped, vehicle);
         }
 
+        public static IEnumerable<Tuple<int, int>> Get(bool ownedAutipilots, float rangeSquared = 3600f)
+        {
+            var ownershipCheck = ownedAutipilots ? new Func<int, bool>(IsOwnedAutopilot) : new Func<int, bool>(IsAutopilot);
+
+            return Peds.Get(Peds.Filter.Dead | Peds.Filter.Players, rangeSquared)
+                .Where(ped => ownershipCheck(ped))
+                .Select(ped => new Tuple<int, int>(ped, API.GetVehiclePedIsIn(ped, false)))
+                .Where(tup => API.GetPedInVehicleSeat(tup.Item2, -1) == tup.Item1);
+        }
+
         private static bool HasWaypoint(int driver)
         {
             return API.DecorGetInt(driver, WaypointHashDecor) > 0;
@@ -218,12 +229,10 @@ namespace PocceMod.Client
 
         private static Task Update()
         {
-            var autopilots = Peds.Get(Peds.Filter.Dead | Peds.Filter.Players, 3600f).Where(ped => IsAutopilot(ped));
-            foreach (var ped in autopilots)
+            foreach (var tuple in Get(false))
             {
-                var vehicle = API.GetVehiclePedIsIn(ped, false);
-                if (API.GetPedInVehicleSeat(vehicle, -1) != ped)
-                    continue;
+                var ped = tuple.Item1;
+                var vehicle = tuple.Item2;
 
                 Vehicles.UpdateAutoHazardLights(vehicle);
 
@@ -234,6 +243,9 @@ namespace PocceMod.Client
                     var tmp_ped = ped;
                     API.SetPedAsNoLongerNeeded(ref tmp_ped);
                 }
+
+                if (API.IsEntityDead(vehicle))
+                    continue;
 
                 var vehicleModel = (uint)API.GetEntityModel(vehicle);
                 if (API.IsThisModelAHeli(vehicleModel))
