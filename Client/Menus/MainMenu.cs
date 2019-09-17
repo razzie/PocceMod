@@ -12,6 +12,7 @@ namespace PocceMod.Client.Menus
     public class MainMenu : Menu
     {
         private static readonly int MenuKey;
+        private static readonly int GamepadMenuKey;
         private readonly Dictionary<Type, Menu> _submenus = new Dictionary<Type, Menu>();
         private readonly Dictionary<int, Func<Task>> _menuItemActions = new Dictionary<int, Func<Task>>();
         private readonly Dictionary<int, List<Func<Task>>> _menuListItemActions = new Dictionary<int, List<Func<Task>>>();
@@ -19,25 +20,19 @@ namespace PocceMod.Client.Menus
         static MainMenu()
         {
             MenuKey = Config.GetConfigInt("MenuKey");
-            if (MenuKey == 0)
+            if (MenuKey <= 0)
             {
                 Common.Notification("No PocceMod menu key configured", true, true);
                 MenuKey = -1;
             }
 
-            MenuController.MenuToggleKey = (Control)MenuKey; // Control.SelectCharacterMichael;
-            MenuController.EnableMenuToggleKeyOnController = false;
-            MenuController.DontOpenAnyMenu = true;
+            GamepadMenuKey = Config.GetConfigInt("GamepadMenuKey");
 
-            try
-            {
-                MenuController.MenuAlignment = Config.GetConfigBool("MenuRightAlign") ? MenuController.MenuAlignmentOption.Right : MenuController.MenuAlignmentOption.Left;
-            }
-            catch (AspectRatioException)
-            {
-                Common.Notification("Unsupported aspect ratio! PocceMod menu is force left aligned", true, true);
-                MenuController.MenuAlignment = MenuController.MenuAlignmentOption.Left;
-            }
+            MenuController.MenuToggleKey = (Control)MenuKey;
+            MenuController.ControllerMenuToggleKey = (Control)GamepadMenuKey;
+            MenuController.EnableMenuToggleKeyOnController = GamepadMenuKey > 0;
+            MenuController.DontOpenAnyMenu = true;
+            MenuController.MenuAlignment = Config.GetConfigBool("MenuRightAlign") ? MenuController.MenuAlignmentOption.Right : MenuController.MenuAlignmentOption.Left;
         }
 
         public MainMenu() : base("PocceMod", "menu")
