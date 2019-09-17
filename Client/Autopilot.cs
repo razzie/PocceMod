@@ -271,7 +271,7 @@ namespace PocceMod.Client
                 else if (API.IsPedInFlyingVehicle(ped))
                 {
                     if (!API.IsEntityInAir(vehicle) &&
-                        (!Vehicles.IsFeatureEnabled(vehicle, Vehicles.FeatureFlag.RemoteControl) || API.GetEntityRotation(vehicle, 2).X > 30f))
+                        (!Vehicles.IsFeatureEnabled(vehicle, Vehicles.FeatureFlag.RemoteControl) || API.GetEntityRotation(vehicle, 2).X > 20f))
                     {
                         API.ApplyForceToEntity(vehicle, 0, 0f, 0f, 200f, 0f, 1f, 0f, -1, true, true, true, false, false);
                         API.ApplyForceToEntityCenterOfMass(vehicle, 0, 0f, 200f, 0f, false, true, true, false);
