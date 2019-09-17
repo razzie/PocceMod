@@ -677,9 +677,10 @@ namespace PocceMod.Client
                     var min = Vector3.Zero;
                     var max = Vector3.Zero;
                     var model = (uint)API.GetEntityModel(vehicle);
+                    var isHeli = API.IsThisModelAHeli(model);
                     API.GetModelDimensions(model, ref min, ref max);
 
-                    var force = API.IsThisModelAPlane(model) ? 1f : 0.1f;
+                    var force = isHeli ? 0.1f : 1f;
                     if (API.IsControlPressed(0, 172)) // up
                     {
                         API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force, 0f, max.Y, 0f, -1, true, true, true, false, false);
@@ -701,6 +702,9 @@ namespace PocceMod.Client
                         API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force / 2, max.X, 0f, 0f, -1, true, true, true, false, false);
                         API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force / 2, min.X, 0f, 0f, -1, true, true, true, false, false);
                     }
+
+                    if (isHeli)
+                        API.TaskVehicleTempAction(driver, vehicle, 9, 1);
 
                     return Delay(33);
                 }
