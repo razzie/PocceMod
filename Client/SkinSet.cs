@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace PocceMod.Client
 {
@@ -6,9 +7,9 @@ namespace PocceMod.Client
     {
         private readonly Dictionary<string, List<Skin>> _skins = new Dictionary<string, List<Skin>>();
 
-        public IEnumerable<KeyValuePair<string, List<Skin>>> Skins
+        public IEnumerable<SkinVariations> Skins
         {
-            get { return _skins; }
+            get { return _skins.Select(pair => new SkinVariations(pair)); }
         }
 
         public int Count
