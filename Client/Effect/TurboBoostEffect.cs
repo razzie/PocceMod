@@ -18,7 +18,7 @@ namespace PocceMod.Client.Effect
                 Offset = API.GetOffsetFromEntityGivenWorldCoords(vehicle, pos.X, pos.Y, pos.Z);
 
                 API.UseParticleFxAssetNextCall("core");
-                Handle = API.StartParticleFxLoopedOnEntity("ent_amb_steam", vehicle, Offset.X, Offset.Y, Offset.Z, 90f + MinAngle, 0f, 0f, 1f, false, false, false);
+                Handle = API.StartParticleFxLoopedOnEntity("ent_amb_steam", vehicle, Offset.X, Offset.Y, Offset.Z, 90f + StartAngle, 0f, 0f, 1f, false, false, false);
             }
 
             public int Handle { get; }
@@ -34,8 +34,8 @@ namespace PocceMod.Client.Effect
         private static readonly float Power;
         private static readonly TimeSpan ChargeSec;
         private static readonly float RechargeRate;
-        private static readonly float MinAngle;
-        private static readonly float MaxAngle;
+        private static readonly float StartAngle;
+        private static readonly float EndAngle;
         private static readonly bool IsMappedToHorn;
         private static readonly Dictionary<int, DateTime> _rechargeDB = new Dictionary<int, DateTime>();
 
@@ -55,8 +55,8 @@ namespace PocceMod.Client.Effect
             Power = Config.GetConfigFloat("TurboBoostPower");
             ChargeSec = TimeSpan.FromSeconds(Config.GetConfigFloat("TurboBoostChargeSec"));
             RechargeRate = Config.GetConfigFloat("TurboBoostRechargeRate");
-            MinAngle = Config.GetConfigFloat("TurboBoostMinAngle");
-            MaxAngle = Config.GetConfigFloat("TurboBoostMaxAngle");
+            StartAngle = Config.GetConfigFloat("TurboBoostStartAngle");
+            EndAngle = Config.GetConfigFloat("TurboBoostEndAngle");
             IsMappedToHorn = Config.GetConfigInt("TurboBoostKey") == 86;
 
             if (Power < 100f)
@@ -82,8 +82,8 @@ namespace PocceMod.Client.Effect
             _offset = max.Y;
             _created = DateTime.Now;
             _timeout = _created + ChargeSec;
-            _angle = MinAngle;
-            _angleStep = (MaxAngle - MinAngle) / ((int)ChargeSec.TotalMilliseconds / 200);
+            _angle = StartAngle;
+            _angleStep = (EndAngle - StartAngle) / ((int)ChargeSec.TotalMilliseconds / 200);
 
             _blocked = _rechargeDB.TryGetValue(_vehicle, out DateTime nextCharge) && _created < nextCharge;
         }
@@ -115,8 +115,16 @@ namespace PocceMod.Client.Effect
             if (_blocked)
                 return;
 
-            if (_angle > MaxAngle)
-                _angle = MaxAngle;
+            if (_angleStep > 0)
+            {
+                if (_angle > EndAngle)
+                    _angle = EndAngle;
+            }
+            else
+            {
+                if (_angle < EndAngle)
+                    _angle = EndAngle;
+            }
             
             foreach (var fx in _effects)
                 fx.Angle = _angle;
