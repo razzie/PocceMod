@@ -51,7 +51,7 @@ namespace PocceMod.Client
         {
             API.DecorSetBool(ped, FlagDecor, true);
             API.DecorSetInt(ped, PlayerDecor, Common.PlayerID);
-            API.SetPedRelationshipGroupHash(ped, (uint)API.GetPedRelationshipGroupHash(API.PlayerId()));
+            API.SetPedRelationshipGroupHash(ped, (uint)API.GetPedRelationshipGroupHash(API.GetPlayerPed(-1)));
             API.TaskSetBlockingOfNonTemporaryEvents(ped, true);
             API.SetPedKeepTask(ped, true);
 
