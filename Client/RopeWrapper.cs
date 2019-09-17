@@ -120,6 +120,9 @@ namespace PocceMod.Client
 
         public override void Clear()
         {
+            if (_handle == -1)
+                return;
+
             API.DeleteRope(ref _handle);
             _handle = -1;
         }
