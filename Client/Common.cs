@@ -8,9 +8,16 @@ namespace PocceMod.Client
 {
     public static class Common
     {
+        private static int? _playerID;
         public static int PlayerID
         {
-            get { return API.GetPlayerServerId(API.PlayerId()); }
+            get
+            {
+                if (_playerID == null)
+                    _playerID = API.GetPlayerServerId(API.PlayerId());
+
+                return (int)_playerID;
+            }
         }
 
         public static void Notification(string message, bool blink = false, bool saveToBrief = false)

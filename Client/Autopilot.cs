@@ -113,20 +113,19 @@ namespace PocceMod.Client
 
         public static bool IsOwnedAutopilot(int driver)
         {
-            return IsAutopilot(driver) && API.DecorGetInt(driver, PlayerDecor) == API.PlayerId();
+            return IsAutopilot(driver) && API.DecorGetInt(driver, PlayerDecor) == Common.PlayerID;
         }
 
         public static async Task Spawn(int vehicle)
         {
             await Common.RequestModel(Model);
-            var playerID = API.PlayerId();
             var ped = API.CreatePedInsideVehicle(vehicle, 26, Model, -1, true, false);
             API.SetModelAsNoLongerNeeded(Model);
             API.DecorSetBool(ped, FlagDecor, true);
-            API.DecorSetInt(ped, PlayerDecor, playerID);
+            API.DecorSetInt(ped, PlayerDecor, Common.PlayerID);
             API.SetDriverAbility(ped, 1f);
             API.SetDriverAggressiveness(ped, 0f);
-            API.SetPedAsGroupMember(ped, API.GetPlayerGroup(playerID));
+            API.SetPedAsGroupMember(ped, API.GetPlayerGroup(API.PlayerId()));
             API.SetEntityAsMissionEntity(ped, true, true);
             API.TaskSetBlockingOfNonTemporaryEvents(ped, true);
             API.SetPedKeepTask(ped, true);

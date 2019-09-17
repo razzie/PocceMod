@@ -22,7 +22,7 @@ namespace PocceMod.Client
 
         private static bool IsCompanion(int ped)
         {
-            return API.DecorGetBool(ped, FlagDecor) && API.DecorGetInt(ped, PlayerDecor) == API.PlayerId();
+            return API.DecorGetBool(ped, FlagDecor) && API.DecorGetInt(ped, PlayerDecor) == Common.PlayerID;
         }
 
         public static List<int> Get(IEnumerable<int> peds)
@@ -49,12 +49,9 @@ namespace PocceMod.Client
 
         public static void Add(int ped)
         {
-            var playerID = API.PlayerId();
-            var player = API.GetPlayerPed(-1);
-
             API.DecorSetBool(ped, FlagDecor, true);
-            API.DecorSetInt(ped, PlayerDecor, playerID);
-            API.SetPedRelationshipGroupHash(ped, (uint)API.GetPedRelationshipGroupHash(player));
+            API.DecorSetInt(ped, PlayerDecor, Common.PlayerID);
+            API.SetPedRelationshipGroupHash(ped, (uint)API.GetPedRelationshipGroupHash(API.PlayerId()));
             API.TaskSetBlockingOfNonTemporaryEvents(ped, true);
             API.SetPedKeepTask(ped, true);
 
