@@ -84,11 +84,18 @@ namespace PocceMod.Client
                 Common.Notification("The autopilot belongs to an other player");
                 return;
             }
-            
-            API.TaskLeaveVehicle(driver, vehicle, 4096);
-            while (API.IsPedInVehicle(driver, vehicle, false))
+
+            if (API.IsPedDeadOrDying(driver, true))
             {
-                await Delay(100);
+                API.DeletePed(ref driver);
+            }
+            else
+            {
+                API.TaskLeaveVehicle(driver, vehicle, 4096);
+                while (API.IsPedInVehicle(driver, vehicle, false))
+                {
+                    await Delay(100);
+                }
             }
 
             API.SetPedIntoVehicle(player, vehicle, -1);
