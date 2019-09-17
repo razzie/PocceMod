@@ -671,17 +671,15 @@ namespace PocceMod.Client
             {
                 if (API.IsVehicleSeatFree(vehicle, -1))
                     return Autopilot.Spawn(vehicle);
-
-                var vehicleModel = (uint)API.GetEntityModel(vehicle);
-                var isPlane = API.IsThisModelAPlane(vehicleModel);
-
-                if (isPlane || API.IsThisModelAHeli(vehicleModel))
+                
+                if (API.IsPedInFlyingVehicle(driver))
                 {
                     var min = Vector3.Zero;
                     var max = Vector3.Zero;
-                    API.GetModelDimensions(vehicleModel, ref min, ref max);
+                    var model = (uint)API.GetEntityModel(vehicle);
+                    API.GetModelDimensions(model, ref min, ref max);
 
-                    var force = isPlane ? 1f : 0.1f;
+                    var force = API.IsThisModelAPlane(model) ? 1f : 0.1f;
                     if (API.IsControlPressed(0, 172)) // up
                     {
                         API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force, 0f, max.Y, 0f, -1, true, true, true, false, false);

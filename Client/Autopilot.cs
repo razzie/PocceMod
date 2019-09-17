@@ -253,8 +253,8 @@ namespace PocceMod.Client
                 if (API.IsEntityDead(vehicle))
                     continue;
 
-                var vehicleModel = (uint)API.GetEntityModel(vehicle);
-                if (API.IsThisModelAHeli(vehicleModel))
+                var model = (uint)API.GetEntityModel(vehicle);
+                if (API.IsThisModelAHeli(model))
                 {
                     if (API.AnyPassengersRappeling(vehicle) && API.DecorGetInt(ped, WaypointHashDecor) > 0)
                     {
@@ -268,7 +268,7 @@ namespace PocceMod.Client
                     else if (!API.IsMountedWeaponTaskUnderneathDrivingTask(ped))
                         API.ControlMountedWeapon(ped);
                 }
-                else if (API.IsThisModelAPlane(vehicleModel))
+                else if (API.IsPedInFlyingVehicle(ped))
                 {
                     if (!API.IsEntityInAir(vehicle) &&
                         (!Vehicles.IsFeatureEnabled(vehicle, Vehicles.FeatureFlag.RemoteControl) || API.GetEntityRotation(vehicle, 2).X > 30f))
