@@ -1,5 +1,4 @@
-﻿using CitizenFX.Core.Native;
-using MenuAPI;
+﻿using MenuAPI;
 using PocceMod.Shared;
 
 namespace PocceMod.Client.Menus
@@ -16,11 +15,7 @@ namespace PocceMod.Client.Menus
                 AddMenuItem(menuItem);
             }
 
-            OnItemSelect += (menu, item, index) =>
-            {
-                SetAircraftHorn(index);
-                CloseMenu();
-            };
+            OnItemSelect += (menu, item, index) => SetAircraftHorn(index);
         }
 
         public static void SetAircraftHorn(int horn)

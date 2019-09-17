@@ -50,19 +50,13 @@ namespace PocceMod.Client.Menus
             OnItemSelect += async (menu, item, index) =>
             {
                 if (_menuItemActions.TryGetValue(index, out Func<Task> action))
-                {
                     await action();
-                    CloseMenu();
-                }
             };
 
             OnListItemSelect += async (menu, listItem, listIndex, itemIndex) =>
             {
                 if (_menuListItemActions.TryGetValue(itemIndex, out List<Func<Task>> actions))
-                {
                     await actions[listIndex]();
-                    CloseMenu();
-                }
             };
         }
 

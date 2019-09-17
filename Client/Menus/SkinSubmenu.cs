@@ -10,7 +10,7 @@ namespace PocceMod.Client.Menus
     {
         private SkinSet _source = null;
 
-        public SkinSubmenu(Func<uint, Skin, Task> onSelect, bool closeOnSelect) : base("PocceMod", "select skin")
+        public SkinSubmenu(Func<uint, Skin, Task> onSelect) : base("PocceMod", "select skin")
         {
             OnItemSelect += async (menu, item, index) =>
             {
@@ -22,9 +22,6 @@ namespace PocceMod.Client.Menus
                     hash = (uint)API.GetHashKey(model);
 
                 await onSelect(hash, null);
-
-                if (closeOnSelect)
-                    CloseMenu();
             };
 
             OnListItemSelect += async (menu, listItem, listIndex, itemIndex) =>
@@ -35,9 +32,6 @@ namespace PocceMod.Client.Menus
                     var skin = skins[listIndex];
                     await onSelect(skin.Model, skin);
                 }
-
-                if (closeOnSelect)
-                    CloseMenu();
             };
 
             OnMenuOpen += (menu) =>

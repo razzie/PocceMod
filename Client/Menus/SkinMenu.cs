@@ -6,7 +6,7 @@ namespace PocceMod.Client.Menus
     [MainMenuInclude]
     public class SkinMenu : SkinSubmenu
     {
-        public SkinMenu() : base(Skin.ChangePlayerSkin, false)
+        public SkinMenu() : base(Skin.ChangePlayerSkin)
         {
             foreach (var pocce in Config.PocceList)
             {

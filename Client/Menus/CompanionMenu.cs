@@ -7,7 +7,7 @@ namespace PocceMod.Client.Menus
     [MainMenuInclude]
     public class CompanionMenu : SkinSubmenu
     {
-        public CompanionMenu() : base(Companions.Spawn, true)
+        public CompanionMenu() : base(Companions.Spawn)
         {
         }
 

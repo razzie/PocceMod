@@ -36,7 +36,6 @@ namespace PocceMod.Client.Menus
             {
                 var model = listItem.ListItems[listIndex];
                 var vehicle = await Vehicles.Spawn(model);
-                CloseMenu();
 
                 if (AutoDespawn)
                     API.SetVehicleAsNoLongerNeeded(ref vehicle);
