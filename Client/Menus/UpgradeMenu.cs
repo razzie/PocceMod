@@ -109,5 +109,17 @@ namespace PocceMod.Client.Menus
             if (!state)
                 Common.Notification("Remote control enabled (use arrow keys)");
         }
+
+        public static void ToggleJesusMode()
+        {
+            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
+                return;
+
+            var state = Vehicles.IsFeatureEnabled(vehicle, Vehicles.FeatureFlag.JesusMode);
+            Vehicles.SetFeatureEnabled(vehicle, Vehicles.FeatureFlag.JesusMode, !state);
+
+            if (!state)
+                Common.Notification("Jesus mode enabled (you can float on water)");
+        }
     }
 }

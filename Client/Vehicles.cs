@@ -35,7 +35,8 @@ namespace PocceMod.Client
             BackToTheFuture = 1,
             TurboBoost = 2,
             AntiGravity = 4,
-            RemoteControl = 8
+            RemoteControl = 8,
+            JesusMode = 16
         }
 
         public enum Light
@@ -594,6 +595,22 @@ namespace PocceMod.Client
             foreach (var vehicle in vehicles.Where(vehicle => IsFeatureEnabled(vehicle, FeatureFlag.BackToTheFuture)))
             {
                 await Effects.AddWheelFireEffect(vehicle);
+            }
+
+            foreach (var vehicle in vehicles.Where(vehicle => IsFeatureEnabled(vehicle, FeatureFlag.JesusMode)))
+            {
+                Common.GetEntityMinMaxZ(vehicle, out float minZ, out float maxZ);
+                var coords = API.GetEntityCoords(vehicle, false);
+                float wheight = 0f;
+
+                if (API.GetWaterHeight(coords.X, coords.Y, coords.Z, ref wheight) && coords.Z + minZ - 1f < wheight)
+                {
+                    var velocity = API.GetEntityVelocity(vehicle);
+                    if (velocity.Z < 0f)
+                        API.SetEntityVelocity(vehicle, velocity.X, velocity.Y, 0f);
+                    
+                    API.ApplyForceToEntityCenterOfMass(vehicle, 1, 0f, 0f, 0.7f, false, false, true, false);
+                }
             }
 
             foreach (var vehicle in vehicles)

@@ -154,6 +154,9 @@ namespace PocceMod.Client
 
             if (Permission.CanDo(Ability.RemoteControl))
                 _menu.AddMenuListItem("Upgrade", "Remote control (toggle)", UpgradeMenu.ToggleRemoteControl);
+
+            if (Permission.CanDo(Ability.JesusMode))
+                _menu.AddMenuListItem("Upgrade", "Jesus mode (toggle)", UpgradeMenu.ToggleJesusMode);
             #endregion
 
             #region Extra

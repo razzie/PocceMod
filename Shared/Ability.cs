@@ -34,6 +34,7 @@
         AntiGravity,
         TurboBoost,
         RemoteControl,
+        JesusMode,
         Balloons,
         FreezePosition,
         IdentifySkins,
