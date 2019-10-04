@@ -171,8 +171,12 @@ namespace PocceMod.Client
         public static float GetEntityHeightAboveGround(int entity)
         {
             var coords = API.GetEntityCoords(entity, false);
-            var height = API.GetEntityHeightAboveGround(entity);
-            return Math.Min(coords.Z, height);
+            float wheight = 0f;
+
+            if (API.GetWaterHeightNoWaves(coords.X, coords.Y, coords.Z, ref wheight))
+                return coords.Z - wheight;
+            else
+                return API.GetEntityHeightAboveGround(entity);
         }
 
         public static Vector3 GetEntityTopCoords(int entity)
