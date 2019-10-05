@@ -147,8 +147,8 @@ namespace PocceMod.Client
             if (Permission.CanDo(Ability.AntiGravity))
                 _menu.AddMenuListItem("Upgrade", "Anti-gravity (toggle)", UpgradeMenu.ToggleAntiGravity);
 
-            if (Permission.CanDo(Ability.AircraftHorn))
-                _menu.AddMenuListItem("Upgrade", "Aircraft horn ↕", _menu.Submenu<AircraftHornMenu>().OpenMenu);
+            if (Permission.CanDo(Ability.CustomHorn))
+                _menu.AddMenuListItem("Upgrade", "Custom horn ↕", _menu.Submenu<CustomHornMenu>().OpenMenu);
 
             if (Permission.CanDo(Ability.TurboBoost))
                 _menu.AddMenuListItem("Upgrade", "Turbo Boost (toggle)", UpgradeMenu.ToggleTurboBoost);

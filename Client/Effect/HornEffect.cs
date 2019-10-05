@@ -26,7 +26,7 @@ namespace PocceMod.Client.Effect
         public Task Init()
         {
             _sound = API.GetSoundId();
-            string sound = Vehicles.GetAircraftHorn(_vehicle);
+            string sound = Vehicles.GetCustomHorn(_vehicle);
             string soundset = null;
 
             if (sound.Contains(":"))

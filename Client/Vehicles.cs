@@ -48,7 +48,7 @@ namespace PocceMod.Client
         }
 
         public const Filter DefaultFilters = Filter.PlayerVehicle;
-        private const string AircraftHornDecor = "POCCE_AIRCRAFT_HORN";
+        private const string CustomHornDecor = "POCCE_CUSTOM_HORN";
         private const string LightMultiplierDecor = "POCCE_VEHICLE_LIGHT_MULTIPLIER";
         private const string StateFlagsDecor = "POCCE_VEHICLE_STATE_FLAGS";
         private const string FeatureFlagsDecor = "POCCE_VEHICLE_FEATURE_FLAGS";
@@ -61,7 +61,7 @@ namespace PocceMod.Client
 
         public Vehicles()
         {
-            API.DecorRegister(AircraftHornDecor, 3);
+            API.DecorRegister(CustomHornDecor, 3);
             API.DecorRegister(LightMultiplierDecor, 1);
             API.DecorRegister(StateFlagsDecor, 3);
             API.DecorRegister(FeatureFlagsDecor, 3);
@@ -312,14 +312,14 @@ namespace PocceMod.Client
             }
         }
 
-        public static void SetAircraftHorn(int aircraft, int horn)
+        public static void SetCustomHorn(int vehicle, int horn)
         {
-            API.DecorSetInt(aircraft, AircraftHornDecor, horn);
+            API.DecorSetInt(vehicle, CustomHornDecor, horn);
         }
 
-        public static string GetAircraftHorn(int aircraft)
+        public static string GetCustomHorn(int vehicle)
         {
-            var horn = API.DecorGetInt(aircraft, AircraftHornDecor);
+            var horn = API.DecorGetInt(vehicle, CustomHornDecor);
             return (horn < Config.HornList.Length) ? Config.HornList[horn] : "SIRENS_AIRHORN";
         }
 
@@ -639,7 +639,7 @@ namespace PocceMod.Client
             if (hasOtherDriver || MainMenu.IsOpen || API.IsEntityDead(vehicle))
                 return Delay(100);
 
-            if (API.DecorExistOn(vehicle, AircraftHornDecor))
+            if (API.DecorExistOn(vehicle, CustomHornDecor))
             {
                 if (API.IsControlJustPressed(0, 86)) // INPUT_VEH_HORN
                 {

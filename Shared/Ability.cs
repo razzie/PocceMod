@@ -24,7 +24,7 @@
         PedRiotArmed,
         MassScenario,
         Autopilot,
-        AircraftHorn,
+        CustomHorn,
         EMP,
         EMPOtherPlayer,
         CargobobMagnet,

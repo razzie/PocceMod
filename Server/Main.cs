@@ -70,7 +70,7 @@ namespace PocceMod.Server
         {
             Debug(source, "ToggleHorn");
 
-            if (Permission.CanDo(source, Ability.AircraftHorn))
+            if (Permission.CanDo(source, Ability.CustomHorn))
                 TriggerClientEvent("PocceMod:ToggleHorn", vehicle, state);
         }
 
