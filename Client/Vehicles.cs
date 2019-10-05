@@ -20,7 +20,7 @@ namespace PocceMod.Client
         }
 
         [Flags]
-        private enum StateFlag
+        public enum StateFlag
         {
             HazardLight = 1,
             TiresIntact = 2,
@@ -46,6 +46,12 @@ namespace PocceMod.Client
             RightIndicator,
             HazardLight
         }
+
+        public delegate void StateChangedDelegate(int vehicle, StateFlag states);
+        public static event StateChangedDelegate StateChanged;
+
+        public delegate void FeatureChangedDelegate(int vehicle, FeatureFlag features);
+        public static event FeatureChangedDelegate FeatureChanged;
 
         public const Filter DefaultFilters = Filter.PlayerVehicle;
         private const string CustomHornDecor = "POCCE_CUSTOM_HORN";
@@ -323,6 +329,11 @@ namespace PocceMod.Client
             return (horn < Config.HornList.Length) ? Config.HornList[horn] : "SIRENS_AIRHORN";
         }
 
+        public static bool HasCustomHorn(int vehicle)
+        {
+            return API.DecorExistOn(vehicle, CustomHornDecor);
+        }
+
         public static void ToggleLightMultiplier(int vehicle)
         {
             if (!API.DecorExistOn(vehicle, LightMultiplierDecor))
@@ -465,6 +476,8 @@ namespace PocceMod.Client
                 state &= ~flag;
 
             API.DecorSetInt(vehicle, FeatureFlagsDecor, (int)state);
+
+            FeatureChanged?.Invoke(vehicle, state);
         }
 
         private static bool GetLastState(int vehicle, StateFlag flag)
@@ -483,6 +496,8 @@ namespace PocceMod.Client
                 state &= ~flag;
 
             API.DecorSetInt(vehicle, StateFlagsDecor, (int)state);
+
+            StateChanged?.Invoke(vehicle, state);
         }
 
         public static bool AreTiresIntact(int vehicle)
@@ -514,6 +529,8 @@ namespace PocceMod.Client
             set(StateFlag.Cruising, API.GetEntitySpeed(vehicle) > 10f);
 
             API.DecorSetInt(vehicle, StateFlagsDecor, (int)state);
+
+            StateChanged?.Invoke(vehicle, state);
         }
 
         private static bool IsHazardLightApplicable(uint model)

@@ -57,6 +57,11 @@ namespace PocceMod.Client.Menus.Dev
             MenuController.BindMenuItem(this, telemetryMenu, telemetryMenuItem);
             AddMenuItem(telemetryMenuItem);
 
+            var vehicleDebugMenu = new VehicleDebugMenu();
+            var vehicleDebugMenuItem = new MenuItem("Vehicle debug ↕");
+            MenuController.BindMenuItem(this, vehicleDebugMenu, vehicleDebugMenuItem);
+            AddMenuItem(vehicleDebugMenuItem);
+
             OnMenuOpen += (menu) =>
             {
                 playerIDItem.Label = API.PlayerId().ToString();

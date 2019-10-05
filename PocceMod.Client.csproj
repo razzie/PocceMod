@@ -52,6 +52,7 @@
     <Compile Include="Client\Menus\Dev\PermissionsMenu.cs" />
     <Compile Include="Client\Menus\Dev\PlayerTelemetryMenu.cs" />
     <Compile Include="Client\Menus\Dev\TelemetryMenu.cs" />
+    <Compile Include="Client\Menus\Dev\VehicleDebugMenu.cs" />
     <Compile Include="Client\Menus\MainMenuIncludeAttribute.cs" />
     <Compile Include="Client\Menus\UpgradeMenu.cs" />
     <Compile Include="Client\RopeWrapperDelayed.cs" />
