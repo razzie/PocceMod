@@ -348,7 +348,7 @@ namespace PocceMod.Client
             }
         }
 
-        private static float GetLightMultiplier(int vehicle)
+        public static float GetLightMultiplier(int vehicle)
         {
             if (!API.DecorExistOn(vehicle, LightMultiplierDecor))
                 return 1f;
@@ -356,7 +356,7 @@ namespace PocceMod.Client
             return API.DecorGetFloat(vehicle, LightMultiplierDecor);
         }
 
-        private static void SetLightMultiplier(int vehicle, float multiplier)
+        public static void SetLightMultiplier(int vehicle, float multiplier)
         {
             if (multiplier < 0.25f)
                 multiplier = 0.25f;

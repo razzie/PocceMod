@@ -33,6 +33,9 @@ namespace PocceMod.Client.Menus.Dev
             var hornMenuItem = new MenuItem("Custom horn") { Enabled = false };
             AddMenuItem(hornMenuItem);
 
+            var lightMultiplierMenuItem = new MenuItem("Light multiplier") { Enabled = false };
+            AddMenuItem(lightMultiplierMenuItem);
+
             OnMenuOpen += (menu) =>
             {
                 _vehicle = Vehicle;
@@ -48,6 +51,13 @@ namespace PocceMod.Client.Menus.Dev
                 {
                     hornMenuItem.Enabled = true;
                     hornMenuItem.Label = Vehicles.GetCustomHorn(_vehicle);
+                }
+
+                var lightMultiplier = Vehicles.GetLightMultiplier(_vehicle);
+                if (lightMultiplier > 1f)
+                {
+                    lightMultiplierMenuItem.Enabled = true;
+                    lightMultiplierMenuItem.Label = lightMultiplier.ToString();
                 }
             };
 
@@ -65,6 +75,9 @@ namespace PocceMod.Client.Menus.Dev
 
                 hornMenuItem.Enabled = false;
                 hornMenuItem.Label = string.Empty;
+
+                lightMultiplierMenuItem.Enabled = false;
+                lightMultiplierMenuItem.Label = string.Empty;
             };
         }
 
