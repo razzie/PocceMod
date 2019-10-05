@@ -46,6 +46,8 @@ namespace PocceMod.Client
 
         public static void RemoveHornEffect(int vehicle) => Remove(HornEffect.GetKeyFrom(vehicle));
 
+        public static Task<bool> AddJesusEffect(int vehicle) => Add(new JesusEffect(vehicle), true);
+
         private static Task Update()
         {
             foreach (var effect in _effects.ToArray())
