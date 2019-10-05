@@ -3,6 +3,7 @@ using CitizenFX.Core.Native;
 using PocceMod.Shared;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace PocceMod.Client.Menus
 {
@@ -28,6 +29,15 @@ namespace PocceMod.Client.Menus
         public static IEnumerable<string> FilteredPropList()
         {
             return Config.PropList.Where(prop => IsValidProp(prop));
+        }
+
+        public static async Task SpawnByName()
+        {
+            var model = await Common.GetUserInput("Spawn prop by name", "", 30);
+            if (string.IsNullOrEmpty(model))
+                return;
+
+            await Props.Spawn(model);
         }
     }
 }
