@@ -35,6 +35,9 @@ namespace PocceMod.Client.Effect
 
             public void Update()
             {
+                if (API.IsEntityAPed(_entity) && API.IsPedInAnyVehicle(_entity, false))
+                    return;
+
                 var coords = (_bone == -1) ? API.GetEntityCoords(_entity, false) : API.GetWorldPositionOfEntityBone(_entity, _bone);
                 float wheight = 0f;
 
