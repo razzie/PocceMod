@@ -56,6 +56,7 @@ The menu toggle key is F5 by default, but can be configured.
     - Aircraft horn
     - Turbo Boost (toggle)
     - Remote control (toggle)
+	- Jesus mode (toggle)
 * Extra
     - Crazy ocean waves (toggle)
     - Rappel from heli
