@@ -25,6 +25,11 @@ namespace PocceMod.Client
             return true;
         }
 
+        public static bool Exists(string key)
+        {
+            return _effects.Any(e => e.Key == key);
+        }
+
         public static void Remove(string key)
         {
             foreach (var effect in _effects.Where(e => e.Key == key).ToArray())
@@ -46,7 +51,7 @@ namespace PocceMod.Client
 
         public static void RemoveHornEffect(int vehicle) => Remove(HornEffect.GetKeyFrom(vehicle));
 
-        public static Task<bool> AddJesusEffect(int vehicle) => Add(new JesusEffect(vehicle), true);
+        public static Task<bool> AddJesusEffect(int entity) => Add(new JesusEffect(entity), true);
 
         private static Task Update()
         {

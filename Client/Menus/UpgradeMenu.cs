@@ -1,4 +1,5 @@
 ﻿using CitizenFX.Core.Native;
+using PocceMod.Client.Effect;
 
 namespace PocceMod.Client.Menus
 {
@@ -112,14 +113,31 @@ namespace PocceMod.Client.Menus
 
         public static void ToggleJesusMode()
         {
-            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
-                return;
+            var player = API.GetPlayerPed(-1);
+            if (API.IsPedInAnyVehicle(player, false))
+            {
+                if (!Common.EnsurePlayerIsVehicleDriver(out player, out int vehicle))
+                    return;
 
-            var state = Vehicles.IsFeatureEnabled(vehicle, Vehicles.FeatureFlag.JesusMode);
-            Vehicles.SetFeatureEnabled(vehicle, Vehicles.FeatureFlag.JesusMode, !state);
+                var state = Vehicles.IsFeatureEnabled(vehicle, Vehicles.FeatureFlag.JesusMode);
+                Vehicles.SetFeatureEnabled(vehicle, Vehicles.FeatureFlag.JesusMode, !state);
 
-            if (!state)
-                Common.Notification("Jesus mode enabled (you can float on water)");
+                if (!state)
+                    Common.Notification("Jesus mode enabled (you can float on water)");
+            }
+            else
+            {
+                var effect = JesusEffect.GetKeyFrom(player);
+                if (Effects.Exists(effect))
+                {
+                    Effects.Remove(effect);
+                }
+                else
+                {
+                    Effects.AddJesusEffect(player);
+                    Common.Notification("Jesus mode enabled (you can walk on water)");
+                }
+            }
         }
     }
 }
