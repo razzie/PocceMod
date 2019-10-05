@@ -93,6 +93,19 @@ namespace PocceMod.Client.Menus
                 }
                 else
                 {
+                    if (!forcePassenger)
+                    {
+                        var driver = API.GetPedInVehicleSeat(vehicle, -1);
+                        if (Autopilot.IsOwnedAutopilot(driver))
+                        {
+                            API.DeletePed(ref driver);
+
+                            var player = API.GetPlayerPed(-1);
+                            API.SetPedIntoVehicle(player, vehicle, -1);
+                            return;
+                        }
+                    }
+
                     Common.Notification("Closest vehicle doesn't have a free seat");
                 }
             }
