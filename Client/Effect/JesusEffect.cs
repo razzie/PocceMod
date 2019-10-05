@@ -108,7 +108,8 @@ namespace PocceMod.Client.Effect
             var coords = API.GetEntityCoords(_entity, false);
             float wheight = 0f;
 
-            if (API.GetWaterHeight(coords.X, coords.Y, coords.Z, ref wheight) && coords.Z + _minZ - 1f < wheight)
+            if (API.IsEntityInWater(_entity) ||
+                (API.GetWaterHeight(coords.X, coords.Y, coords.Z, ref wheight) && coords.Z + _minZ - 1f < wheight))
             {
                 var velocity = API.GetEntityVelocity(_entity);
                 if (velocity.Z < 0f)
