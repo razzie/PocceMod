@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 
 namespace PocceMod.Client
 {
+    using TurboBoostMode = Effect.TurboBoostEffect.Mode;
+
     public class Vehicles : BaseScript
     {
         [Flags]
@@ -75,7 +77,7 @@ namespace PocceMod.Client
             EventHandlers["PocceMod:EMP"] += new Func<int, Task>(NetEMP);
             EventHandlers["PocceMod:SetIndicator"] += new Action<int, int>(NetSetIndicator);
             EventHandlers["PocceMod:CompressVehicle"] += new Func<int, Task>(NetCompress);
-            EventHandlers["PocceMod:ToggleTurboBoost"] += new Func<int, bool, Task>(NetToggleTurboBoost);
+            EventHandlers["PocceMod:ToggleTurboBoost"] += new Func<int, bool, int, Task>(NetToggleTurboBoost);
             EventHandlers["PocceMod:ToggleHorn"] += new Func<int, bool, Task>(NetToggleHorn);
 
             if (!Config.GetConfigBool("DisableAutoHazardLights"))
@@ -448,14 +450,14 @@ namespace PocceMod.Client
                 Effects.RemoveHornEffect(vehicle);
         }
 
-        private static async Task NetToggleTurboBoost(int netVehicle, bool state)
+        private static async Task NetToggleTurboBoost(int netVehicle, bool state, int mode)
         {
             var vehicle = API.NetToVeh(netVehicle);
             if (!API.DoesEntityExist(vehicle))
                 return;
 
             if (state)
-                await Effects.AddTurboBoostEffect(vehicle);
+                await Effects.AddTurboBoostEffect(vehicle, (TurboBoostMode)mode);
             else
                 Effects.RemoveTurboBoostEffect(vehicle);
         }
@@ -684,10 +686,16 @@ namespace PocceMod.Client
 
             if (TurboBoostKey > 0 && IsFeatureEnabled(vehicle, FeatureFlag.TurboBoost))
             {
+                var mode = TurboBoostMode.Custom;
+                if (API.IsControlPressed(0, 21)) // LEFT_SHIFT
+                    mode = TurboBoostMode.Vertical;
+                else if (API.IsControlPressed(0, 36)) // LEFT_CTRL
+                    mode = TurboBoostMode.Horizontal;
+
                 if (API.IsControlJustPressed(0, TurboBoostKey) || API.IsDisabledControlJustPressed(0, TurboBoostKey))
-                    TriggerServerEvent("PocceMod:ToggleTurboBoost", API.VehToNet(vehicle), true);
+                    TriggerServerEvent("PocceMod:ToggleTurboBoost", API.VehToNet(vehicle), true, (int)mode);
                 else if (API.IsControlJustReleased(0, TurboBoostKey) || API.IsDisabledControlJustReleased(0, TurboBoostKey))
-                    TriggerServerEvent("PocceMod:ToggleTurboBoost", API.VehToNet(vehicle), false);
+                    TriggerServerEvent("PocceMod:ToggleTurboBoost", API.VehToNet(vehicle), false, 0);
             }
 
             if (driver != player && IsFeatureEnabled(vehicle, FeatureFlag.RemoteControl) && IsAnyRemoteControlPressed())

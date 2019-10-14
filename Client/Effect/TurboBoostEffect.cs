@@ -10,6 +10,13 @@ namespace PocceMod.Client.Effect
 {
     public class TurboBoostEffect : IEffect
     {
+        public enum Mode
+        {
+            Custom,
+            Horizontal,
+            Vertical
+        }
+
         private class SteamFX
         {
             public SteamFX(int vehicle, int bone)
@@ -40,6 +47,7 @@ namespace PocceMod.Client.Effect
         private static readonly Dictionary<int, DateTime> _rechargeDB = new Dictionary<int, DateTime>();
 
         private readonly int _vehicle;
+        private readonly Mode _mode;
         private readonly int[] _wheelBones;
         private readonly float _offset;
         private readonly bool _blocked;
@@ -69,9 +77,10 @@ namespace PocceMod.Client.Effect
                 RechargeRate = 0.25f;
         }
 
-        public TurboBoostEffect(int vehicle)
+        public TurboBoostEffect(int vehicle, Mode mode)
         {
             _vehicle = vehicle;
+            _mode = mode;
             _wheelBones = WheelBoneNames.Select(wheel => API.GetEntityBoneIndexByName(_vehicle, wheel)).Where(bone => bone != -1).ToArray();
 
             var model = (uint)API.GetEntityModel(_vehicle);
@@ -82,8 +91,24 @@ namespace PocceMod.Client.Effect
             _offset = max.Y;
             _created = DateTime.Now;
             _timeout = _created + ChargeSec;
-            _angle = StartAngle;
-            _angleStep = (EndAngle - StartAngle) / ((int)ChargeSec.TotalMilliseconds / 200);
+
+            switch (_mode)
+            {
+                case Mode.Custom:
+                    _angle = StartAngle;
+                    _angleStep = (EndAngle - StartAngle) / ((int)ChargeSec.TotalMilliseconds / 200);
+                    break;
+
+                case Mode.Horizontal:
+                    _angle = 0f;
+                    _angleStep = 0f;
+                    break;
+
+                case Mode.Vertical:
+                    _angle = 90f;
+                    _angleStep = 0f;
+                    break;
+            }
 
             _blocked = _rechargeDB.TryGetValue(_vehicle, out DateTime nextCharge) && _created < nextCharge;
         }
@@ -107,7 +132,7 @@ namespace PocceMod.Client.Effect
                 API.SetHornEnabled(_vehicle, false);
 
             await Common.RequestPtfxAsset("core");
-            _effects = _wheelBones.Select(bone => new SteamFX(_vehicle, bone)).ToArray();
+            _effects = _wheelBones.Select(bone => new SteamFX(_vehicle, bone) { Angle = _angle }).ToArray();
         }
 
         public void Update()
@@ -120,7 +145,7 @@ namespace PocceMod.Client.Effect
                 if (_angle > EndAngle)
                     _angle = EndAngle;
             }
-            else
+            else if (_angleStep < 0)
             {
                 if (_angle < EndAngle)
                     _angle = EndAngle;

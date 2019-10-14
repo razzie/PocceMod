@@ -23,7 +23,7 @@ namespace PocceMod.Server
             EventHandlers["PocceMod:RequestRopes"] += new Action<Player>(RequestRopes);
             EventHandlers["PocceMod:RequestMPSkin"] += new Action<Player, int, int>(RequestMPSkin);
             EventHandlers["PocceMod:SetMPSkin"] += new Action<Player, int, dynamic, int>(SetMPSkin);
-            EventHandlers["PocceMod:ToggleTurboBoost"] += new Action<Player, int, bool>(ToggleTurboBoost);
+            EventHandlers["PocceMod:ToggleTurboBoost"] += new Action<Player, int, bool, int>(ToggleTurboBoost);
             EventHandlers["PocceMod:RequestTelemetry"] += new Action<Player, int>(RequestTelemetry);
             EventHandlers["PocceMod:Telemetry"] += new Action<Player, int, dynamic>(Telemetry);
         }
@@ -135,12 +135,12 @@ namespace PocceMod.Server
             Players[requestingPlayer].TriggerEvent("PocceMod:SetMPSkin", ped, skin);
         }
 
-        private void ToggleTurboBoost([FromSource] Player source, int vehicle, bool state)
+        private void ToggleTurboBoost([FromSource] Player source, int vehicle, bool state, int mode)
         {
             Debug(source, "TurboBoost");
 
             if (Permission.CanDo(source, Ability.TurboBoost))
-                TriggerClientEvent("PocceMod:ToggleTurboBoost", vehicle, state);
+                TriggerClientEvent("PocceMod:ToggleTurboBoost", vehicle, state, mode);
         }
 
         private void RequestTelemetry([FromSource] Player source, int timeoutSec)
