@@ -106,10 +106,11 @@ namespace PocceMod.Client.Effect
         public void Update()
         {
             var coords = API.GetEntityCoords(_entity, false);
+            float minZ = coords.Z + _minZ - 1f;
             float wheight = 0f;
 
             if (API.IsEntityInWater(_entity) ||
-                (API.GetWaterHeight(coords.X, coords.Y, coords.Z, ref wheight) && coords.Z + _minZ - 1f < wheight))
+                (API.GetWaterHeight(coords.X, coords.Y, coords.Z, ref wheight) && minZ < wheight))
             {
                 var velocity = API.GetEntityVelocity(_entity);
                 if (velocity.Z < 0f)
@@ -122,7 +123,7 @@ namespace PocceMod.Client.Effect
                     API.SetEntityVelocity(_entity, velocity.X, velocity.Y, velocity.Z);
                 }
 
-                API.ApplyForceToEntityCenterOfMass(_entity, 1, 0f, 0f, 0.7f, false, false, true, false);
+                API.ApplyForceToEntityCenterOfMass(_entity, 1, 0f, 0f, wheight - minZ, false, false, true, false);
             }
 
             foreach (var platform in _platforms)
