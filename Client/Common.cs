@@ -187,6 +187,31 @@ namespace PocceMod.Client
             return coords;
         }
 
+        public static void ApplyTorque(int entity, float x, float y, bool scaleLeverage = true)
+        {
+            var min = -Vector3.One;
+            var max = Vector3.One;
+
+            if (scaleLeverage)
+            {
+                var model = (uint)API.GetEntityModel(entity);
+                var isHeli = API.IsThisModelAHeli(model);
+                API.GetModelDimensions(model, ref min, ref max);
+            }
+
+            if (x != 0) // up-down
+            {
+                API.ApplyForceToEntity(entity, 1, 0f, 0f, -x, 0f, max.Y, 0f, -1, true, true, true, false, false);
+                API.ApplyForceToEntity(entity, 1, 0f, 0f, x, 0f, min.Y, 0f, -1, true, true, true, false, false);
+            }
+
+            if (y != 0) // left-right
+            {
+                API.ApplyForceToEntity(entity, 1, 0f, 0f, y / 2, max.X, 0f, 0f, -1, true, true, true, false, false);
+                API.ApplyForceToEntity(entity, 1, 0f, 0f, -y / 2, min.X, 0f, 0f, -1, true, true, true, false, false);
+            }
+        }
+
         public static bool EnsurePlayerIsInVehicle(out int player, out int vehicle, bool notification = true)
         {
             vehicle = 0;

@@ -705,34 +705,19 @@ namespace PocceMod.Client
                 
                 if (API.IsPedInFlyingVehicle(driver))
                 {
-                    var min = Vector3.Zero;
-                    var max = Vector3.Zero;
                     var model = (uint)API.GetEntityModel(vehicle);
                     var isHeli = API.IsThisModelAHeli(model);
-                    API.GetModelDimensions(model, ref min, ref max);
 
                     var force = isHeli ? 0.1f : 1f;
                     if (API.IsControlPressed(0, 172)) // up
-                    {
-                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force, 0f, max.Y, 0f, -1, true, true, true, false, false);
-                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force, 0f, min.Y, 0f, -1, true, true, true, false, false);
-                    }
+                        Common.ApplyTorque(vehicle, force, 0);
                     else if (API.IsControlPressed(0, 173)) // down
-                    {
-                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force, 0f, max.Y, 0f, -1, true, true, true, false, false);
-                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force, 0f, min.Y, 0f, -1, true, true, true, false, false);
-                    }
+                        Common.ApplyTorque(vehicle, -force, 0);
 
                     if (API.IsControlPressed(0, 174)) // left
-                    {
-                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force / 2, max.X, 0f, 0f, -1, true, true, true, false, false);
-                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force / 2, min.X, 0f, 0f, -1, true, true, true, false, false);
-                    }
+                        Common.ApplyTorque(vehicle, 0, force / 2);
                     else if (API.IsControlPressed(0, 175)) // right
-                    {
-                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, -force / 2, max.X, 0f, 0f, -1, true, true, true, false, false);
-                        API.ApplyForceToEntity(vehicle, 1, 0f, 0f, force / 2, min.X, 0f, 0f, -1, true, true, true, false, false);
-                    }
+                        Common.ApplyTorque(vehicle, 0, -force / 2);
 
                     if (isHeli)
                         API.TaskVehicleTempAction(driver, vehicle, 9, 1);
