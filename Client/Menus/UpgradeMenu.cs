@@ -140,6 +140,35 @@ namespace PocceMod.Client.Menus
             }
         }
 
+        public static void ToggleMosesMode()
+        {
+            var player = API.GetPlayerPed(-1);
+            if (API.IsPedInAnyVehicle(player, false))
+            {
+                if (!Common.EnsurePlayerIsVehicleDriver(out player, out int vehicle))
+                    return;
+
+                var state = Vehicles.IsFeatureEnabled(vehicle, Vehicles.FeatureFlag.MosesMode);
+                Vehicles.SetFeatureEnabled(vehicle, Vehicles.FeatureFlag.MosesMode, !state);
+
+                if (!state)
+                    Common.Notification("Moses mode enabled");
+            }
+            else
+            {
+                var effect = MosesEffect.GetKeyFrom(player);
+                if (Effects.Exists(effect))
+                {
+                    Effects.Remove(effect);
+                }
+                else
+                {
+                    Effects.AddMosesEffect(player);
+                    Common.Notification("Moses mode enabled");
+                }
+            }
+        }
+
         public static void ToggleStabilizer()
         {
             if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))

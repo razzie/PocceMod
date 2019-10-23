@@ -48,6 +48,7 @@
     <Compile Include="Client\Autopilot.cs" />
     <Compile Include="Client\Common.cs" />
     <Compile Include="Client\Effect\JesusEffect.cs" />
+    <Compile Include="Client\Effect\MosesEffect.cs" />
     <Compile Include="Client\Menus\Dev\DebugMenu.cs" />
     <Compile Include="Client\Menus\Dev\PermissionsMenu.cs" />
     <Compile Include="Client\Menus\Dev\PlayerTelemetryMenu.cs" />

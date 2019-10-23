@@ -39,7 +39,8 @@ namespace PocceMod.Client
             AntiGravity = 4,
             RemoteControl = 8,
             JesusMode = 16,
-            Stabilizer = 32
+            MosesMode = 32,
+            Stabilizer = 64
         }
 
         public enum Light
@@ -629,6 +630,11 @@ namespace PocceMod.Client
             foreach (var vehicle in vehicles.Where(vehicle => IsFeatureEnabled(vehicle, FeatureFlag.JesusMode)))
             {
                 await Effects.AddJesusEffect(vehicle);
+            }
+
+            foreach (var vehicle in vehicles.Where(vehicle => IsFeatureEnabled(vehicle, FeatureFlag.MosesMode)))
+            {
+                await Effects.AddMosesEffect(vehicle);
             }
 
             foreach (var vehicle in vehicles)

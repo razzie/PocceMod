@@ -53,6 +53,8 @@ namespace PocceMod.Client
 
         public static Task<bool> AddJesusEffect(int entity) => Add(new JesusEffect(entity), true);
 
+        public static Task<bool> AddMosesEffect(int entity) => Add(new MosesEffect(entity), true);
+
         private static Task Update()
         {
             foreach (var effect in _effects.ToArray())

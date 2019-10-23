@@ -127,7 +127,7 @@ namespace PocceMod.Client.Effect
             }
 
             foreach (var platform in _platforms)
-                platform.Update();
+                platform?.Update();
         }
 
         public void Clear()
