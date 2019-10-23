@@ -711,12 +711,6 @@ namespace PocceMod.Client
                     var pitch = _stabilizerPitch - API.GetEntityPitch(vehicle);
                     var roll = _stabilizerRoll - API.GetEntityRoll(vehicle);
                     Common.ApplyTorque(vehicle, pitch * 0.1f, roll * 0.1f);
-
-                    /*if (pitch < -5f || pitch > 5f)
-                        Common.ApplyTorque(vehicle, pitch * 0.025f, 0);
-
-                    if (roll < -5f || roll > 5f)
-                        Common.ApplyTorque(vehicle, 0, roll * 0.025f);*/
                 }
             }
 
@@ -743,7 +737,7 @@ namespace PocceMod.Client
                         else if (API.IsControlPressed(0, 175)) // right
                             Common.ApplyTorque(vehicle, 0, -force / 2);
 
-                        //if (isHeli)
+                        if (isHeli)
                             API.TaskVehicleTempAction(driver, vehicle, 9, 1);
 
                         return Delay(33);
@@ -777,11 +771,11 @@ namespace PocceMod.Client
                         }
                     }
                 }
-                else if (API.IsPedInFlyingVehicle(driver) && API.IsEntityInAir(vehicle) && RemoteControlKeys.Any(key => API.IsControlJustReleased(0, key)))
+                /*else if (API.IsPedInFlyingVehicle(driver) && API.IsEntityInAir(vehicle) && RemoteControlKeys.Any(key => API.IsControlJustReleased(0, key)))
                 {
                     //Autopilot.GotoWaypoint(driver, vehicle, API.GetEntityCoords(player, true));
                     Autopilot.Wander(driver, vehicle);
-                }
+                }*/
             }
 
             return Task.FromResult(0);
