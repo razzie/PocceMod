@@ -62,6 +62,8 @@ namespace PocceMod.Client
         private const string StateFlagsDecor = "POCCE_VEHICLE_STATE_FLAGS";
         private const string FeatureFlagsDecor = "POCCE_VEHICLE_FEATURE_FLAGS";
         private static readonly int TurboBoostKey;
+        private static readonly int TurboBoostHorizontalKey;
+        private static readonly int TurboBoostVerticalKey;
         private static readonly int StabilizerKey;
         private static readonly int[] RemoteControlKeys = new int[] { 172, 173, 174, 175 };
         private static float _stabilizerPitch;
@@ -70,6 +72,8 @@ namespace PocceMod.Client
         static Vehicles()
         {
             TurboBoostKey = Config.GetConfigInt("TurboBoostKey");
+            TurboBoostHorizontalKey = Config.GetConfigInt("TurboBoostHorizontalKey");
+            TurboBoostVerticalKey = Config.GetConfigInt("TurboBoostVerticalKey");
             StabilizerKey = Config.GetConfigInt("StabilizerKey");
         }
 
@@ -684,9 +688,9 @@ namespace PocceMod.Client
             if (TurboBoostKey > 0 && IsFeatureEnabled(vehicle, FeatureFlag.TurboBoost))
             {
                 var mode = TurboBoostMode.Custom;
-                if (API.IsControlPressed(0, 21)) // LEFT_SHIFT
+                if (TurboBoostVerticalKey > 0 && API.IsControlPressed(0, TurboBoostVerticalKey)) // LEFT_SHIFT by default
                     mode = TurboBoostMode.Vertical;
-                else if (API.IsControlPressed(0, 36)) // LEFT_CTRL
+                else if (TurboBoostHorizontalKey > 0 && API.IsControlPressed(0, TurboBoostHorizontalKey)) // LEFT_CTRL by default
                     mode = TurboBoostMode.Horizontal;
 
                 if (API.IsControlJustPressed(0, TurboBoostKey) || API.IsDisabledControlJustPressed(0, TurboBoostKey))
