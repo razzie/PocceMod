@@ -35,6 +35,7 @@
         TurboBoost,
         RemoteControl,
         JesusMode,
+        Stabilizer,
         Balloons,
         FreezePosition,
         IdentifySkins,

@@ -123,7 +123,7 @@ namespace PocceMod.Client.Effect
                     API.SetEntityVelocity(_entity, velocity.X, velocity.Y, velocity.Z);
                 }
 
-                API.ApplyForceToEntityCenterOfMass(_entity, 1, 0f, 0f, wheight - minZ, false, false, true, false);
+                API.ApplyForceToEntityCenterOfMass(_entity, 1, 0f, 0f, minZ - wheight, false, false, true, false);
             }
 
             foreach (var platform in _platforms)

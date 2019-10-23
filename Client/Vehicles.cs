@@ -38,7 +38,8 @@ namespace PocceMod.Client
             TurboBoost = 2,
             AntiGravity = 4,
             RemoteControl = 8,
-            JesusMode = 16
+            JesusMode = 16,
+            Stabilizer = 32
         }
 
         public enum Light
@@ -61,10 +62,15 @@ namespace PocceMod.Client
         private const string StateFlagsDecor = "POCCE_VEHICLE_STATE_FLAGS";
         private const string FeatureFlagsDecor = "POCCE_VEHICLE_FEATURE_FLAGS";
         private static readonly int TurboBoostKey;
+        private static readonly int StabilizerKey;
+        private static readonly int[] RemoteControlKeys = new int[] { 172, 173, 174, 175 };
+        private static float _stabilizerPitch;
+        private static float _stabilizerRoll;
 
         static Vehicles()
         {
             TurboBoostKey = Config.GetConfigInt("TurboBoostKey");
+            StabilizerKey = Config.GetConfigInt("StabilizerKey");
         }
 
         public Vehicles()
@@ -630,7 +636,6 @@ namespace PocceMod.Client
             }
         }
 
-        private static readonly int[] RemoteControlKeys = new int[] { 172, 173, 174, 175 };
         private static Task UpdateControls()
         {
             var player = API.GetPlayerPed(-1);
@@ -690,6 +695,27 @@ namespace PocceMod.Client
                     TriggerServerEvent("PocceMod:ToggleTurboBoost", API.VehToNet(vehicle), false, 0);
             }
 
+            if (driver == player && StabilizerKey > 0 && IsFeatureEnabled(vehicle, FeatureFlag.Stabilizer))
+            {
+                if (API.IsControlJustPressed(0, StabilizerKey))
+                {
+                    _stabilizerPitch = API.GetEntityPitch(vehicle);
+                    _stabilizerRoll = API.GetEntityRoll(vehicle);
+                }
+                else if (API.IsControlPressed(0, StabilizerKey))
+                {
+                    var pitch = _stabilizerPitch - API.GetEntityPitch(vehicle);
+                    var roll = _stabilizerRoll - API.GetEntityRoll(vehicle);
+                    Common.ApplyTorque(vehicle, pitch * 0.1f, roll * 0.1f);
+
+                    /*if (pitch < -5f || pitch > 5f)
+                        Common.ApplyTorque(vehicle, pitch * 0.025f, 0);
+
+                    if (roll < -5f || roll > 5f)
+                        Common.ApplyTorque(vehicle, 0, roll * 0.025f);*/
+                }
+            }
+
             if (driver != player && IsFeatureEnabled(vehicle, FeatureFlag.RemoteControl))
             {
                 if (RemoteControlKeys.Any(key => API.IsControlPressed(0, key)))
@@ -704,9 +730,9 @@ namespace PocceMod.Client
 
                         var force = isHeli ? 0.1f : 1f;
                         if (API.IsControlPressed(0, 172)) // up
-                            Common.ApplyTorque(vehicle, force, 0);
-                        else if (API.IsControlPressed(0, 173)) // down
                             Common.ApplyTorque(vehicle, -force, 0);
+                        else if (API.IsControlPressed(0, 173)) // down
+                            Common.ApplyTorque(vehicle, force, 0);
 
                         if (API.IsControlPressed(0, 174)) // left
                             Common.ApplyTorque(vehicle, 0, force / 2);
@@ -747,7 +773,7 @@ namespace PocceMod.Client
                         }
                     }
                 }
-                else if (API.IsPedInFlyingVehicle(driver) && RemoteControlKeys.Any(key => API.IsControlJustReleased(0, key)))
+                else if (API.IsPedInFlyingVehicle(driver) && API.IsEntityInAir(vehicle) && RemoteControlKeys.Any(key => API.IsControlJustReleased(0, key)))
                 {
                     //Autopilot.GotoWaypoint(driver, vehicle, API.GetEntityCoords(player, true));
                     Autopilot.Wander(driver, vehicle);

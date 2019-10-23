@@ -201,14 +201,14 @@ namespace PocceMod.Client
 
             if (x != 0) // up-down
             {
-                API.ApplyForceToEntity(entity, 1, 0f, 0f, -x, 0f, max.Y, 0f, -1, true, true, true, false, false);
-                API.ApplyForceToEntity(entity, 1, 0f, 0f, x, 0f, min.Y, 0f, -1, true, true, true, false, false);
+                API.ApplyForceToEntity(entity, 1, 0f, 0f, x, 0f, max.Y, 0f, -1, true, true, true, false, false);
+                API.ApplyForceToEntity(entity, 1, 0f, 0f, -x, 0f, min.Y, 0f, -1, true, true, true, false, false);
             }
 
             if (y != 0) // left-right
             {
-                API.ApplyForceToEntity(entity, 1, 0f, 0f, y / 2, max.X, 0f, 0f, -1, true, true, true, false, false);
-                API.ApplyForceToEntity(entity, 1, 0f, 0f, -y / 2, min.X, 0f, 0f, -1, true, true, true, false, false);
+                API.ApplyForceToEntity(entity, 1, 0f, 0f, y, max.X, 0f, 0f, -1, true, true, true, false, false);
+                API.ApplyForceToEntity(entity, 1, 0f, 0f, -y, min.X, 0f, 0f, -1, true, true, true, false, false);
             }
         }
 

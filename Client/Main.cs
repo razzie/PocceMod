@@ -158,6 +158,9 @@ namespace PocceMod.Client
 
             if (Permission.CanDo(Ability.JesusMode))
                 _menu.AddMenuListItem("Upgrade", "Jesus mode (toggle)", UpgradeMenu.ToggleJesusMode);
+
+            if (Permission.CanDo(Ability.Stabilizer))
+                _menu.AddMenuListItem("Upgrade", "Stabilizer (toggle)", UpgradeMenu.ToggleStabilizer);
             #endregion
 
             #region Extra

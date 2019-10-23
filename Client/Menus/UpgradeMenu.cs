@@ -139,5 +139,17 @@ namespace PocceMod.Client.Menus
                 }
             }
         }
+
+        public static void ToggleStabilizer()
+        {
+            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
+                return;
+
+            var state = Vehicles.IsFeatureEnabled(vehicle, Vehicles.FeatureFlag.Stabilizer);
+            Vehicles.SetFeatureEnabled(vehicle, Vehicles.FeatureFlag.Stabilizer, !state);
+
+            if (!state)
+                Common.Notification("Stabilizer enabled (use dedicated key to activate)");
+        }
     }
 }

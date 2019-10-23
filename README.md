@@ -57,6 +57,7 @@ The menu toggle key is F5 by default, but can be configured.
     - Turbo Boost (toggle)
     - Remote control (toggle)
 	- Jesus mode (toggle)
+	- Stabilizer (toggle)
 * Extra
     - Crazy ocean waves (toggle)
     - Rappel from heli
