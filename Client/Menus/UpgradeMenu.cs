@@ -48,6 +48,18 @@ namespace PocceMod.Client.Menus
                 Common.Notification("Turbo Boost enabled");
         }
 
+        public static void ToggleTurboBrake()
+        {
+            if (!Common.EnsurePlayerIsVehicleDriver(out int player, out int vehicle))
+                return;
+
+            var state = !Vehicles.IsFeatureEnabled(vehicle, Vehicles.FeatureFlag.TurboBrake);
+            Vehicles.SetFeatureEnabled(vehicle, Vehicles.FeatureFlag.TurboBrake, state);
+
+            if (state)
+                Common.Notification("Turbo Brake enabled (use handbrake key)");
+        }
+
         public static void CargobobMagnet()
         {
             var player = API.GetPlayerPed(-1);

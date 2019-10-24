@@ -33,6 +33,7 @@
         CompressVehicle,
         AntiGravity,
         TurboBoost,
+        TurboBrake,
         RemoteControl,
         JesusMode,
         MosesMode,

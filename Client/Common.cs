@@ -314,6 +314,14 @@ namespace PocceMod.Client
             };
         }
 
+        public static Vector3 DirectionToRotation(Vector3 dir)
+        {
+            dir.Normalize();
+            var pitch = Math.Asin(-dir.Z) * 57.2957795;
+            var yaw = Math.Atan2(dir.X, -dir.Y) * 57.2957795;
+            return new Vector3((float)pitch, 0f, (float)yaw);
+        }
+
         public static Vector3 GetRandomSpawnCoordsInRange(Vector3 center, float minRange, float maxRange, out float heading)
         {
             heading = API.GetRandomFloatInRange(0f, 360f);

@@ -153,6 +153,9 @@ namespace PocceMod.Client
             if (Permission.CanDo(Ability.TurboBoost))
                 _menu.AddMenuListItem("Upgrade", "Turbo Boost (toggle)", UpgradeMenu.ToggleTurboBoost);
 
+            if (Permission.CanDo(Ability.TurboBrake))
+                _menu.AddMenuListItem("Upgrade", "Turbo Brake (toggle)", UpgradeMenu.ToggleTurboBrake);
+
             if (Permission.CanDo(Ability.RemoteControl))
                 _menu.AddMenuListItem("Upgrade", "Remote control (toggle)", UpgradeMenu.ToggleRemoteControl);
 

@@ -15,9 +15,9 @@ namespace PocceMod.Client
             Tick += Telemetry.Wrap("effects", Update);
         }
 
-        public static async Task<bool> Add(IEffect effect, bool unique)
+        public static async Task<bool> Add(IEffect effect)
         {
-            if (unique && _effects.Any(e => e.Key == effect.Key))
+            if (Exists(effect.Key))
                 return false;
 
             _effects.Add(effect);
@@ -39,21 +39,25 @@ namespace PocceMod.Client
             }
         }
 
-        public static Task<bool> AddEMPEffect(int vehicle) => Add(new EMPEffect(vehicle), true);
+        public static Task<bool> AddEMPEffect(int vehicle) => Add(new EMPEffect(vehicle));
 
-        public static Task<bool> AddWheelFireEffect(int vehicle) => Add(new WheelFireEffect(vehicle), true);
+        public static Task<bool> AddWheelFireEffect(int vehicle) => Add(new WheelFireEffect(vehicle));
 
-        public static Task<bool> AddTurboBoostEffect(int vehicle, TurboBoostEffect.Mode mode) => Add(new TurboBoostEffect(vehicle, mode), true);
+        public static Task<bool> AddTurboBoostEffect(int vehicle, TurboBoostEffect.Mode mode) => Add(new TurboBoostEffect(vehicle, mode));
 
         public static void RemoveTurboBoostEffect(int vehicle) => Remove(TurboBoostEffect.GetKeyFrom(vehicle));
 
-        public static Task<bool> AddHornEffect(int vehicle) => Add(new HornEffect(vehicle), true);
+        public static Task<bool> AddTurboBrakeEffect(int vehicle) => Add(new TurboBrakeEffect(vehicle));
+
+        public static void RemoveTurboBrakeEffect(int vehicle) => Remove(TurboBrakeEffect.GetKeyFrom(vehicle));
+
+        public static Task<bool> AddHornEffect(int vehicle) => Add(new HornEffect(vehicle));
 
         public static void RemoveHornEffect(int vehicle) => Remove(HornEffect.GetKeyFrom(vehicle));
 
-        public static Task<bool> AddJesusEffect(int entity) => Add(new JesusEffect(entity), true);
+        public static Task<bool> AddJesusEffect(int entity) => Add(new JesusEffect(entity));
 
-        public static Task<bool> AddMosesEffect(int entity) => Add(new MosesEffect(entity), true);
+        public static Task<bool> AddMosesEffect(int entity) => Add(new MosesEffect(entity));
 
         private static Task Update()
         {

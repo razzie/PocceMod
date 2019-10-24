@@ -55,6 +55,7 @@ The menu toggle key is F5 by default, but can be configured.
     - Anti-gravity (toggle)
     - Aircraft horn
     - Turbo Boost (toggle)
+	- Turbo Brake (toggle)
     - Remote control (toggle)
 	- Jesus mode (toggle)
 	- Stabilizer (toggle)

@@ -36,11 +36,12 @@ namespace PocceMod.Client
         {
             BackToTheFuture = 1,
             TurboBoost = 2,
-            AntiGravity = 4,
-            RemoteControl = 8,
-            JesusMode = 16,
-            MosesMode = 32,
-            Stabilizer = 64
+            TurboBrake = 4,
+            AntiGravity = 8,
+            RemoteControl = 16,
+            JesusMode = 32,
+            MosesMode = 64,
+            Stabilizer = 128
         }
 
         public enum Light
@@ -89,6 +90,7 @@ namespace PocceMod.Client
             EventHandlers["PocceMod:SetIndicator"] += new Action<int, int>(NetSetIndicator);
             EventHandlers["PocceMod:CompressVehicle"] += new Func<int, Task>(NetCompress);
             EventHandlers["PocceMod:ToggleTurboBoost"] += new Func<int, bool, int, Task>(NetToggleTurboBoost);
+            EventHandlers["PocceMod:ToggleTurboBrake"] += new Func<int, bool, Task>(NetToggleTurboBrake);
             EventHandlers["PocceMod:ToggleHorn"] += new Func<int, bool, Task>(NetToggleHorn);
 
             if (!Config.GetConfigBool("DisableAutoHazardLights"))
@@ -473,6 +475,18 @@ namespace PocceMod.Client
                 Effects.RemoveTurboBoostEffect(vehicle);
         }
 
+        private static async Task NetToggleTurboBrake(int netVehicle, bool state)
+        {
+            var vehicle = API.NetToVeh(netVehicle);
+            if (!API.DoesEntityExist(vehicle))
+                return;
+
+            if (state)
+                await Effects.AddTurboBrakeEffect(vehicle);
+            else
+                Effects.RemoveTurboBrakeEffect(vehicle);
+        }
+
         public static bool IsFeatureEnabled(int vehicle, FeatureFlag flag)
         {
             var state = (FeatureFlag)API.DecorGetInt(vehicle, FeatureFlagsDecor);
@@ -703,6 +717,14 @@ namespace PocceMod.Client
                     TriggerServerEvent("PocceMod:ToggleTurboBoost", API.VehToNet(vehicle), true, (int)mode);
                 else if (API.IsControlJustReleased(0, TurboBoostKey) || API.IsDisabledControlJustReleased(0, TurboBoostKey))
                     TriggerServerEvent("PocceMod:ToggleTurboBoost", API.VehToNet(vehicle), false, 0);
+            }
+
+            if (IsFeatureEnabled(vehicle, FeatureFlag.TurboBrake))
+            {
+                if (API.IsControlJustPressed(0, 76)) // INPUT_VEH_HANDBRAKE
+                    TriggerServerEvent("PocceMod:ToggleTurboBrake", API.VehToNet(vehicle), true);
+                else if (API.IsControlJustReleased(0, 76))
+                    TriggerServerEvent("PocceMod:ToggleTurboBrake", API.VehToNet(vehicle), false);
             }
 
             if (driver == player && StabilizerKey > 0 && IsFeatureEnabled(vehicle, FeatureFlag.Stabilizer))
