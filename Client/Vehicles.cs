@@ -66,10 +66,12 @@ namespace PocceMod.Client
         private static readonly int TurboBoostKey;
         private static readonly int TurboBoostHorizontalKey;
         private static readonly int TurboBoostVerticalKey;
-        private static readonly int StabilizerKey;
         private static readonly int[] RemoteControlKeys = new int[] { 172, 173, 174, 175 };
+        private static readonly int StabilizerKey;
+        private static readonly bool StabilizerHeadingLock;
         private static float _stabilizerPitch;
         private static float _stabilizerRoll;
+        private static float _stabilizerYaw;
 
         static Vehicles()
         {
@@ -77,6 +79,7 @@ namespace PocceMod.Client
             TurboBoostHorizontalKey = Config.GetConfigInt("TurboBoostHorizontalKey");
             TurboBoostVerticalKey = Config.GetConfigInt("TurboBoostVerticalKey");
             StabilizerKey = Config.GetConfigInt("StabilizerKey");
+            StabilizerHeadingLock = Config.GetConfigBool("StabilizerHeadingLock");
         }
 
         public Vehicles()
@@ -733,12 +736,14 @@ namespace PocceMod.Client
                 {
                     _stabilizerPitch = API.GetEntityPitch(vehicle);
                     _stabilizerRoll = API.GetEntityRoll(vehicle);
+                    _stabilizerYaw = API.GetEntityHeading(vehicle);
                 }
                 else if (API.IsControlPressed(0, StabilizerKey))
                 {
                     var pitch = _stabilizerPitch - API.GetEntityPitch(vehicle);
                     var roll = _stabilizerRoll - API.GetEntityRoll(vehicle);
-                    Common.ApplyTorque(vehicle, pitch * 0.1f, roll * 0.1f);
+                    var yaw = StabilizerHeadingLock ? Common.GetAngleDifference(_stabilizerYaw, API.GetEntityHeading(vehicle)) : 0f;
+                    Common.ApplyTorque(vehicle, pitch * 0.02f, roll * 0.02f, yaw * 0.01f);
                 }
             }
 
@@ -751,19 +756,23 @@ namespace PocceMod.Client
 
                     if (API.IsPedInFlyingVehicle(driver))
                     {
+                        var pitch = 0f;
+                        var roll = 0f;
                         var model = (uint)API.GetEntityModel(vehicle);
                         var isHeli = API.IsThisModelAHeli(model);
 
                         var force = isHeli ? 0.1f : 1f;
                         if (API.IsControlPressed(0, 172)) // up
-                            Common.ApplyTorque(vehicle, -force, 0);
+                            pitch = -force;
                         else if (API.IsControlPressed(0, 173)) // down
-                            Common.ApplyTorque(vehicle, force, 0);
+                            pitch = force;
 
                         if (API.IsControlPressed(0, 174)) // left
-                            Common.ApplyTorque(vehicle, 0, force / 2);
+                            roll = force / 2;
                         else if (API.IsControlPressed(0, 175)) // right
-                            Common.ApplyTorque(vehicle, 0, -force / 2);
+                            roll = -force / 2;
+
+                        Common.ApplyTorque(vehicle, pitch, roll, 0);
 
                         if (isHeli)
                             API.TaskVehicleTempAction(driver, vehicle, 9, 1);

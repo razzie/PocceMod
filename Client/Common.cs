@@ -187,7 +187,7 @@ namespace PocceMod.Client
             return coords;
         }
 
-        public static void ApplyTorque(int entity, float x, float y, bool scaleLeverage = true)
+        public static void ApplyTorque(int entity, float pitch, float roll, float yaw, bool scaleLeverage = true)
         {
             var min = -Vector3.One;
             var max = Vector3.One;
@@ -199,16 +199,22 @@ namespace PocceMod.Client
                 API.GetModelDimensions(model, ref min, ref max);
             }
 
-            if (x != 0) // up-down
+            if (pitch != 0)
             {
-                API.ApplyForceToEntity(entity, 1, 0f, 0f, x, 0f, max.Y, 0f, -1, true, true, true, false, false);
-                API.ApplyForceToEntity(entity, 1, 0f, 0f, -x, 0f, min.Y, 0f, -1, true, true, true, false, false);
+                API.ApplyForceToEntity(entity, 1, 0f, 0f, pitch, 0f, max.Y, 0f, -1, true, true, true, false, false);
+                API.ApplyForceToEntity(entity, 1, 0f, 0f, -pitch, 0f, min.Y, 0f, -1, true, true, true, false, false);
             }
 
-            if (y != 0) // left-right
+            if (roll != 0)
             {
-                API.ApplyForceToEntity(entity, 1, 0f, 0f, y, max.X, 0f, 0f, -1, true, true, true, false, false);
-                API.ApplyForceToEntity(entity, 1, 0f, 0f, -y, min.X, 0f, 0f, -1, true, true, true, false, false);
+                API.ApplyForceToEntity(entity, 1, 0f, 0f, roll, max.X, 0f, 0f, -1, true, true, true, false, false);
+                API.ApplyForceToEntity(entity, 1, 0f, 0f, -roll, min.X, 0f, 0f, -1, true, true, true, false, false);
+            }
+
+            if (yaw != 0)
+            {
+                API.ApplyForceToEntity(entity, 1, 0f, yaw, 0f, max.X, 0f, 0f, -1, true, true, true, false, false);
+                API.ApplyForceToEntity(entity, 1, 0f, -yaw, 0f, min.X, 0f, 0f, -1, true, true, true, false, false);
             }
         }
 
@@ -320,6 +326,15 @@ namespace PocceMod.Client
             var pitch = Math.Asin(-dir.Z) * 57.2957795;
             var yaw = Math.Atan2(dir.X, -dir.Y) * 57.2957795;
             return new Vector3((float)pitch, 0f, (float)yaw);
+        }
+
+        public static float GetAngleDifference(float a, float b, bool deg = true)
+        {
+            var pi = deg ? 180f : (float)Math.PI;
+            //return pi - Math.Abs(Math.Abs(a - b) - pi);
+
+            var diff = a - b;
+            return diff > pi ? diff - (2 * pi) : diff;
         }
 
         public static Vector3 GetRandomSpawnCoordsInRange(Vector3 center, float minRange, float maxRange, out float heading)
