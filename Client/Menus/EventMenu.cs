@@ -8,7 +8,7 @@ namespace PocceMod.Client.Menus
 {
     public static class EventMenu
     {
-        public static async Task PocceParty(float radius, int speakers, int peds, int balloons, int booze)
+        public static async Task PocceParty(float radius, int speakers, int peds, int booze)
         {
             var center = API.GetEntityCoords(API.GetPlayerPed(-1), true);
             var station = API.GetPlayerRadioStationIndex();
@@ -30,17 +30,6 @@ namespace PocceMod.Client.Menus
                 API.SetPedAsNoLongerNeeded(ref ped);
             }
 
-            if (Permission.CanDo(Ability.Balloons))
-            {
-                for (int i = 0; i < balloons; ++i)
-                {
-                    var coords = Common.GetRandomSpawnCoordsInRange(center, 1f, radius, out float heading);
-                    var balloon = await Props.SpawnBalloons(coords);
-                    API.FreezeEntityPosition(balloon, true);
-                    API.SetEntityAsNoLongerNeeded(ref balloon);
-                }
-            }
-
             for (int i = 0; i < booze; ++i)
             {
                 var model = BoozeList[API.GetRandomIntInRange(0, BoozeList.Length)];
@@ -54,9 +43,8 @@ namespace PocceMod.Client.Menus
             float radius = API.GetRandomFloatInRange(5f, 10f);
             int speakers = API.GetRandomIntInRange(2, 7);
             int peds = API.GetRandomIntInRange(10, 20);
-            int balloons = API.GetRandomIntInRange(1, 10);
             int booze = API.GetRandomIntInRange(10, 20);
-            return PocceParty(radius, speakers, peds, balloons, booze);
+            return PocceParty(radius, speakers, peds, booze);
         }
 
         private static async Task PocceRiot(bool useWeapons)
