@@ -73,6 +73,25 @@ namespace PocceMod.Client
             API.AttachEntitiesToRope(_handle, Entity1, Entity2, pos1.X, pos1.Y, pos1.Z, pos2.X, pos2.Y, pos2.Z, Length, false, false, bone1, bone2);
         }
 
+        private void FixLongRopeBug()
+        {
+            GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
+
+            if (Entity1 != 0)
+            {
+                var dir = pos2 - pos1;
+                API.DetachEntity(Entity1, false, false);
+                API.ApplyForceToEntityCenterOfMass(Entity1, 1, dir.X, dir.Y, dir.Z, false, false, true, false);
+            }
+
+            if (Entity2 != 0)
+            {
+                var dir = pos1 - pos2;
+                API.DetachEntity(Entity2, false, false);
+                API.ApplyForceToEntityCenterOfMass(Entity2, 1, dir.X, dir.Y, dir.Z, false, false, true, false);
+            }
+        }
+
         public void Update()
         {
             if (!Exists)
@@ -91,38 +110,20 @@ namespace PocceMod.Client
                 Length = Ropes.MaxLength;
 
             var length = API.GetRopeLength(_handle);
-
-            // if length is negative, rope is detached
-            if (length < 0f)
+            if (length < 0f) // if length is negative, rope is detached
             {
                 GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
                 Attach(pos1, pos2);
                 return;
             }
-            /*else if (length > _length * 4)
-            {
-                GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
-
-                if (Entity1 != 0)
-                {
-                    var dir = pos2 - pos1;
-                    API.DetachEntity(Entity1, false, false);
-                    API.ApplyForceToEntityCenterOfMass(Entity1, 1, dir.X, dir.Y, dir.Z, false, false, true, false);
-                }
-
-                if (Entity2 != 0)
-                {
-                    var dir = pos1 - pos2;
-                    API.DetachEntity(Entity2, false, false);
-                    API.ApplyForceToEntityCenterOfMass(Entity2, 1, dir.X, dir.Y, dir.Z, false, false, true, false);
-                }
-            }*/
-
-            if (length > Length + 0.2f) // current length > desired length : winding case
+            else if (length > Length + 0.2f) // current length > desired length : winding case
             {
                 API.StopRopeUnwindingFront(_handle);
                 API.StartRopeWinding(_handle);
                 API.RopeForceLength(_handle, length - 0.2f);
+
+                if (length > Length + 10f)
+                    FixLongRopeBug();
             }
             else if (length < Length - 0.2f) // current length < desired length : unwinding case
             {
