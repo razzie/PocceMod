@@ -36,7 +36,7 @@
         TurboBrake,
         RemoteControl,
         JesusMode,
-        MosesMode,
+        //MosesMode,
         Stabilizer,
         Balloons,
         FreezePosition,
