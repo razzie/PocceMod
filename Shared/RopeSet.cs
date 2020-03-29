@@ -1,79 +1,57 @@
-﻿using CitizenFX.Core;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace PocceMod.Shared
 {
     public class RopeSet
     {
-        private readonly Dictionary<Player, List<Rope>> _ropes = new Dictionary<Player, List<Rope>>();
+        private readonly Dictionary<string, Dictionary<int, IRope>> _ropes = new Dictionary<string, Dictionary<int, IRope>>();
 
-        public Rope[] Ropes
+        public IEnumerable<IRope> Ropes
         {
-            get { return _ropes.Values.SelectMany(ropes => ropes).ToArray(); }
+            get { return _ropes.Values.SelectMany(ropes => ropes.Values); }
         }
 
-        public void AddRope(Rope rope)
+        public IEnumerable<IRope> GetPlayerRopes(string player)
         {
-            if (_ropes.TryGetValue(rope.Player, out List<Rope> playerRopes))
-                playerRopes.Add(rope);
+            if (_ropes.TryGetValue(player, out Dictionary<int, IRope> playerRopes))
+                return playerRopes.Values;
             else
-                _ropes.Add(rope.Player, new List<Rope> { rope });
+                return Enumerable.Empty<IRope>();
         }
 
-        public bool HasRopesAttached(int entity)
+        public IEnumerable<IRope> GetEntityRopes(int entity)
         {
-            foreach (var playerRopes in _ropes.Values)
-            {
-                foreach (var rope in playerRopes)
-                {
-                    if (rope.Entity1 == entity || rope.Entity2 == entity)
-                        return true;
-                }
-            }
-
-            return false;
+            return Ropes.Where(rope => rope.Entity1 == entity || rope.Entity2 == entity);
         }
 
-        public void ClearRopes(Player player)
+        public bool IsAnyRopeAttachedToEntity(int entity)
         {
-            if (_ropes.TryGetValue(player, out List<Rope> playerRopes))
-            {
-                foreach (var rope in playerRopes)
-                {
-                    rope.Clear();
-                }
-
-                playerRopes.Clear();
-            }
+            return Ropes.Any(rope => rope.Entity1 == entity || rope.Entity2 == entity);
         }
 
-        public void ClearLastRope(Player player)
+        public void AddRope(IRope rope)
         {
-            if (_ropes.TryGetValue(player, out List<Rope> playerRopes))
-            {
-                if (playerRopes.Count == 0)
-                    return;
+            if (_ropes.TryGetValue(rope.Player, out Dictionary<int, IRope> playerRopes))
+                playerRopes.Add(rope.ID, rope);
+            else
+                _ropes.Add(rope.Player, new Dictionary<int, IRope> { { rope.ID, rope } });
+        }
 
-                var rope = playerRopes[playerRopes.Count - 1];
+        public IRope GetRope(string player, int id)
+        {
+            if (_ropes.TryGetValue(player, out Dictionary<int, IRope> playerRopes) && playerRopes.TryGetValue(id, out IRope rope))
+                return rope;
+            else
+                return null;
+        }
+
+        public void RemoveRope(string player, int id)
+        {
+            if (_ropes.TryGetValue(player, out Dictionary<int, IRope> playerRopes) && playerRopes.TryGetValue(id, out IRope rope))
+            {
                 rope.Clear();
-
-                playerRopes.RemoveAt(playerRopes.Count - 1);
-            }
-        }
-
-        public void ClearEntityRopes(int entity)
-        {
-            foreach (var playerRopes in _ropes.Values)
-            {
-                foreach (var rope in playerRopes.ToArray())
-                {
-                    if (rope.Entity1 == entity || rope.Entity2 == entity)
-                    {
-                        rope.Clear();
-                        playerRopes.Remove(rope);
-                    }
-                }
+                playerRopes.Remove(id);
             }
         }
     }

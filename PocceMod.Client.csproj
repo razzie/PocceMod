@@ -57,9 +57,10 @@
     <Compile Include="Client\Menus\Dev\VehicleDebugMenu.cs" />
     <Compile Include="Client\Menus\MainMenuIncludeAttribute.cs" />
     <Compile Include="Client\Menus\UpgradeMenu.cs" />
-    <Compile Include="Client\RopeWrapperDelayed.cs" />
     <Compile Include="Client\SkinVariations.cs" />
     <Compile Include="Client\Telemetry.cs" />
+    <Compile Include="Client\Rope.cs" />
+    <Compile Include="Client\RopePool.cs" />
     <Compile Include="Shared\Controls.cs" />
     <Compile Include="Client\Effects.cs" />
     <Compile Include="Client\Effect\EMPEffect.cs" />
@@ -99,8 +100,8 @@
     <Compile Include="Client\Ropes.cs" />
     <Compile Include="Client\Vehicles.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Shared\IRope.cs" />
     <Compile Include="Shared\Permission.cs" />
-    <Compile Include="Shared\Rope.cs" />
     <Compile Include="Shared\RopeSet.cs" />
   </ItemGroup>
   <ItemGroup>

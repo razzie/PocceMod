@@ -5,35 +5,44 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static PocceMod.Shared.Rope;
 
 namespace PocceMod.Client
 {
     public class Ropes : BaseScript
     {
+        public static readonly float MaxLength = Config.GetConfigFloat("MaxRopeLength");
         private const uint Ropegun = 0x44AE7910; // WEAPON_POCCE_ROPEGUN
         private static readonly int RopegunWindKey;
         private static readonly int RopeClearKey;
+        private static int _nextRopeID;
         private static readonly RopeSet _ropes = new RopeSet();
         private static readonly RopegunState _ropegunState = new RopegunState();
-        private static int _rootObject;
+        private static readonly Dictionary<int, DateTime> _expirations = new Dictionary<int, DateTime>();
+
+        [Flags]
+        public enum ModeFlag
+        {
+            Normal = 0,
+            Tow = 1,
+            Ropegun = 2,
+            Grapple = 4
+        }
 
         static Ropes()
         {
             RopegunWindKey = Config.GetConfigInt("RopegunWindKey");
             RopeClearKey = Config.GetConfigInt("RopeClearKey");
+
+            API.AddTextEntryByHash(0x6FCC4E8A, "Pocce Ropegun"); // WT_POCCE_ROPEGUN
         }
 
         public Ropes()
         {
-            EventHandlers["PocceMod:AddRope"] += new Func<int, int, int, Vector3, Vector3, int, Task>(NetAddRope);
-            EventHandlers["PocceMod:ClearRopes"] += new Action<int>(NetClearAll);
-            EventHandlers["PocceMod:ClearLastRope"] += new Action<int>(NetClearLast);
-            EventHandlers["PocceMod:ClearEntityRopes"] += new Action<int>(NetClearEntity);
+            EventHandlers["PocceMod:AddRope"] += new Func<string, int, int, int, Vector3, Vector3, float, Task>(NetAddRope);
+            EventHandlers["PocceMod:SetRopeLength"] += new Action<string, int, float>(NetSetRopeLength);
+            EventHandlers["PocceMod:RemoveRope"] += new Action<string, int>(NetRemoveRope);
 
             TriggerServerEvent("PocceMod:RequestRopes");
-
-            API.AddTextEntryByHash(0x6FCC4E8A, "Pocce Ropegun"); // WT_POCCE_ROPEGUN
 
             Tick += Telemetry.Wrap("ropegun", UpdateRopegun);
             Tick += Telemetry.Wrap("ropes", UpdateRopes);
@@ -82,48 +91,6 @@ namespace PocceMod.Client
             return false;
         }
 
-        private static async Task NetAddRope(int player, int netEntity1, int netEntity2, Vector3 offset1, Vector3 offset2, int mode)
-        {
-            if (_rootObject == 0)
-            {
-                var model = (uint)API.GetHashKey("prop_devin_rope_01");
-                await Common.RequestModel(model);
-                _rootObject = API.CreateObject((int)model, 0f, 0f, 0f, false, false, false);
-                API.SetModelAsNoLongerNeeded(model);
-                API.FreezeEntityPosition(_rootObject, true);
-            }
-
-            var entity1 = (netEntity1 == 0) ? _rootObject : API.NetToEnt(netEntity1);
-            var entity2 = (netEntity2 == 0) ? _rootObject : API.NetToEnt(netEntity2);
-            DateTime? timeout = null;
-
-            if (entity1 == _rootObject && entity2 == _rootObject)
-                timeout = DateTime.Now + TimeSpan.FromMinutes(1);
-
-            if (!API.DoesEntityExist(entity1) || !API.DoesEntityExist(entity2))
-                _ropes.AddRope(new RopeWrapperDelayed(player, netEntity1, netEntity2, entity1, entity2, offset1, offset2, (ModeFlag)mode) { Timeout = timeout });
-            else
-                _ropes.AddRope(new RopeWrapper(player, entity1, entity2, offset1, offset2, (ModeFlag)mode) { Timeout = timeout });
-
-            if (!API.RopeAreTexturesLoaded())
-                API.RopeLoadTextures();
-        }
-
-        private static void NetClearAll(int player)
-        {
-            _ropes.ClearRopes(new Player(player));
-        }
-
-        private static void NetClearLast(int player)
-        {
-            _ropes.ClearLastRope(new Player(player));
-        }
-
-        private static void NetClearEntity(int netEntity)
-        {
-            _ropes.ClearEntityRopes(API.NetToEnt(netEntity));
-        }
-
         public static void PlayerAttach(int entity, Vector3 offset, ModeFlag mode = ModeFlag.Normal)
         {
             Attach(Common.GetPlayerPedOrVehicle(), entity, Vector3.Zero, offset, mode);
@@ -137,12 +104,12 @@ namespace PocceMod.Client
                 Common.Notification("Nothing in range");
         }
 
-        public static void Attach(int entity1, int entity2, Vector3 offset1, Vector3 offset2, ModeFlag mode = ModeFlag.Normal)
+        public static int? Attach(int entity1, int entity2, Vector3 offset1, Vector3 offset2, ModeFlag mode = ModeFlag.Normal)
         {
             if (!Permission.CanDo(Ability.RopeOtherPlayer) && (IsOtherPlayerEntity(entity1) || IsOtherPlayerEntity(entity2)))
             {
                 Common.Notification("You are not allowed to attach rope to another player");
-                return;
+                return null;
             }
 
             if ((mode & ModeFlag.Tow) == ModeFlag.Tow)
@@ -163,7 +130,7 @@ namespace PocceMod.Client
             }
 
             if (entity1 == entity2 && entity1 > 0)
-                return;
+                return null;
 
             int ObjToNet(int entity)
             {
@@ -173,31 +140,76 @@ namespace PocceMod.Client
                 return API.ObjToNet(entity);
             }
 
-            TriggerServerEvent("PocceMod:AddRope", ObjToNet(entity1), ObjToNet(entity2), offset1, offset2, (int)mode);
+            Vector3 GetPos(int entity, Vector3 offset)
+            {
+                if (entity == 0)
+                    return offset;
+
+                return API.GetOffsetFromEntityInWorldCoords(entity, offset.X, offset.Y, offset.Z);
+            }
+
+            var id = ++_nextRopeID;
+            var length = (GetPos(entity1, offset1) - GetPos(entity2, offset2)).Length();
+
+            TriggerServerEvent("PocceMod:AddRope", id, ObjToNet(entity1), ObjToNet(entity2), offset1, offset2, length);
+
+            if ((mode & ModeFlag.Grapple) == ModeFlag.Grapple)
+                TriggerServerEvent("PocceMod:SetRopeLength", id, 1f);
+
+            if (entity1 == 0 && entity2 == 0)
+                _expirations.Add(id, DateTime.Now + TimeSpan.FromMinutes(1));
+
+            return id;
         }
 
         public static void ClearAll()
         {
-            TriggerServerEvent("PocceMod:ClearRopes");
+            foreach (var rope in _ropes.GetPlayerRopes(Common.PlayerID.ToString()).ToArray())
+                TriggerServerEvent("PocceMod:RemoveRope", rope.ID);
         }
 
         public static void ClearLast()
         {
-            TriggerServerEvent("PocceMod:ClearLastRope");
+            var ropes = _ropes.GetPlayerRopes(Common.PlayerID.ToString()).ToArray();
+            if (ropes.Length > 0)
+            {
+                var lastRopeID = ropes.Max(rope => rope.ID);
+                TriggerServerEvent("PocceMod:RemoveRope", lastRopeID);
+            }
         }
 
         public static void ClearPlayer()
         {
             var player = API.GetPlayerPed(-1);
-            if (_ropes.HasRopesAttached(player))
-                TriggerServerEvent("PocceMod:ClearEntityRopes", API.PedToNet(player));
+            if (_ropes.IsAnyRopeAttachedToEntity(player))
+                TriggerServerEvent("PocceMod:RemoveEntityRopes", API.PedToNet(player));
 
             if (API.IsPedInAnyVehicle(player, false))
             {
                 int vehicle = API.GetVehiclePedIsIn(player, false);
-                if (_ropes.HasRopesAttached(vehicle))
-                    TriggerServerEvent("PocceMod:ClearEntityRopes", API.VehToNet(vehicle));
+                if (_ropes.IsAnyRopeAttachedToEntity(vehicle))
+                    TriggerServerEvent("PocceMod:RemoveEntityRopes", API.VehToNet(vehicle));
             }
+        }
+        
+        private static async Task NetAddRope(string player, int id, int netEntity1, int netEntity2, Vector3 offset1, Vector3 offset2, float length)
+        {
+            _ropes.AddRope(await RopeWrapper.Create(player, id, netEntity1, netEntity2, offset1, offset2, length));
+
+            if (!API.RopeAreTexturesLoaded())
+                API.RopeLoadTextures();
+        }
+
+        private static void NetSetRopeLength(string player, int id, float length)
+        {
+            var rope = _ropes.GetRope(player, id);
+            if (rope != null)
+                rope.Length = length;
+        }
+
+        private static void NetRemoveRope(string player, int id)
+        {
+            _ropes.RemoveRope(player, id);
         }
 
         public static void EquipRopeGun()
@@ -285,7 +297,7 @@ namespace PocceMod.Client
             var attackControl = API.IsPedInAnyVehicle(player, false) ? 69 : 24;  // INPUT_VEH_ATTACK; INPUT_ATTACK
             var grapple = (RopegunWindKey > 0 && API.IsControlPressed(0, RopegunWindKey));
 
-            if (API.IsControlJustPressed(0, attackControl) && TryShootRopegun(48f, out int target, out Vector3 offset))
+            if (API.IsControlJustPressed(0, attackControl) && TryShootRopegun(MaxLength, out int target, out Vector3 offset))
             {
                 PlayerAttach(target, offset, grapple ? ModeFlag.Ropegun | ModeFlag.Grapple : ModeFlag.Ropegun);
 
@@ -308,6 +320,16 @@ namespace PocceMod.Client
             foreach (var rope in _ropes.Ropes)
             {
                 rope.Update();
+            }
+
+            var now = DateTime.Now;
+            foreach (var rope in _expirations.ToArray())
+            {
+                if (rope.Value < now)
+                {
+                    TriggerServerEvent("PocceMod:RemoveRope", rope.Key);
+                    _expirations.Remove(rope.Key);
+                }
             }
         }
 

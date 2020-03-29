@@ -1,130 +1,168 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
+using PocceMod.Shared;
 using System;
+using System.Threading.Tasks;
 
 namespace PocceMod.Client
 {
-    internal class RopeWrapper : Shared.Rope
+    internal class RopeWrapper : IRope
     {
-        private int _handle;
+        private static int _rootObject;
+        private readonly int _netEntity1;
+        private readonly int _netEntity2;
+        private bool _tryResolve1;
+        private bool _tryResolve2;
+        private DateTime _retry;
+        private Rope _rope;
+        private float _initialLength;
         private float _length;
+        private bool _showPoolErrMsg;
 
-        public RopeWrapper(int player, int entity1, int entity2, Vector3 offset1, Vector3 offset2, ModeFlag mode) : base(new Player(player), entity1, entity2, offset1, offset2, mode)
+        private RopeWrapper(string player, int id, int netEntity1, int netEntity2, Vector3 offset1, Vector3 offset2, float length)
         {
-            GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
-            _length = (pos1 - pos2).Length();
+            Player = player;
+            ID = id;
+            Offset1 = offset1;
+            Offset2 = offset2;
+            _initialLength = length;
+            _length = length;
 
-            int unkPtr = 0;
-            var ropePos = pos1;
-            _handle = API.AddRope(ropePos.X, ropePos.Y, ropePos.Z, 0f, 0f, 0f, _length, 1, _length, 1f, 0f, false, false, false, 5f, true, ref unkPtr);
-            Attach(pos1, pos2);
+            _netEntity1 = netEntity1;
+            _netEntity2 = netEntity2;
 
-            if ((Mode & ModeFlag.Grapple) == ModeFlag.Grapple)
-                API.StartRopeWinding(_handle);
+            if (_netEntity1 == 0)
+                Entity1 = _rootObject;
+            else
+                _tryResolve1 = true;
+
+            if (_netEntity2 == 0)
+                Entity2 = _rootObject;
+            else
+                _tryResolve2 = true;
+
+            _showPoolErrMsg = true;
         }
 
-        public bool Exists
+        public static async Task<RopeWrapper> Create(string player, int id, int netEntity1, int netEntity2, Vector3 offset1, Vector3 offset2, float length)
+        {
+            if (_rootObject == 0)
+            {
+                var model = (uint)API.GetHashKey("prop_devin_rope_01");
+                await Common.RequestModel(model);
+                _rootObject = API.CreateObject((int)model, 0f, 0f, 0f, false, false, false);
+                API.SetModelAsNoLongerNeeded(model);
+                API.FreezeEntityPosition(_rootObject, true);
+            }
+
+            return new RopeWrapper(player, id, netEntity1, netEntity2, offset1, offset2, length);
+        }
+
+        public string Player { get; }
+        public int ID { get; }
+        public int Entity1 { get; private set; }
+        public int Entity2 { get; private set; }
+        public Vector3 Offset1 { get; }
+        public Vector3 Offset2 { get; }
+        public float Length
         {
             get
             {
-                int rope = _handle;
-                return API.DoesRopeExist(ref rope);
+                return _length;
+            }
+
+            set
+            {
+                _length = value;
+
+                if (_rope != null)
+                    _rope.Length = value;
             }
         }
 
-        public DateTime? Timeout { get; set; } = null;
-
-        private void GetWorldCoords(out Vector3 pos1, out Vector3 pos2)
+        private void Retry()
         {
-            pos1 = API.GetOffsetFromEntityInWorldCoords(Entity1, Offset1.X, Offset1.Y, Offset1.Z);
-            pos2 = API.GetOffsetFromEntityInWorldCoords(Entity2, Offset2.X, Offset2.Y, Offset2.Z);
+            _retry = DateTime.Now + TimeSpan.FromSeconds(2);
         }
 
-        private void Attach(Vector3 pos1, Vector3 pos2)
+        public void Update()
         {
-            string bone1 = null;
-            string bone2 = null;
-
-            if (API.IsEntityAPed(Entity1))
+            if (_rope != null)
             {
-                pos1 = Vector3.Zero;
-                bone1 = "SKEL_ROOT"; // "SKEL_R_Hand";
-            }
+                _rope.Update();
 
-            if (API.IsEntityAPed(Entity2))
-            {
-                pos2 = Vector3.Zero;
-                bone2 = "SKEL_ROOT"; // "SKEL_R_Hand";
-            }
-
-            API.AttachEntitiesToRope(_handle, Entity1, Entity2, pos1.X, pos1.Y, pos1.Z, pos2.X, pos2.Y, pos2.Z, _length, false, false, bone1, bone2);
-        }
-
-        public override void Update()
-        {
-            if (_handle == -1)
-                return;
-
-            // if a rope is shot, it ceases to exist
-            if (!Exists)
-            {
-                Clear();
-                return;
-            }
-
-            if (!API.DoesEntityExist(Entity1) || !API.DoesEntityExist(Entity2))
-            {
-                Clear();
-                return;
-            }
-
-            if (Timeout != null && Timeout < DateTime.Now)
-            {
-                Clear();
-                return;
-            }
-
-            var length = API.GetRopeLength(_handle);
-
-            // if length is negative, rope is detached
-            if (length < 0f)
-            {
-                GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
-                Attach(pos1, pos2);
-            }
-            else if (length > _length * 4)
-            {
-                GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
-
-                if (Entity1 != 0)
+                if (!_rope.Exists)
                 {
-                    var dir = pos2 - pos1;
-                    API.DetachEntity(Entity1, false, false);
-                    API.ApplyForceToEntityCenterOfMass(Entity1, 1, dir.X, dir.Y, dir.Z, false, false, true, false);
+                    _rope = null;
+                    Retry();
                 }
 
-                if (Entity2 != 0)
-                {
-                    var dir = pos1 - pos2;
-                    API.DetachEntity(Entity2, false, false);
-                    API.ApplyForceToEntityCenterOfMass(Entity2, 1, dir.X, dir.Y, dir.Z, false, false, true, false);
-                }
+                return;
             }
 
-            if ((Mode & ModeFlag.Grapple) == ModeFlag.Grapple && _length > 1f)
+            if (DateTime.Now > _retry)
             {
-                _length -= 0.2f;
-                API.RopeForceLength(_handle, _length);
+                if (_tryResolve1)
+                {
+                    Entity1 = API.NetToEnt(_netEntity1);
+
+                    if (!API.DoesEntityExist(Entity1))
+                    {
+                        Retry();
+                        return;
+                    }
+
+                    _tryResolve1 = false;
+                }
+
+                if (_tryResolve2)
+                {
+                    Entity2 = API.NetToEnt(_netEntity2);
+
+                    if (!API.DoesEntityExist(Entity2))
+                    {
+                        Retry();
+                        return;
+                    }
+
+                    _tryResolve2 = false;
+                }
+
+                if (_netEntity1 == 0 && _netEntity2 == 0)
+                {
+                    var playerCoords = API.GetEntityCoords(API.GetPlayerPed(-1), true);
+                    const float minDistSquared = 10000f;
+
+                    if (Offset1.DistanceToSquared(playerCoords) > minDistSquared ||
+                        Offset2.DistanceToSquared(playerCoords) > minDistSquared)
+                    {
+                        Retry();
+                        return;
+                    }
+                }
+
+                try
+                {
+                    _rope = new Rope(Player, ID, Entity1, Entity2, Offset1, Offset2, _initialLength);
+                    _rope.Length = _length;
+                    _showPoolErrMsg = true;
+                }
+                catch (Exception)
+                {
+                    if (_showPoolErrMsg)
+                    {
+                        Debug.WriteLine("[PocceMod] no rope available in pool.. waiting");
+                        _showPoolErrMsg = false;
+                    }
+
+                    Retry();
+                }
             }
         }
 
-        public override void Clear()
+        public void Clear()
         {
-            if (_handle == -1)
-                return;
-
-            API.DeleteRope(ref _handle);
-            _handle = -1;
+            _rope?.Clear();
         }
     }
 }

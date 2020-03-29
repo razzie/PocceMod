@@ -66,10 +66,16 @@ namespace PocceMod.Client
 
             if (Permission.CanDo(Ability.Rope))
             {
-                _menu.AddMenuListItem("Rope", "Closest ped", () => Ropes.AttachToClosest(Peds.Get(Peds.Filter.LocalPlayer | Peds.Filter.Dead | Peds.Filter.CurrentVehiclePassengers)));
-                _menu.AddMenuListItem("Rope", "Closest vehicle", () => Ropes.AttachToClosest(Vehicles.Get()));
-                _menu.AddMenuListItem("Rope", "Closest vehicle tow", () => Ropes.AttachToClosest(Vehicles.Get(), true));
-                _menu.AddMenuListItem("Rope", "Closest prop", () => Ropes.AttachToClosest(Props.Get()));
+                var ropeRangeSquared = Ropes.MaxLength * Ropes.MaxLength;
+
+                _menu.AddMenuListItem("Rope", "Closest ped", () => Ropes.AttachToClosest(
+                    Peds.Get(Peds.Filter.LocalPlayer | Peds.Filter.Dead | Peds.Filter.CurrentVehiclePassengers, ropeRangeSquared)));
+                _menu.AddMenuListItem("Rope", "Closest vehicle", () => Ropes.AttachToClosest(
+                    Vehicles.Get(Vehicles.Filter.PlayerVehicle, ropeRangeSquared)));
+                _menu.AddMenuListItem("Rope", "Closest vehicle tow", () => Ropes.AttachToClosest(
+                    Vehicles.Get(Vehicles.Filter.PlayerVehicle, ropeRangeSquared), true));
+                _menu.AddMenuListItem("Rope", "Closest prop", () => Ropes.AttachToClosest(
+                    Props.Get(Props.Filter.NonNetwork, ropeRangeSquared)));
             }
 
             if (Permission.CanDo(Ability.Rope) || Permission.CanDo(Ability.RopeGun))
