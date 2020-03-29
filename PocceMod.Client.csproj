@@ -34,6 +34,10 @@
     <Reference Include="CitizenFX.Core.Client, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\CitizenFX.Core.Client.1.0.1463\lib\net45\CitizenFX.Core.Client.dll</HintPath>
     </Reference>
+    <Reference Include="MenuAPI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\MenuAPI.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -141,10 +145,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="MenuAPI\MenuAPI\MenuAPI.csproj">
-      <Project>{9c746601-9f3d-4b0d-877c-1c7bc493c5bc}</Project>
-      <Name>MenuAPI</Name>
-    </ProjectReference>
+    <Content Include="MenuAPI.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
