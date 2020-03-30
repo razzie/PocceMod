@@ -11,6 +11,7 @@ namespace PocceMod.Client
         public delegate void OnDespawnDelegate(IRope rope);
         public event OnDespawnDelegate OnDespawn;
 
+        public const float NetworkRopeSpawnDistance = 128f;
         private static int _rootObject;
         private readonly int _netEntity1;
         private readonly int _netEntity2;
@@ -88,6 +89,12 @@ namespace PocceMod.Client
             _retry = DateTime.Now + TimeSpan.FromSeconds(2);
         }
 
+        private void GetWorldCoords(out Vector3 pos1, out Vector3 pos2)
+        {
+            pos1 = API.GetOffsetFromEntityInWorldCoords(Entity1, Offset1.X, Offset1.Y, Offset1.Z);
+            pos2 = API.GetOffsetFromEntityInWorldCoords(Entity2, Offset2.X, Offset2.Y, Offset2.Z);
+        }
+
         public void Update()
         {
             if (_rope != null)
@@ -133,13 +140,14 @@ namespace PocceMod.Client
                     _tryResolve2 = false;
                 }
 
-                if (_netEntity1 == 0 && _netEntity2 == 0)
+                if (Player != Common.PlayerID.ToString())
                 {
+                    GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
                     var playerCoords = API.GetEntityCoords(API.GetPlayerPed(-1), true);
-                    const float minDistSquared = 10000f;
+                    const float minDistSquared = NetworkRopeSpawnDistance * NetworkRopeSpawnDistance;
 
-                    if (Offset1.DistanceToSquared(playerCoords) > minDistSquared ||
-                        Offset2.DistanceToSquared(playerCoords) > minDistSquared)
+                    if (pos1.DistanceToSquared(playerCoords) > minDistSquared ||
+                        pos2.DistanceToSquared(playerCoords) > minDistSquared)
                     {
                         Retry();
                         return;
