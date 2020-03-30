@@ -27,18 +27,6 @@ namespace PocceMod.Client
             API.RopeForceLength(_handle, length);
         }
 
-        public bool Exists
-        {
-            get
-            {
-                if (_handle == -1)
-                    return false;
-
-                int rope = _handle;
-                return API.DoesRopeExist(ref rope);
-            }
-        }
-
         public string Player { get; }
         public int ID { get; }
         public int Entity1 { get; }
@@ -46,6 +34,11 @@ namespace PocceMod.Client
         public Vector3 Offset1 { get; }
         public Vector3 Offset2 { get; }
         public float Length { get; set; }
+
+        public bool Exists
+        {
+            get { return _handle != -1; }
+        }
 
         private void GetWorldCoords(out Vector3 pos1, out Vector3 pos2)
         {
@@ -95,10 +88,7 @@ namespace PocceMod.Client
         public void Update()
         {
             if (!Exists)
-            {
-                Clear();
                 return;
-            }
 
             if (!API.DoesEntityExist(Entity1) || !API.DoesEntityExist(Entity2))
             {
@@ -135,6 +125,7 @@ namespace PocceMod.Client
             {
                 API.StartRopeWinding(_handle);
                 API.RopeForceLength(_handle, Length);
+                API.RopeConvertToSimple(_handle);
             }
         }
 

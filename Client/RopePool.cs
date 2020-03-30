@@ -15,7 +15,7 @@ namespace PocceMod.Client
             for (int i = 0; i < PoolSize; i++)
             {
                 int unkPtr = 0;
-                int handle = API.AddRope(0f, 0f, 0f, 0f, 0f, 0f, Ropes.MaxLength, 1, Ropes.MaxLength, 0.25f, 0f, false, false, false, 5f, true, ref unkPtr);
+                int handle = API.AddRope(0f, 0f, 0f, 0f, 0f, 0f, Ropes.MaxLength, 1, Ropes.MaxLength, 0.25f, 0f, false, false, false, 5f, false, ref unkPtr);
                 _pool.Add(handle);
             }
         }
@@ -29,9 +29,10 @@ namespace PocceMod.Client
 
         public static void DeleteRope(ref int rope)
         {
-            if (API.DoesRopeExist(ref rope))
-                _pool.Add(rope);
-
+            API.StopRopeUnwindingFront(rope);
+            API.StopRopeWinding(rope);
+            API.RopeConvertToSimple(rope);
+            _pool.Add(rope);
             rope = -1;
         }
     }
