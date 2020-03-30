@@ -340,7 +340,7 @@ namespace PocceMod.Client
                 ClearPlayer();
             }
 
-            if (RopegunWindKey > 0 && API.IsControlJustPressed(0, RopegunWindKey))
+            if (RopegunWindKey > 0 && API.IsControlJustPressed(0, RopegunWindKey) && !API.IsControlPressed(0, 25)) // INPUT_AIM
             {
                 var player = Common.PlayerID.ToString();
                 var ropes = _ropes.GetEntityRopes(Common.GetPlayerPedOrVehicle()).Where(rope => rope.Player == player).ToArray();
