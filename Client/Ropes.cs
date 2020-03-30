@@ -46,11 +46,7 @@ namespace PocceMod.Client
 
             Tick += Telemetry.Wrap("ropegun", UpdateRopegun);
             Tick += Telemetry.Wrap("ropes", UpdateRopes);
-
-            if (RopeClearKey > 0)
-            {
-                Tick += Telemetry.Wrap("clear_ropes", UpdateRopeClear);
-            }
+            Tick += Telemetry.Wrap("rope_hotkeys", UpdateRopeHotkeys);
         }
 
         private static void AdjustOffsetForTowing(int entity, ref Vector3 offset, float towOffset)
@@ -333,11 +329,21 @@ namespace PocceMod.Client
             }
         }
 
-        private static Task UpdateRopeClear()
+        private static Task UpdateRopeHotkeys()
         {
-            if (API.IsControlJustPressed(0, RopeClearKey))
+            if (RopeClearKey > 0 && API.IsControlJustPressed(0, RopeClearKey))
             {
                 ClearPlayer();
+            }
+
+            if (RopegunWindKey > 0 && API.IsControlJustPressed(0, RopegunWindKey))
+            {
+                var player = Common.PlayerID.ToString();
+                var ropes = _ropes.GetEntityRopes(Common.GetPlayerPedOrVehicle()).Where(rope => rope.Player == player).ToArray();
+                foreach (var rope in ropes)
+                {
+                    TriggerServerEvent("PocceMod:SetRopeLength", rope.ID, 1f);
+                }
             }
 
             return Task.FromResult(0);
