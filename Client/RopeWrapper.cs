@@ -8,6 +8,9 @@ namespace PocceMod.Client
 {
     internal class RopeWrapper : IRope
     {
+        public delegate void OnDespawnDelegate(IRope rope);
+        public event OnDespawnDelegate OnDespawn;
+
         private static int _rootObject;
         private readonly int _netEntity1;
         private readonly int _netEntity2;
@@ -93,8 +96,10 @@ namespace PocceMod.Client
 
                 if (!_rope.Exists)
                 {
+                    var tmpRope = _rope;
                     _rope = null;
                     Retry();
+                    OnDespawn?.Invoke(tmpRope);
                 }
 
                 return;

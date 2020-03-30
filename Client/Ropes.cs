@@ -187,10 +187,14 @@ namespace PocceMod.Client
                     TriggerServerEvent("PocceMod:RemoveEntityRopes", API.VehToNet(vehicle));
             }
         }
-        
+
         private static async Task NetAddRope(string player, int id, int netEntity1, int netEntity2, Vector3 offset1, Vector3 offset2, float length)
         {
-            _ropes.AddRope(await RopeWrapper.Create(player, id, netEntity1, netEntity2, offset1, offset2, length));
+            var rope = await RopeWrapper.Create(player, id, netEntity1, netEntity2, offset1, offset2, length);
+            if (player == Common.PlayerID.ToString())
+                rope.OnDespawn += _ => TriggerServerEvent("PocceMod:RemoveRope", id);
+
+            _ropes.AddRope(rope);
 
             if (!API.RopeAreTexturesLoaded())
                 API.RopeLoadTextures();
@@ -313,7 +317,7 @@ namespace PocceMod.Client
         {
             await Delay(10);
 
-            foreach (var rope in _ropes.Ropes)
+            foreach (var rope in _ropes.Ropes.ToArray())
             {
                 rope.Update();
             }
