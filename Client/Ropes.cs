@@ -13,10 +13,13 @@ namespace PocceMod.Client
         public static readonly float MaxLength = Config.GetConfigFloat("MaxRopeLength");
         private const uint Ropegun = 0x44AE7910; // WEAPON_POCCE_ROPEGUN
         private static readonly int RopegunWindKey;
+        private static readonly bool RopegunLateWind;
         private static readonly int RopeClearKey;
         private static int _nextRopeID;
+        private static bool _ropegunWindStarted;
         private static readonly RopeSet _ropes = new RopeSet();
         private static readonly RopegunState _ropegunState = new RopegunState();
+        private static readonly HashSet<int> _ropegunRopes = new HashSet<int>();
         private static readonly Dictionary<int, DateTime> _expirations = new Dictionary<int, DateTime>();
 
         [Flags]
@@ -31,6 +34,7 @@ namespace PocceMod.Client
         static Ropes()
         {
             RopegunWindKey = Config.GetConfigInt("RopegunWindKey");
+            RopegunLateWind = Config.GetConfigBool("RopegunLateWind");
             RopeClearKey = Config.GetConfigInt("RopeClearKey");
 
             API.AddTextEntryByHash(0x6FCC4E8A, "Pocce Ropegun"); // WT_POCCE_ROPEGUN
@@ -150,7 +154,10 @@ namespace PocceMod.Client
             TriggerServerEvent("PocceMod:AddRope", id, ObjToNet(entity1), ObjToNet(entity2), offset1, offset2, length);
 
             if ((mode & ModeFlag.Grapple) == ModeFlag.Grapple)
+            {
+                _ropegunRopes.Add(id);
                 TriggerServerEvent("PocceMod:SetRopeLength", id, 1f);
+            }
 
             if (entity1 == 0 && entity2 == 0)
                 _expirations.Add(id, DateTime.Now + TimeSpan.FromMinutes(1));
@@ -209,6 +216,9 @@ namespace PocceMod.Client
 
         private static void NetRemoveRope(string player, int id)
         {
+            if (player == Common.PlayerID.ToString())
+                _ropegunRopes.Remove(id);
+
             _ropes.RemoveRope(player, id);
         }
 
@@ -340,13 +350,25 @@ namespace PocceMod.Client
                 ClearPlayer();
             }
 
-            if (RopegunWindKey > 0 && API.IsControlJustPressed(0, RopegunWindKey) && !API.IsControlPressed(0, 25)) // INPUT_AIM
+            if (RopegunLateWind && RopegunWindKey > 0)
             {
-                var player = Common.PlayerID.ToString();
-                var ropes = _ropes.GetEntityRopes(Common.GetPlayerPedOrVehicle()).Where(rope => rope.Player == player).ToArray();
-                foreach (var rope in ropes)
+                if (API.IsControlJustPressed(0, RopegunWindKey) && !Common.IsPlayerAiming())
                 {
-                    TriggerServerEvent("PocceMod:SetRopeLength", rope.ID, 1f);
+                    _ropegunWindStarted = true;
+                }
+
+                if (API.IsControlJustReleased(0, RopegunWindKey) && _ropegunWindStarted)
+                {
+                    _ropegunWindStarted = false;
+                    if (!Common.IsPlayerAiming())
+                    {
+                        var player = Common.PlayerID.ToString();
+                        var ropes = _ropes.GetEntityRopes(Common.GetPlayerPedOrVehicle()).Where(rope => rope.Player == player).Select(rope => rope.ID)/*.Intersect(_ropegunRopes)*/;
+                        foreach (var rope in ropes.ToArray())
+                        {
+                            TriggerServerEvent("PocceMod:SetRopeLength", rope, 1f);
+                        }
+                    }
                 }
             }
 

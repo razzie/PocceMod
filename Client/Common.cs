@@ -128,6 +128,11 @@ namespace PocceMod.Client
             return API.IsPedInAnyVehicle(player, false) ? API.GetVehiclePedIsIn(player, false) : player;
         }
 
+        public static bool IsPlayerAiming()
+        {
+            return API.IsPlayerFreeAiming(API.PlayerId()) || API.IsControlPressed(0, 25); // INPUT_AIM
+        }
+
         public static bool GetClosestEntity(IEnumerable<int> entities, out int closest)
         {
             closest = -1;
