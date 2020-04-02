@@ -15,12 +15,7 @@ namespace PocceMod.Server.Server
         private void RequestTelemetry([FromSource] Player source, int timeoutSec)
         {
             if (Permission.CanDo(source, Ability.ReceiveTelemetry))
-            {
-                foreach (var player in Players)
-                {
-                    player.TriggerEvent("PocceMod:RequestTelemetry", source.Handle, timeoutSec);
-                }
-            }
+                TriggerEvent("PocceMod:RequestTelemetry", source.Handle, timeoutSec);
         }
 
         private void SendTelemetry([FromSource] Player source, int targetPlayer, dynamic data)
