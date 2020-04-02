@@ -28,8 +28,11 @@ namespace PocceMod.Client
 
             if (_firstUse)
             {
-                Common.Notification("First time using ropegun, yay! You can connect 2 entities in 2 seconds");
                 _firstUse = false;
+                Common.Notification("First time using ropegun, yay! You can connect 2 entities in 2 seconds");
+
+                if (Ropes.RopegunWindKey.Exists)
+                    Common.Notification(string.Format("Use {0} key for grappling", Ropes.RopegunWindKey.Label));
             }
 
             var timestamp = DateTime.Now;

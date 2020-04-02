@@ -1,4 +1,5 @@
 ﻿using CitizenFX.Core;
+using CitizenFX.Core.Native;
 
 namespace PocceMod.Shared
 {
@@ -14,9 +15,19 @@ namespace PocceMod.Shared
 
             public InputGroup Group { get; }
             public Input Input { get; }
+            public bool Exists { get { return Input >= 0; } }
 
 #if CLIENT
             public Control Control { get { return (Control)Input; } }
+            public string Label { get { return API.GetLabelText("INPUT_" + Input.ToString()); } }
+
+            public bool IsPressed { get { return Exists && API.IsControlPressed((int)Group, (int)Input); } }
+            public bool IsJustPressed { get { return Exists && API.IsControlJustPressed((int)Group, (int)Input); } }
+            public bool IsJustReleased { get { return Exists && API.IsControlJustReleased((int)Group, (int)Input); } }
+
+            public bool IsDisabledPressed { get { return Exists && API.IsDisabledControlPressed((int)Group, (int)Input); } }
+            public bool IsDisabledJustPressed { get { return Exists && API.IsDisabledControlJustPressed((int)Group, (int)Input); } }
+            public bool IsDisabledJustReleased { get { return Exists && API.IsDisabledControlJustReleased((int)Group, (int)Input); } }
 #endif
 
             public override string ToString()

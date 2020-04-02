@@ -63,24 +63,15 @@ namespace PocceMod.Client
         private const string LightMultiplierDecor = "POCCE_VEHICLE_LIGHT_MULTIPLIER";
         private const string StateFlagsDecor = "POCCE_VEHICLE_STATE_FLAGS";
         private const string FeatureFlagsDecor = "POCCE_VEHICLE_FEATURE_FLAGS";
-        private static readonly int TurboBoostKey;
-        private static readonly int TurboBoostHorizontalKey;
-        private static readonly int TurboBoostVerticalKey;
+        public static readonly Controls.InputPair TurboBoostKey = Config.GetConfigControl("TurboBoostKey");
+        public static readonly Controls.InputPair TurboBoostHorizontalKey = Config.GetConfigControl("TurboBoostHorizontalKey");
+        public static readonly Controls.InputPair TurboBoostVerticalKey = Config.GetConfigControl("TurboBoostVerticalKey");
         private static readonly int[] RemoteControlKeys = new int[] { 172, 173, 174, 175 };
-        private static readonly int StabilizerKey;
-        private static readonly bool StabilizerHeadingLock;
+        public static readonly Controls.InputPair StabilizerKey = Config.GetConfigControl("StabilizerKey");
+        private static readonly bool StabilizerHeadingLock = Config.GetConfigBool("StabilizerHeadingLock");
         private static float _stabilizerPitch;
         private static float _stabilizerRoll;
         private static float _stabilizerYaw;
-
-        static Vehicles()
-        {
-            TurboBoostKey = Config.GetConfigInt("TurboBoostKey");
-            TurboBoostHorizontalKey = Config.GetConfigInt("TurboBoostHorizontalKey");
-            TurboBoostVerticalKey = Config.GetConfigInt("TurboBoostVerticalKey");
-            StabilizerKey = Config.GetConfigInt("StabilizerKey");
-            StabilizerHeadingLock = Config.GetConfigBool("StabilizerHeadingLock");
-        }
 
         public Vehicles()
         {
@@ -708,17 +699,17 @@ namespace PocceMod.Client
                 }
             }
 
-            if (TurboBoostKey > 0 && IsFeatureEnabled(vehicle, FeatureFlag.TurboBoost))
+            if (TurboBoostKey.Exists && IsFeatureEnabled(vehicle, FeatureFlag.TurboBoost))
             {
                 var mode = TurboBoostMode.Custom;
-                if (TurboBoostVerticalKey > 0 && API.IsControlPressed(0, TurboBoostVerticalKey)) // LEFT_SHIFT by default
+                if (TurboBoostVerticalKey.IsPressed) // LEFT_SHIFT by default
                     mode = TurboBoostMode.Vertical;
-                else if (TurboBoostHorizontalKey > 0 && API.IsControlPressed(0, TurboBoostHorizontalKey)) // LEFT_CTRL by default
+                else if (TurboBoostHorizontalKey.IsPressed) // LEFT_CTRL by default
                     mode = TurboBoostMode.Horizontal;
 
-                if (API.IsControlJustPressed(0, TurboBoostKey) || API.IsDisabledControlJustPressed(0, TurboBoostKey))
+                if (TurboBoostKey.IsJustPressed || TurboBoostKey.IsDisabledJustPressed)
                     TriggerServerEvent("PocceMod:ToggleTurboBoost", API.VehToNet(vehicle), true, (int)mode);
-                else if (API.IsControlJustReleased(0, TurboBoostKey) || API.IsDisabledControlJustReleased(0, TurboBoostKey))
+                else if (TurboBoostKey.IsJustReleased || TurboBoostKey.IsDisabledJustReleased)
                     TriggerServerEvent("PocceMod:ToggleTurboBoost", API.VehToNet(vehicle), false, 0);
             }
 
@@ -730,15 +721,15 @@ namespace PocceMod.Client
                     TriggerServerEvent("PocceMod:ToggleTurboBrake", API.VehToNet(vehicle), false);
             }
 
-            if (driver == player && StabilizerKey > 0 && IsFeatureEnabled(vehicle, FeatureFlag.Stabilizer))
+            if (driver == player && StabilizerKey.Exists && IsFeatureEnabled(vehicle, FeatureFlag.Stabilizer))
             {
-                if (API.IsControlJustPressed(0, StabilizerKey))
+                if (StabilizerKey.IsJustPressed)
                 {
                     _stabilizerPitch = API.GetEntityPitch(vehicle);
                     _stabilizerRoll = API.GetEntityRoll(vehicle);
                     _stabilizerYaw = API.GetEntityHeading(vehicle);
                 }
-                else if (API.IsControlPressed(0, StabilizerKey))
+                else if (StabilizerKey.IsPressed)
                 {
                     var pitch = _stabilizerPitch - API.GetEntityPitch(vehicle);
                     var roll = _stabilizerRoll - API.GetEntityRoll(vehicle);

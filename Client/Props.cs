@@ -13,9 +13,9 @@ namespace PocceMod.Client
     {
         private const string PropDecor = "POCCE_PROP";
         private const string SpeakerRadioDecor = "POCCE_SPEAKER_RADIO_DECOR";
-        private static readonly int PropUndoKey;
-        private static readonly bool AllowPropEdit;
-        private static readonly float PropEditDistanceFactor;
+        public static readonly Controls.InputPair PropUndoKey = Config.GetConfigControl("PropUndoKey");
+        private static readonly bool AllowPropEdit = !Config.GetConfigBool("DisablePropEdit");
+        private static readonly float PropEditDistanceFactor = Math.Max(1f, Config.GetConfigFloat("PropEditDistanceFactor"));
         private static readonly List<int> _props = new List<int>();
         private static readonly List<int> _speakers = new List<int>();
         private static bool _firstSpawn = true;
@@ -29,13 +29,6 @@ namespace PocceMod.Client
         }
 
         public const Filter DefaultFilters = Filter.NonNetwork;
-
-        static Props()
-        {
-            PropUndoKey = Config.GetConfigInt("PropUndoKey");
-            AllowPropEdit = !Config.GetConfigBool("DisablePropEdit");
-            PropEditDistanceFactor = Math.Max(1f, Config.GetConfigFloat("PropEditDistanceFactor"));
-        }
 
         public Props()
         {
@@ -232,7 +225,7 @@ namespace PocceMod.Client
 
         private static bool IsAnyPropControlPressed()
         {
-            return (PropUndoKey > 0 && API.IsControlJustPressed(0, PropUndoKey)) ||
+            return PropUndoKey.IsJustPressed ||
                 API.IsControlPressed(0, 172) ||
                 API.IsControlPressed(0, 173) ||
                 API.IsControlPressed(0, 174) ||
@@ -305,7 +298,7 @@ namespace PocceMod.Client
                     }
                 }
 
-                if (PropUndoKey > 0 && API.IsControlJustPressed(0, PropUndoKey))
+                if (PropUndoKey.IsJustPressed)
                     return ClearLast();
             }
 

@@ -12,9 +12,9 @@ namespace PocceMod.Client
     {
         public static readonly float MaxLength = Config.GetConfigFloat("MaxRopeLength");
         private const uint Ropegun = 0x44AE7910; // WEAPON_POCCE_ROPEGUN
-        private static readonly int RopegunWindKey;
-        private static readonly bool RopegunLateWind;
-        private static readonly int RopeClearKey;
+        public static readonly Controls.InputPair RopegunWindKey = Config.GetConfigControl("RopegunWindKey");
+        private static readonly bool RopegunLateWind = Config.GetConfigBool("RopegunLateWind");
+        public static readonly Controls.InputPair RopeClearKey = Config.GetConfigControl("RopeClearKey");
         private static int _nextRopeID;
         private static bool _ropegunWindStarted;
         private static readonly RopeSet _ropes = new RopeSet();
@@ -33,10 +33,6 @@ namespace PocceMod.Client
 
         static Ropes()
         {
-            RopegunWindKey = Config.GetConfigInt("RopegunWindKey");
-            RopegunLateWind = Config.GetConfigBool("RopegunLateWind");
-            RopeClearKey = Config.GetConfigInt("RopeClearKey");
-
             API.AddTextEntryByHash(0x6FCC4E8A, "Pocce Ropegun"); // WT_POCCE_ROPEGUN
         }
 
@@ -305,7 +301,7 @@ namespace PocceMod.Client
                 return;
 
             var attackControl = API.IsPedInAnyVehicle(player, false) ? 69 : 24;  // INPUT_VEH_ATTACK; INPUT_ATTACK
-            var grapple = (RopegunWindKey > 0 && API.IsControlPressed(0, RopegunWindKey));
+            var grapple = RopegunWindKey.IsPressed;
 
             if (API.IsControlJustPressed(0, attackControl) && TryShootRopegun(MaxLength, out int target, out Vector3 offset))
             {
@@ -345,19 +341,19 @@ namespace PocceMod.Client
 
         private static Task UpdateRopeHotkeys()
         {
-            if (RopeClearKey > 0 && API.IsControlJustPressed(0, RopeClearKey))
+            if (RopeClearKey.IsJustPressed)
             {
                 ClearPlayer();
             }
 
-            if (RopegunLateWind && RopegunWindKey > 0)
+            if (RopegunLateWind && RopegunWindKey.Exists)
             {
-                if (API.IsControlJustPressed(0, RopegunWindKey) && !Common.IsPlayerAiming())
+                if (RopegunWindKey.IsJustPressed && !Common.IsPlayerAiming())
                 {
                     _ropegunWindStarted = true;
                 }
 
-                if (API.IsControlJustReleased(0, RopegunWindKey) && _ropegunWindStarted)
+                if (RopegunWindKey.IsJustReleased && _ropegunWindStarted)
                 {
                     _ropegunWindStarted = false;
                     if (!Common.IsPlayerAiming())

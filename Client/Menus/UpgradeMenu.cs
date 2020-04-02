@@ -45,7 +45,15 @@ namespace PocceMod.Client.Menus
             Vehicles.SetFeatureEnabled(vehicle, Vehicles.FeatureFlag.TurboBoost, state);
 
             if (state)
-                Common.Notification("Turbo Boost enabled");
+            {
+                Common.Notification(string.Format("Turbo Boost enabled (use {0} key)", Vehicles.TurboBoostKey.Label));
+
+                if (Vehicles.TurboBoostHorizontalKey.Exists || Vehicles.TurboBoostVerticalKey.Exists)
+                {
+                    Common.Notification(string.Format("Hold {0} or {1} before activating turbo boost for altered effect",
+                        Vehicles.TurboBoostHorizontalKey.Label, Vehicles.TurboBoostVerticalKey.Label));
+                }
+            }
         }
 
         public static void ToggleTurboBrake()
@@ -190,7 +198,7 @@ namespace PocceMod.Client.Menus
             Vehicles.SetFeatureEnabled(vehicle, Vehicles.FeatureFlag.Stabilizer, !state);
 
             if (!state)
-                Common.Notification("Stabilizer enabled (use dedicated key to activate)");
+                Common.Notification(string.Format("Stabilizer enabled (use {0} key to activate)", Vehicles.StabilizerKey.Label));
         }
     }
 }
