@@ -10,16 +10,11 @@ namespace PocceMod.Client
 {
     public class Telemetry : BaseScript
     {
-        private static readonly bool Enabled;
+        private static readonly bool Enabled = Config.GetConfigBool("EnableTelemetry");
         private static readonly List<Measurement> _measurements = new List<Measurement>();
 
         public delegate void TelemetryReceivedDelegate(int sourcePlayer, Measurement measurement);
         public static event TelemetryReceivedDelegate TelemetryReceived;
-
-        static Telemetry()
-        {
-            Enabled = Config.GetConfigBool("EnableTelemetry");
-        }
 
         public Telemetry()
         {
