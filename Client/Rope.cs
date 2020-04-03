@@ -1,12 +1,17 @@
 ﻿using CitizenFX.Core;
 using CitizenFX.Core.Native;
 using PocceMod.Shared;
+using System;
 
 namespace PocceMod.Client
 {
     internal class Rope : IRope
     {
         private int _handle;
+        private readonly string _bone1;
+        private readonly string _bone2;
+        private readonly int _boneIndex1;
+        private readonly int _boneIndex2;
 
         public Rope(string player, int id, int entity1, int entity2, Vector3 offset1, Vector3 offset2, float length)
         {
@@ -18,11 +23,22 @@ namespace PocceMod.Client
             Offset2 = offset2;
             Length = length;
 
+            if (API.IsEntityAPed(Entity1))
+            {
+                _bone1 = Peds.GetClosestPedBoneToOffset(Entity1, Offset1);
+                _boneIndex1 = API.GetEntityBoneIndexByName(Entity1, _bone1);
+                Offset1 = Vector3.Zero;
+            }
+
+            if (API.IsEntityAPed(Entity2))
+            {
+                _bone2 = Peds.GetClosestPedBoneToOffset(Entity2, Offset2);
+                _boneIndex2 = API.GetEntityBoneIndexByName(Entity2, _bone2);
+                Offset2 = Vector3.Zero;
+            }
+
             _handle = RopePool.AddRope();
-
-            GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
-            Attach(pos1, pos2);
-
+            Attach();
             API.StartRopeWinding(_handle);
             API.RopeForceLength(_handle, length);
         }
@@ -42,47 +58,48 @@ namespace PocceMod.Client
 
         private void GetWorldCoords(out Vector3 pos1, out Vector3 pos2)
         {
-            pos1 = API.GetOffsetFromEntityInWorldCoords(Entity1, Offset1.X, Offset1.Y, Offset1.Z);
-            pos2 = API.GetOffsetFromEntityInWorldCoords(Entity2, Offset2.X, Offset2.Y, Offset2.Z);
+            if (_bone1 == null)
+                pos1 = API.GetOffsetFromEntityInWorldCoords(Entity1, Offset1.X, Offset1.Y, Offset1.Z);
+            else
+                pos1 = API.GetPedBoneCoords(Entity1, _boneIndex1, 0f, 0f, 0f);
+
+            if (_bone2 == null)
+                pos2 = API.GetOffsetFromEntityInWorldCoords(Entity2, Offset2.X, Offset2.Y, Offset2.Z);
+            else
+                pos2 = API.GetPedBoneCoords(Entity2, _boneIndex2, 0f, 0f, 0f);
         }
 
-        private void Attach(Vector3 pos1, Vector3 pos2)
+        private void Attach()
         {
-            string bone1 = null;
-            string bone2 = null;
+            GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
 
-            if (API.IsEntityAPed(Entity1))
-            {
+            if (_bone1 != null)
                 pos1 = Vector3.Zero;
-                bone1 = "SKEL_ROOT"; // "SKEL_R_Hand";
-            }
 
-            if (API.IsEntityAPed(Entity2))
-            {
+            if (_bone2 != null)
                 pos2 = Vector3.Zero;
-                bone2 = "SKEL_ROOT"; // "SKEL_R_Hand";
-            }
 
-            API.AttachEntitiesToRope(_handle, Entity1, Entity2, pos1.X, pos1.Y, pos1.Z, pos2.X, pos2.Y, pos2.Z, Length, false, false, bone1, bone2);
+            API.AttachEntitiesToRope(_handle, Entity1, Entity2, pos1.X, pos1.Y, pos1.Z, pos2.X, pos2.Y, pos2.Z, Length, false, false, _bone1, _bone2);
         }
 
         private void FixLongRopeBug()
         {
             GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
+            var dir = pos2 - pos1;
 
-            if (Entity1 != 0)
-            {
-                var dir = pos2 - pos1;
-                API.DetachEntity(Entity1, false, false);
-                API.ApplyForceToEntityCenterOfMass(Entity1, 1, dir.X, dir.Y, dir.Z, false, false, true, false);
-            }
+            API.DetachEntity(Entity1, false, false);
+            //API.ApplyForceToEntityCenterOfMass(Entity1, 1, dir.X, dir.Y, dir.Z, false, false, true, false);
+            API.ApplyForceToEntity(Entity1, 1, dir.X, dir.Y, dir.Z, Offset1.X, Offset1.Y, Offset1.Z, _boneIndex1, false, true, true, false, false);
 
-            if (Entity2 != 0)
-            {
-                var dir = pos1 - pos2;
-                API.DetachEntity(Entity2, false, false);
-                API.ApplyForceToEntityCenterOfMass(Entity2, 1, dir.X, dir.Y, dir.Z, false, false, true, false);
-            }
+            API.DetachEntity(Entity2, false, false);
+            //API.ApplyForceToEntityCenterOfMass(Entity2, 1, dir.X, dir.Y, dir.Z, false, false, true, false);
+            API.ApplyForceToEntity(Entity2, 1, -dir.X, -dir.Y, -dir.Z, Offset2.X, Offset2.Y, Offset2.Z, _boneIndex2, false, true, true, false, false);
+        }
+
+        private float GetDesiredLength()
+        {
+            GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
+            return Math.Min(API.GetRopeLength(_handle), Vector3.Distance(pos1, pos2));
         }
 
         public void Update()
@@ -99,11 +116,10 @@ namespace PocceMod.Client
             if (Length > Ropes.MaxLength)
                 Length = Ropes.MaxLength;
 
-            var length = API.GetRopeLength(_handle);
+            var length = GetDesiredLength();
             if (length < 0f) // if length is negative, rope is detached
             {
-                GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
-                Attach(pos1, pos2);
+                Attach();
                 return;
             }
             else if (length > Length + 0.2f) // current length > desired length : winding case
@@ -121,12 +137,12 @@ namespace PocceMod.Client
                 API.StartRopeUnwindingFront(_handle);
                 API.RopeForceLength(_handle, length + 0.2f);
             }
-            else
+            /*else
             {
                 API.StartRopeWinding(_handle);
                 API.RopeForceLength(_handle, Length);
                 API.RopeConvertToSimple(_handle);
-            }
+            }*/
         }
 
         public void Clear()

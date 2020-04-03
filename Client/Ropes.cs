@@ -21,6 +21,7 @@ namespace PocceMod.Client
         private static readonly RopegunState _ropegunState = new RopegunState();
         private static readonly HashSet<int> _ropegunRopes = new HashSet<int>();
         private static readonly Dictionary<int, DateTime> _expirations = new Dictionary<int, DateTime>();
+        private static readonly Vector3 _skelRootOffset;
 
         [Flags]
         public enum ModeFlag
@@ -34,6 +35,10 @@ namespace PocceMod.Client
         static Ropes()
         {
             API.AddTextEntryByHash(0x6FCC4E8A, "Pocce Ropegun"); // WT_POCCE_ROPEGUN
+
+            var playerPed = API.GetPlayerPed(-1);
+            var skelRootCoords = API.GetPedBoneCoords(playerPed, 0x0, 0f, 0f, 0f);
+            _skelRootOffset = API.GetOffsetFromEntityGivenWorldCoords(playerPed, skelRootCoords.X, skelRootCoords.Y, skelRootCoords.Z);
         }
 
         public Ropes()
@@ -89,7 +94,11 @@ namespace PocceMod.Client
 
         public static void PlayerAttach(int entity, Vector3 offset, ModeFlag mode = ModeFlag.Normal)
         {
-            Attach(Common.GetPlayerPedOrVehicle(), entity, Vector3.Zero, offset, mode);
+            var player = API.GetPlayerPed(-1);
+            if (API.IsPedInAnyVehicle(player, false))
+                Attach(API.GetVehiclePedIsIn(player, false), entity, Vector3.Zero, offset, mode);
+            else
+                Attach(player, entity, _skelRootOffset, offset, mode);
         }
 
         public static void AttachToClosest(IEnumerable<int> entities, bool tow = false)
@@ -244,8 +253,6 @@ namespace PocceMod.Client
                 switch (API.GetEntityType(target))
                 {
                     case 1:
-                        return true;
-
                     case 2:
                         if (coords == Vector3.Zero)
                             offset = coords;

@@ -9,6 +9,56 @@ namespace PocceMod.Client
 {
     public class Peds : BaseScript
     {
+        private static readonly int[] BoneIDs = new int[]
+        {
+            0x0, // SKEL_ROOT
+            0x2E28, // SKEL_Pelvis
+            0xE0FD, // SKEL_Spine_Root
+            0x5C01, // SKEL_Spine0
+            0x60F0, // SKEL_Spine1
+            0x60F1, // SKEL_Spine2
+            0x60F2, // SKEL_Spine3
+            0x9995, // SKEL_Neck_1
+            0x796E, // SKEL_Head
+            0xE39F, // SKEL_L_Thigh
+            0xF9BB, // SKEL_L_Calf
+            0x3779, // SKEL_L_Foot
+            0xB1C5, // SKEL_L_UpperArm
+            0xEEEB, // SKEL_L_Forearm
+            0x49D9, // SKEL_L_Hand
+            0xCA72, // SKEL_R_Thigh
+            0x9000, // SKEL_R_Calf
+            0xCC4D, // SKEL_R_Foot
+            0x9D4D, // SKEL_R_UpperArm
+            0x6E5C, // SKEL_R_Forearm
+            0xDEAD // SKEL_R_Hand
+        };
+
+        private static readonly string[] BoneNames = new string[]
+        {
+            "SKEL_ROOT",
+            "SKEL_Pelvis",
+            "SKEL_Spine_Root",
+            "SKEL_Spine0",
+            "SKEL_Spine1",
+            "SKEL_Spine2",
+            "SKEL_Spine3",
+            "SKEL_Neck_1",
+            "SKEL_Head",
+            "SKEL_L_Thigh",
+            "SKEL_L_Calf",
+            "SKEL_L_Foot",
+            "SKEL_L_UpperArm",
+            "SKEL_L_Forearm",
+            "SKEL_L_Hand",
+            "SKEL_R_Thigh",
+            "SKEL_R_Calf",
+            "SKEL_R_Foot",
+            "SKEL_R_UpperArm",
+            "SKEL_R_Forearm",
+            "SKEL_R_Hand"
+        };
+
         [Flags]
         public enum Filter
         {
@@ -95,6 +145,25 @@ namespace PocceMod.Client
 
             API.EndFindPed(handle);
             return peds;
+        }
+
+        public static string GetClosestPedBoneToOffset(int ped, Vector3 offset)
+        {
+            int closestBone = 0;
+            float minDist = float.MaxValue;
+
+            var boneCoords = BoneIDs.Select(bone => API.GetPedBoneCoords(ped, bone, 0f, 0f, 0f)).Select(bone => API.GetOffsetFromEntityGivenWorldCoords(ped, bone.X, bone.Y, bone.Z)).ToArray();
+            for (int i = 0; i < boneCoords.Length; i++)
+            {
+                var dist = offset.DistanceToSquared(boneCoords[i]);
+                if (dist < minDist)
+                {
+                    minDist = dist;
+                    closestBone = i;
+                }
+            }
+
+            return BoneNames[closestBone];
         }
 
         public static Vector3 GetSafeCoords(Vector3 coords)
