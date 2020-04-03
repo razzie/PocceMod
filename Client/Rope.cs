@@ -85,7 +85,7 @@ namespace PocceMod.Client
         private void FixLongRopeBug()
         {
             GetWorldCoords(out Vector3 pos1, out Vector3 pos2);
-            var dir = pos2 - pos1;
+            var dir = (pos2 - pos1) * 0.25f;
 
             API.DetachEntity(Entity1, false, false);
             //API.ApplyForceToEntityCenterOfMass(Entity1, 1, dir.X, dir.Y, dir.Z, false, false, true, false);
