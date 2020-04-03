@@ -149,11 +149,11 @@ namespace PocceMod.Client
 
             TriggerServerEvent("PocceMod:AddRope", id, ObjToNet(entity1), ObjToNet(entity2), offset1, offset2, length);
 
-            if ((mode & ModeFlag.Grapple) == ModeFlag.Grapple)
-            {
+            if ((mode & ModeFlag.Ropegun) == ModeFlag.Ropegun)
                 _ropegunRopes.Add(id);
+
+            if ((mode & ModeFlag.Grapple) == ModeFlag.Grapple)
                 TriggerServerEvent("PocceMod:SetRopeLength", id, 1f);
-            }
 
             if (entity1 == 0 && entity2 == 0)
                 _expirations.Add(id, DateTime.Now + TimeSpan.FromMinutes(1));
@@ -359,7 +359,7 @@ namespace PocceMod.Client
                     if (!Common.IsPlayerAiming())
                     {
                         var player = Common.PlayerID.ToString();
-                        var ropes = _ropes.GetEntityRopes(Common.GetPlayerPedOrVehicle()).Where(rope => rope.Player == player).Select(rope => rope.ID)/*.Intersect(_ropegunRopes)*/;
+                        var ropes = _ropes.GetEntityRopes(Common.GetPlayerPedOrVehicle()).Where(rope => rope.Player == player).Select(rope => rope.ID).Intersect(_ropegunRopes);
                         foreach (var rope in ropes.ToArray())
                         {
                             TriggerServerEvent("PocceMod:SetRopeLength", rope, 1f);
